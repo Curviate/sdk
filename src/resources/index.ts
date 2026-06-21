@@ -2,11 +2,9 @@
  * Resource namespace assembly.
  *
  * The root client and every `account(id)` accessor expose the same set of
- * resource namespaces (sdk/001 FR-003). Accounts, messaging, profiles, invites,
- * search, and posts are fully implemented (delegation 2A). The remaining
- * namespaces (salesNavigator, recruiter, webhooks) are implemented in
- * delegation 2B and kept as stubs here so AC-006 (namespace parity between
- * root and account-scoped clients) holds in the interim.
+ * resource namespaces (sdk/001 FR-003). All 9 namespaces are fully implemented:
+ * accounts, messaging, profiles, invites, search, posts (delegation 2A) +
+ * salesNavigator, recruiter, webhooks (delegation 2B).
  */
 import type { RequestContext } from "../internal/context.js";
 import { AccountsResource } from "./accounts.js";
@@ -15,6 +13,9 @@ import { ProfilesResource } from "./profiles.js";
 import { InvitesResource } from "./invites.js";
 import { SearchResource } from "./search.js";
 import { PostsResource } from "./posts.js";
+import { SalesNavigatorResource } from "./sales-navigator.js";
+import { RecruiterResource } from "./recruiter.js";
+import { WebhooksResource } from "./webhooks.js";
 
 export { AccountsResource } from "./accounts.js";
 export { MessagingResource } from "./messaging.js";
@@ -22,19 +23,9 @@ export { ProfilesResource } from "./profiles.js";
 export { InvitesResource } from "./invites.js";
 export { SearchResource } from "./search.js";
 export { PostsResource } from "./posts.js";
-
-/**
- * Placeholder for a not-yet-implemented namespace (delegation 2B). It is a real
- * object (so the namespace exists per FR-003) carrying the bound context, ready
- * for its methods to be added. Calling no method on it is a no-op.
- */
-class StubResource {
-  constructor(protected readonly ctx: RequestContext) {}
-}
-
-export class SalesNavigatorResource extends StubResource {}
-export class RecruiterResource extends StubResource {}
-export class WebhooksResource extends StubResource {}
+export { SalesNavigatorResource } from "./sales-navigator.js";
+export { RecruiterResource } from "./recruiter.js";
+export { WebhooksResource } from "./webhooks.js";
 
 /** The full namespace surface, shared by the root client and account scopes. */
 export interface ResourceNamespaces {
