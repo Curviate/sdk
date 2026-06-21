@@ -1,8 +1,7 @@
 // @curviate/sdk — the official TypeScript SDK for the Curviate API.
 //
-// Entry point. Re-exports the client, the typed error model, and the generated
-// request/response types. The webhook-receiving surface (constructEvent,
-// CurviateEvent, WebhookSignatureError) is added by a later delegation.
+// Entry point. Re-exports the client, the typed error model, the generated
+// request/response types, and the webhook-receiving surface.
 
 export { Curviate } from "./client.js";
 export type {
@@ -31,3 +30,14 @@ export type {
 } from "./resources/index.js";
 
 export type { paths, components, operations } from "./generated/types.js";
+
+// Webhook-receiving surface (sdk/003 FR-005..FR-007)
+export {
+  constructEvent,
+  WebhookSignatureError,
+  type CurviateEvent,
+  type MessagePayload,
+  type ConnectionPayload,
+  type AccountPayload,
+  type ConstructEventOptions,
+} from "./webhooks.js";
