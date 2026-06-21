@@ -1,0 +1,41 @@
+// Shared OpenAPI pre-processing for the type-gen + drift-check pipeline.
+//
+// Why this exists: the API's OpenAPI document emits `discriminator.mapping`
+// values as local JSON pointers (e.g. "#/oneOf/0"). OpenAPI 3.1 does NOT permit
+// JSON-Pointer-into-a-sibling-`oneOf` as a mapping target — mapping values must
+// be component schema names or URI references to schemas. Redocly's bundler
+// (used internally by openapi-typescript) rejects these as unresolvable refs.
+//
+// Each affected `oneOf` member already carries a `const` on its discriminator
+// property, which is sufficient for both validators and codegen to narrow the
+// union — so the offending `mapping` is dropped while `propertyName` is kept.
+// This is a defensive boundary transform; the upstream document is unchanged.
+
+/**
+ * Recursively strip any `discriminator.mapping` whose values are local
+ * JSON pointers (`#/oneOf/N`). Mutates `node` in place. Returns the count
+ * of mappings stripped (for observability).
+ * @param {unknown} node
+ * @returns {number}
+ */
+export function stripLocalDiscriminatorMappings(node) {
+  let stripped = 0;
+  const visit = (n) => {
+    if (!n || typeof n !== "object") return;
+    if (Array.isArray(n)) {
+      for (const item of n) visit(item);
+      return;
+    }
+    const disc = n.discriminator;
+    if (disc && disc.mapping && typeof disc.mapping === "object") {
+      const values = Object.values(disc.mapping);
+      if (values.some((v) => typeof v === "string" && v.startsWith("#/oneOf/"))) {
+        delete disc.mapping;
+        stripped += 1;
+      }
+    }
+    for (const key of Object.keys(n)) visit(n[key]);
+  };
+  visit(node);
+  return stripped;
+}
