@@ -1,5 +1,5 @@
 /**
- * Client configuration (sdk/001 FR-001, FR-004, FR-005).
+ * Client configuration.
  *
  * Only `apiKey` is required; every other field has a sensible default. The
  * resolved config is frozen — the client is immutable after construction.
@@ -35,7 +35,7 @@ export const DEFAULT_MAX_RETRIES = 3;
 
 /**
  * Validate and resolve a {@link CurviateConfig}. Throws synchronously (no
- * network call) on a missing/empty apiKey — FR-001.
+ * network call) when `apiKey` is missing or empty.
  */
 export function resolveConfig(config: CurviateConfig): ResolvedConfig {
   if (typeof config?.apiKey !== "string" || config.apiKey.length === 0) {

@@ -3,11 +3,11 @@
  *
  * A `RequestContext` binds the resolved client config to a `request` function
  * and (optionally) a fixed `account_id` injected on every call — the mechanism
- * behind `curviate.account(id).<resource>` (sdk/001 FR-003). Resources never
- * touch the transport directly; they call `ctx.request(...)`.
+ * behind `curviate.account(id).<resource>`. Resources never touch the transport
+ * directly; they call `ctx.request(...)`.
  *
- * This is the seam delegation 2's resources are built on: each resource takes a
- * `RequestContext` and maps one method to one `/v1/*` operation.
+ * Each resource takes a `RequestContext` and maps one method to one `/v1/*`
+ * operation.
  */
 import { execute, type HttpMethod } from "../transport.js";
 import type { ResolvedConfig } from "../config.js";

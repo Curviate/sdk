@@ -1,17 +1,17 @@
 /**
- * Typed error model for the Curviate SDK (sdk/003 FR-001..FR-004).
+ * Typed error model for the Curviate SDK.
  *
  * `CurviateError` is the single thrown type for every API-layer failure. Its
  * `code` is one of the stable, flat `ErrorCode` values — agent builders can
  * write an exhaustive `switch (error.code)` without fear of unknown codes.
  *
- * Credential safety (Hard Rule #2): a `CurviateError` never holds a reference
- * to the client or the apiKey, and its serialized form (`JSON.stringify`)
- * contains neither the key nor the `Bearer` scheme. The `message` is derived
- * from the API response body only.
+ * Credential safety: a `CurviateError` never holds a reference to the client
+ * or the apiKey, and its serialized form (`JSON.stringify`) contains neither
+ * the key nor the `Bearer` scheme. The `message` is derived from the API
+ * response body only.
  *
  * The webhook-receiving surface (`constructEvent`, `CurviateEvent`,
- * `WebhookSignatureError`, FR-005..007) is added separately.
+ * `WebhookSignatureError`) is exported separately from `webhooks.ts`.
  */
 
 /**
@@ -97,7 +97,7 @@ export interface CurviateErrorInit {
   retryLikelyToSucceed: boolean;
   /** Present on `TIER_NOT_ACTIVE` only. */
   requiredTier?: RequiredTier;
-  /** Milliseconds to wait before retry, parsed from `Retry-After` (FR-007, sdk/004). */
+  /** Milliseconds to wait before retry, parsed from the `Retry-After` response header. */
   retryAfterMs?: number;
 }
 

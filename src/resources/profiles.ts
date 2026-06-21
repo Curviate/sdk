@@ -1,5 +1,5 @@
 /**
- * Profiles resource — 9 methods (sdk/002 FR-002).
+ * Profiles resource — 9 methods.
  *
  * Account-scoped: the bound context injects `account_id` into every request.
  * Methods that have `account_id` in their query params omit it from the

@@ -1,12 +1,12 @@
 /**
- * HTTP transport for the Curviate SDK (sdk/004).
+ * HTTP transport for the Curviate SDK.
  *
  * Wraps `fetch`: injects the Bearer auth header, serialises JSON and multipart
  * bodies, parses JSON and binary responses, maps HTTP errors to
  * {@link CurviateError}, and runs the client-side retry/backoff contract.
  *
  * Stateless: each {@link execute} call is independent — no request queue, no
- * in-flight dedupe, no client-side idempotency (clients own retry safety).
+ * in-flight dedupe (clients own retry safety).
  *
  * The `_jitterFn` and `_sleepFn` options are internal seams for deterministic
  * tests; they are not part of the public client surface.
@@ -41,7 +41,7 @@ export interface ExecuteOptions {
   _sleepFn?: (ms: number) => Promise<void>;
 }
 
-/** ADR-005 error envelope as it arrives on the wire (snake_case). */
+/** Error envelope as it arrives on the wire (snake_case). */
 interface WireErrorEnvelope {
   code?: string;
   message?: string;
@@ -51,11 +51,11 @@ interface WireErrorEnvelope {
   required_tier?: string;
 }
 
-// Backoff defaults (FR-005).
+// Backoff defaults.
 const BASE_DELAY_MS = 500;
 const MAX_DELAY_MS = 30_000;
 
-/** Codes that are safe to retry — and only for GET/HEAD (FR-004). */
+/** Codes that are safe to retry — and only for GET/HEAD. */
 const RETRYABLE_CODES: ReadonlySet<string> = new Set([
   "INTERNAL",
   "PLATFORM_ERROR",
@@ -188,7 +188,7 @@ async function parseSuccess<T>(res: Response): Promise<T> {
   if (ct.includes("application/json")) {
     return (await res.json()) as T;
   }
-  // Any non-JSON 2xx body is returned as binary (FR-003).
+  // Any non-JSON 2xx body is returned as binary (e.g. file downloads).
   return (await res.arrayBuffer()) as T;
 }
 
@@ -248,8 +248,8 @@ export async function execute<T = unknown>(
       attempt += 1;
       continue;
     }
-    // FR-004 exception: a write that is rate-limited with a Retry-After waits
-    // the indicated delay but is never re-fired (clients own retry safety).
+    // For writes that are rate-limited with a Retry-After header: wait the
+    // indicated delay but do not re-fire (clients own retry safety).
     if (isWrite && err.retryAfterMs !== undefined) {
       await sleep(err.retryAfterMs);
     }

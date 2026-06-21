@@ -1,10 +1,10 @@
 /**
- * Webhooks resource — 6 methods (sdk/002 FR-002; root-scoped).
+ * Webhooks resource — 6 methods (root-scoped).
  *
  * Root-scoped: webhooks are tenant-wide, not account-scoped. All methods are
  * mounted directly on the root client (like `accounts`).
- * getStateDiff is placed here because it is tagged Webhooks in the OpenAPI
- * (GET /v1/accounts/:id/state-diff enables event-driven state sync).
+ * `getStateDiff` is placed here because it is tagged Webhooks in the OpenAPI
+ * (`GET /v1/accounts/:id/state-diff` enables event-driven state sync).
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -48,7 +48,7 @@ export class WebhooksResource {
    * Register a new webhook endpoint to receive real-time events.
    * `POST /v1/webhooks`
    * The HMAC signing secret is returned exactly once in the 201 response.
-   * `account_ids` is required for security (api/011).
+   * `account_ids` is required (each webhook is scoped to specific accounts).
    */
   create(body: WebhookCreateBody): Promise<WebhookCreateResult> {
     return this.ctx.request<WebhookCreateResult>({
@@ -108,7 +108,6 @@ export class WebhooksResource {
    * Return the set of changes since the last known version for a connected account.
    * Enables event-driven state sync without polling the account endpoint.
    * `GET /v1/accounts/{id}/state-diff`
-   * Tagged Webhooks in the OpenAPI (sdk/002 FR-002).
    */
   getStateDiff(accountId: string, params?: AccountStateDiffParams): Promise<AccountStateDiffResult> {
     return this.ctx.request<AccountStateDiffResult>({

@@ -1,10 +1,10 @@
 /**
- * Messaging resource — 14 methods (sdk/002 FR-002).
+ * Messaging resource — 14 methods.
  *
  * Account-scoped: the bound context injects `account_id` into every request.
- * Multipart methods (startChat, sendMessage) accept `attachments: Array<Buffer | File>`
- * and build `FormData` before calling the transport (sdk/002 FR-004).
- * Binary method (getAttachment) returns `Promise<ArrayBuffer>` (sdk/002 FR-005).
+ * Multipart methods (`startChat`, `sendMessage`) accept `attachments: Array<Buffer | File>`
+ * and build `FormData` automatically before calling the transport.
+ * `getAttachment` returns `Promise<ArrayBuffer>` (binary response).
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -129,8 +129,8 @@ export class MessagingResource {
   }
 
   /**
-   * Start a new chat. Accepts optional `attachments[]` — when present the
-   * request is sent as `multipart/form-data` (sdk/002 FR-004). `POST /v1/chats`
+   * Start a new chat. Accepts optional `attachments[]` — when present, the
+   * request is sent as `multipart/form-data`. `POST /v1/chats`
    */
   startChat(body: StartChatBody): Promise<StartChatResult> {
     const { attachments, ...scalars } = body;
@@ -221,7 +221,7 @@ export class MessagingResource {
   /**
    * Download a message attachment. Returns raw binary.
    * `GET /v1/messages/{message_id}/attachments/{attachment_id}`
-   * Returns `ArrayBuffer` — sdk/002 FR-005 (binary response).
+   * Returns `ArrayBuffer` — binary response; the SDK does not cache or store it.
    */
   getAttachment(messageId: string, attachmentId: string): Promise<ArrayBuffer> {
     return this.ctx.request<ArrayBuffer>({
