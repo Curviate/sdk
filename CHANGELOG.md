@@ -20,7 +20,7 @@ Initial public release.
 **Resource surface**
 
 - `curviate.accounts.*`:
-  - `list(params?)` — list managed accounts with optional filters.
+  - `list(params?)` — list managed accounts with optional `limit` and `cursor`.
   - `get(accountId)` — fetch a single managed account.
   - `link(body)` — connect a LinkedIn account via cookie or API key; returns an account or a checkpoint.
   - `reconnect(accountId, body)` — reconnect a disconnected account.

@@ -44,7 +44,7 @@ Every LinkedIn operation (messages, profiles, invites, posts) is tied to a **man
 const { items: accounts } = await curviate.accounts.list();
 
 // Account-scoped: all LinkedIn ops under a specific account
-const acc = curviate.account(accounts[0].id);
+const acc = curviate.account(accounts?.[0]?.account_id ?? "");
 
 // Now every resource call is scoped to that account:
 const { items: chats } = await acc.messaging.listChats();
@@ -64,18 +64,19 @@ const curviate = new Curviate({ apiKey: process.env.CURVIATE_API_KEY! });
 
 async function sendFirstMessage() {
   // 1. List connected accounts
-  const { items: accounts } = await curviate.accounts.list({ status: "active" });
-  if (accounts.length === 0) throw new Error("No active accounts.");
+  const { items: accounts } = await curviate.accounts.list();
+  if (!accounts || accounts.length === 0) throw new Error("No active accounts.");
 
-  const acc = curviate.account(accounts[0].id);
+  const first = accounts[0]!;
+  const acc = curviate.account(first.account_id ?? "");
 
   // 2. List recent chats
   const { items: chats } = await acc.messaging.listChats({ limit: 5 });
-  if (chats.length === 0) return;
+  if (!chats || chats.length === 0) return;
 
   // 3. Send a message to the first chat
-  const chat = chats[0];
-  await acc.messaging.sendMessage(chat.id, {
+  const chat = chats[0]!;
+  await acc.messaging.sendMessage(chat.id ?? "", {
     text: "Hi — following up from our conversation.",
   });
 
@@ -129,16 +130,16 @@ Resources that return lists support cursor pagination. `curviate.paginate()` is 
 
 ```ts
 // Iterate over every chat across all pages
-for await (const chat of curviate.paginate(acc.messaging.listChats.bind(acc.messaging))) {
-  console.log(chat.id, chat.last_message_text);
+for await (const chat of curviate.paginate(acc.messaging.listChats.bind(acc.messaging), {})) {
+  console.log(chat.id, chat.unread_count);
 }
 
 // With initial params
 for await (const account of curviate.paginate(
   curviate.accounts.list.bind(curviate.accounts),
-  { status: "active" },
+  { limit: 50 },
 )) {
-  console.log(account.id);
+  console.log(account.account_id);
 }
 ```
 
