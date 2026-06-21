@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+*.log
+.DS_Store
+coverage/
+
+# NOTE: src/generated/ is intentionally NOT ignored — the generated types
+# are committed so consumers get types without running a server (sdk/005 FR-002).
