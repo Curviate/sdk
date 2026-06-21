@@ -221,6 +221,32 @@ describe("retry logic (FR-004)", () => {
     expect(calls).toBe(1);
   });
 
+  // FR-004 exception — a write that gets 429 + Retry-After waits the delay but
+  // does NOT re-fire; it throws with the retry-after surfaced (1 fetch).
+  it("waits the Retry-After on a 429 write but does not re-fire it", async () => {
+    const sleeps: number[] = [];
+    let calls = 0;
+    server.use(
+      http.post(`${BASE}/v1/accounts/link`, () => {
+        calls += 1;
+        return HttpResponse.json(
+          { code: "RATE_LIMIT_ACCOUNT", message: "slow", user_fixable: false, retry_likely_to_succeed: true },
+          { status: 429, headers: { "Retry-After": "7" } },
+        );
+      }),
+    );
+    const err = await execute("POST", "/v1/accounts/link", det({
+      body: {},
+      _sleepFn: async (ms: number) => {
+        sleeps.push(ms);
+      },
+    })).catch((e) => e);
+    expect(calls).toBe(1); // never re-fired the write
+    expect(sleeps).toEqual([7_000]); // but waited the Retry-After
+    expect((err as CurviateError).retryAfterMs).toBe(7_000);
+    expect((err as CurviateError).retryLikelyToSucceed).toBe(true);
+  });
+
   // FR-004 — a non-retryable code (404) on a GET throws immediately (1 fetch).
   it("does not retry a non-retryable GET error (404, 1 fetch)", async () => {
     let calls = 0;
