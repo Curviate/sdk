@@ -10,7 +10,10 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve, join } from "node:path";
 import openapiTS, { astToString } from "openapi-typescript";
-import { stripLocalDiscriminatorMappings } from "./openapi-sanitize.mjs";
+import {
+  stripLocalDiscriminatorMappings,
+  forbiddenVendorPattern,
+} from "./openapi-sanitize.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = resolve(__dirname, "..");
@@ -28,7 +31,7 @@ const ast = await openapiTS(doc);
 const fresh = HEADER + astToString(ast);
 
 // FR-005 — vendor-name grep on the freshly generated output.
-if (/unipile/i.test(fresh)) {
+if (forbiddenVendorPattern().test(fresh)) {
   console.error("FAIL: vendor name in generated types");
   process.exit(1);
 }

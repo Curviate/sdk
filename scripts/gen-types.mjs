@@ -14,7 +14,10 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import openapiTS, { astToString } from "openapi-typescript";
-import { stripLocalDiscriminatorMappings } from "./openapi-sanitize.mjs";
+import {
+  stripLocalDiscriminatorMappings,
+  forbiddenVendorPattern,
+} from "./openapi-sanitize.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = resolve(__dirname, "..");
@@ -60,7 +63,7 @@ const body = astToString(ast);
 await writeFile(OUTPUT, HEADER + body, "utf8");
 
 // FR-005 — vendor-name grep on the generated output.
-if (/unipile/i.test(HEADER + body)) {
+if (forbiddenVendorPattern().test(HEADER + body)) {
   console.error("FAIL: vendor name present in generated types");
   process.exit(1);
 }
