@@ -1,9 +1,11 @@
 # @curviate/sdk
 
 The official TypeScript SDK for the [Curviate API](https://docs.curviate.com) — agent-native
-LinkedIn infrastructure.
+LinkedIn infrastructure for AI engineers and agent builders.
 
 > **Status:** `0.1.0` — pre-GA. The surface is public but not yet stability-promised.
+
+---
 
 ## Install
 
@@ -11,20 +13,192 @@ LinkedIn infrastructure.
 npm install @curviate/sdk
 ```
 
-## Quick start
+Requires Node 18+. Works in Cloudflare Workers and Vercel Edge.
+
+---
+
+## Auth — construct the client
+
+Get your API key from the Curviate dashboard. Store it as an environment variable.
 
 ```ts
 import { Curviate } from "@curviate/sdk";
 
+const curviate = new Curviate({
+  apiKey: process.env.CURVIATE_API_KEY!,
+  // Optional:
+  // baseUrl: "https://api.curviate.com", // default
+  // timeout: 30_000,                     // per-attempt timeout, ms
+  // maxRetries: 3,                        // GET/HEAD retries with backoff
+});
+```
+
+---
+
+## Account-scoped accessor
+
+Every LinkedIn operation (messages, profiles, invites, posts) is tied to a **managed account** — a LinkedIn session you have connected via `curviate.accounts.create()`. The `curviate.account(id)` accessor fixes the `account_id` on every call so you do not have to thread it manually:
+
+```ts
+// Root-level: tenant-wide operations
+const { items: accounts } = await curviate.accounts.list();
+
+// Account-scoped: all LinkedIn ops under a specific account
+const acc = curviate.account(accounts[0].id);
+
+// Now every resource call is scoped to that account:
+const { items: chats } = await acc.messaging.listChats();
+const profile = await acc.profiles.get({ identifier: "some-handle" });
+```
+
+---
+
+## First end-to-end call
+
+This snippet lists your connected accounts, picks the first one, and sends a message — something an agent might do to automate outreach:
+
+```ts
+import { Curviate, isCurviateError } from "@curviate/sdk";
+
 const curviate = new Curviate({ apiKey: process.env.CURVIATE_API_KEY! });
 
-const accounts = await curviate.accounts.list();
+async function sendFirstMessage() {
+  // 1. List connected accounts
+  const { items: accounts } = await curviate.accounts.list({ status: "active" });
+  if (accounts.length === 0) throw new Error("No active accounts.");
+
+  const acc = curviate.account(accounts[0].id);
+
+  // 2. List recent chats
+  const { items: chats } = await acc.messaging.listChats({ limit: 5 });
+  if (chats.length === 0) return;
+
+  // 3. Send a message to the first chat
+  const chat = chats[0];
+  await acc.messaging.sendMessage({
+    chat_id: chat.id,
+    text: "Hi — following up from our conversation.",
+  });
+
+  console.log("Message sent.");
+}
+
+sendFirstMessage().catch(console.error);
 ```
+
+---
+
+## Typed error handling
+
+Every API error is a `CurviateError`. Use `isCurviateError` to narrow in `catch`, then switch on `err.code` for exhaustive handling:
+
+```ts
+import { isCurviateError } from "@curviate/sdk";
+
+try {
+  await acc.messaging.sendMessage({ chat_id: "c_123", text: "hello" });
+} catch (err) {
+  if (!isCurviateError(err)) throw err; // re-throw network errors etc.
+
+  switch (err.code) {
+    case "RECIPIENT_UNREACHABLE":
+      console.warn("Recipient can't receive messages.");
+      break;
+    case "RATE_LIMIT_ACCOUNT":
+      // err.retryAfterMs tells you exactly how long to wait
+      await sleep(err.retryAfterMs ?? 5_000);
+      break;
+    case "ACCOUNT_NOT_FOUND":
+      console.error("Account does not exist for this tenant.");
+      break;
+    default:
+      if (err.retryLikelyToSucceed) {
+        // Safe to retry — server-side transient error
+        await retry();
+      }
+  }
+}
+```
+
+All 34 error codes are documented in the [API reference](https://docs.curviate.com).
+
+---
+
+## Cursor pagination
+
+Resources that return lists support cursor pagination. `curviate.paginate()` is an async iterator that follows `next_cursor` automatically — pull items one at a time without managing cursors:
+
+```ts
+// Iterate over every chat across all pages
+for await (const chat of curviate.paginate(acc.messaging.listChats.bind(acc.messaging))) {
+  console.log(chat.id, chat.last_message_text);
+}
+
+// With initial params
+for await (const account of curviate.paginate(
+  curviate.accounts.list.bind(curviate.accounts),
+  { status: "active" },
+)) {
+  console.log(account.id);
+}
+```
+
+---
+
+## Webhook verification
+
+Register a webhook to receive real-time events, then verify each delivery with `constructEvent`:
+
+```ts
+import { constructEvent, WebhookSignatureError } from "@curviate/sdk";
+
+// Express (Node — synchronous)
+app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
+  const sig = req.headers["x-curviate-signature"] as string;
+  const secret = process.env.CURVIATE_WEBHOOK_SECRET!;
+
+  let event;
+  try {
+    event = constructEvent(req.body, sig, secret);
+  } catch (err) {
+    if (err instanceof WebhookSignatureError) {
+      console.warn("Bad webhook:", err.reason); // 'invalid_signature' | 'replay_detected' | 'malformed_header'
+      return res.sendStatus(400);
+    }
+    throw err;
+  }
+
+  switch (event.type) {
+    case "message.received":
+      // event.data is MessagePayload — account_id, message_id, etc.
+      handleNewMessage(event.data);
+      break;
+    case "account.connected":
+      handleAccountConnected(event.data);
+      break;
+    // 17 more event types — all in the CurviateEvent union
+  }
+
+  res.sendStatus(200);
+});
+
+// Hono / Vercel Edge — always await (Web Crypto is async)
+app.post("/webhook", async (c) => {
+  const rawBody = await c.req.text();
+  const event = await constructEvent(rawBody, c.req.header("x-curviate-signature")!, secret);
+  return c.text("ok");
+});
+```
+
+`WebhookSignatureError` is NOT a `CurviateError` — narrow with `instanceof WebhookSignatureError`.
+
+---
 
 ## Links
 
 - API reference: https://docs.curviate.com
 - Issues: https://github.com/curviate/sdk/issues
+- Changelog: [CHANGELOG.md](./CHANGELOG.md)
 
 ## License
 
