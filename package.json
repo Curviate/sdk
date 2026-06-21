@@ -28,6 +28,7 @@
   "files": [
     "dist/",
     "src/generated/types.ts",
+    "CHANGELOG.md",
     "LICENSE",
     "README.md"
   ],
