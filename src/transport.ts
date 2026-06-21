@@ -249,6 +249,11 @@ export async function execute<T = unknown>(
       attempt += 1;
       continue;
     }
+    // FR-004 exception: a write that is rate-limited with a Retry-After waits
+    // the indicated delay but is never re-fired (clients own retry safety).
+    if (isWrite && err.retryAfterMs !== undefined) {
+      await sleep(err.retryAfterMs);
+    }
     throw err;
   }
 }
