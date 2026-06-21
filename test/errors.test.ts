@@ -136,7 +136,6 @@ describe("ErrorCode union (FR-002)", () => {
       "LINKEDIN_FEATURE_NOT_SUBSCRIBED",
       "RATE_LIMIT_ACCOUNT",
       "RATE_LIMIT_TENANT",
-      "RATE_LIMIT_QUOTA",
       "PLATFORM_RATE_LIMIT",
       "PLATFORM_ERROR",
       "PLATFORM_NOT_IMPLEMENTED",

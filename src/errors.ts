@@ -42,7 +42,6 @@ export type ErrorCode =
   // Rate limits
   | "RATE_LIMIT_ACCOUNT"
   | "RATE_LIMIT_TENANT"
-  | "RATE_LIMIT_QUOTA"
   | "PLATFORM_RATE_LIMIT"
   // Platform errors
   | "PLATFORM_ERROR"
