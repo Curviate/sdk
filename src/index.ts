@@ -31,7 +31,7 @@ export type {
 
 export type { paths, components, operations } from "./generated/types.js";
 
-// Webhook-receiving surface (sdk/003 FR-005..FR-007)
+// Webhook signature verification and typed event surface
 export {
   constructEvent,
   WebhookSignatureError,

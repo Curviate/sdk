@@ -1,13 +1,13 @@
 /**
- * Webhook signature verification and typed event parsing (sdk/003 FR-005..FR-007).
+ * Webhook signature verification and typed event parsing.
  *
  * `constructEvent` verifies the HMAC-SHA256 signature on an inbound webhook
  * request and returns a typed `CurviateEvent`. It is framework-agnostic:
  * works in Node ≥ 18, Cloudflare Workers, Vercel Edge, and any runtime that
  * exposes the Web Crypto API via `globalThis.crypto.subtle`.
  *
- * Security properties (NFR-002, NFR-003):
- * - No third-party crypto dependency (zod is not used here either).
+ * Security properties:
+ * - No third-party crypto dependency.
  * - Web Crypto (`globalThis.crypto.subtle`) when available; Node `crypto` module
  *   fallback when `crypto.subtle` is absent.
  * - Because `crypto.subtle` is async and `constructEvent` must be synchronous
@@ -16,7 +16,7 @@
  *   unavailable (Cloudflare Workers, Vercel Edge — those runtimes do not expose
  *   `require` but do expose `crypto.subtle`). Runtime detection chooses the path.
  * - HMAC comparison is constant-time: byte-by-byte XOR accumulation, no early
- *   return on first mismatch (prevents timing-oracle attacks, NFR-003).
+ *   return on first mismatch (prevents timing-oracle attacks).
  * - Replay guard: reject events older than `replayWindowMs` (default 300 s).
  */
 
@@ -25,8 +25,8 @@
 /**
  * Thrown by {@link constructEvent} when signature verification fails.
  *
- * Extends `Error`, NOT `CurviateError` (sdk/003 FR-007 / AC-010) — callers can
- * narrow with `instanceof WebhookSignatureError` independently of CurviateError.
+ * Extends `Error`, NOT `CurviateError` — callers can narrow with
+ * `instanceof WebhookSignatureError` independently of CurviateError.
  *
  * @example
  * try {
@@ -77,8 +77,8 @@ export interface AccountPayload {
 }
 
 /**
- * The complete discriminated union of all 19 canonical Curviate webhook events
- * (sdk/003 FR-006). The `type` field is the discriminant.
+ * The complete discriminated union of all 19 canonical Curviate webhook events.
+ * The `type` field is the discriminant.
  *
  * @example
  * const event = constructEvent(rawBody, header, secret);
@@ -165,7 +165,7 @@ function bytesToHex(bytes: Uint8Array): string {
     .join("");
 }
 
-// ─── Constant-time comparison (NFR-003) ──────────────────────────────────────
+// ─── Constant-time comparison ────────────────────────────────────────────────
 
 /**
  * Compare two byte arrays in constant time — no early return on first mismatch.
@@ -261,7 +261,7 @@ function verifyAndParse(
   bodyStr: string,
   replayWindowMs: number,
 ): CurviateEvent {
-  // Step 3 — constant-time HMAC comparison (NFR-003).
+  // Step 3 — constant-time HMAC comparison.
   let providedBytes: Uint8Array;
   try {
     providedBytes = hexToBytes(v1);
