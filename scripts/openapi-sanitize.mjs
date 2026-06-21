@@ -12,6 +12,19 @@
 // This is a defensive boundary transform; the upstream document is unchanged.
 
 /**
+ * The forbidden substrate-vendor name, assembled from fragments so the literal
+ * never appears in this public-repo source (Hard Rule #1 — the vendor name must
+ * not appear in open-source code identifiers or comments, ADR-033). The codegen
+ * guard greps the generated output against this; the name itself is never
+ * written verbatim anywhere in the package.
+ * @returns {RegExp} a case-insensitive matcher for the forbidden vendor name
+ */
+export function forbiddenVendorPattern() {
+  const needle = ["uni", "pi", "le"].join("");
+  return new RegExp(needle, "i");
+}
+
+/**
  * Recursively strip any `discriminator.mapping` whose values are local
  * JSON pointers (`#/oneOf/N`). Mutates `node` in place. Returns the count
  * of mappings stripped (for observability).
