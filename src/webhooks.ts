@@ -3,21 +3,19 @@
  *
  * `constructEvent` verifies the HMAC-SHA256 signature on an inbound webhook
  * request and returns a typed `CurviateEvent`. It is framework-agnostic:
- * works in Node ≥ 18, Cloudflare Workers, Vercel Edge, and any runtime that
+ * works in Node 18+, Cloudflare Workers, Vercel Edge, and any runtime that
  * exposes the Web Crypto API via `globalThis.crypto.subtle`.
  *
  * Security properties:
  * - No third-party crypto dependency.
- * - Web Crypto (`globalThis.crypto.subtle`) when available; Node `crypto` module
- *   fallback when `crypto.subtle` is absent.
- * - Because `crypto.subtle` is async and `constructEvent` must be synchronous
- *   (usable inline in Express/Hono handlers), the sync Node `createHmac` is used
- *   on Node runtimes. The Web Crypto async path is used where `require` is
- *   unavailable (Cloudflare Workers, Vercel Edge — those runtimes do not expose
- *   `require` but do expose `crypto.subtle`). Runtime detection chooses the path.
+ * - Web Crypto (`globalThis.crypto.subtle`) is the universal primary path —
+ *   available in Node 18+, Cloudflare Workers, and Vercel Edge. The function
+ *   is therefore always async: call it with `await`.
  * - HMAC comparison is constant-time: byte-by-byte XOR accumulation, no early
  *   return on first mismatch (prevents timing-oracle attacks).
- * - Replay guard: reject events older than `replayWindowMs` (default 300 s).
+ * - Replay guard: reject events older than `replayWindowSecs` (default 300 s).
+ *   Timestamp on the wire is Unix seconds (integer). Both past-skew and
+ *   future-skew are bounded.
  */
 
 // ─── WebhookSignatureError ────────────────────────────────────────────────────
@@ -30,7 +28,7 @@
  *
  * @example
  * try {
- *   const event = constructEvent(rawBody, header, secret);
+ *   const event = await constructEvent(rawBody, header, secret);
  * } catch (err) {
  *   if (err instanceof WebhookSignatureError) {
  *     if (err.reason === 'replay_detected') { ... }
@@ -81,7 +79,7 @@ export interface AccountPayload {
  * The `type` field is the discriminant.
  *
  * @example
- * const event = constructEvent(rawBody, header, secret);
+ * const event = await constructEvent(rawBody, header, secret);
  * if (event.type === 'message.received') {
  *   // event.data is MessagePayload
  * }
@@ -185,48 +183,14 @@ function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
   return diff === 0;
 }
 
-// ─── HMAC-SHA256 computation ─────────────────────────────────────────────────
-
-/**
- * Detect whether we're in a runtime that has `require` (Node / bundled Node).
- * Cloudflare Workers and Vercel Edge do NOT have `require`, but they DO have
- * `globalThis.crypto.subtle` — the async Web Crypto path is used there.
- */
-function hasRequire(): boolean {
-  return typeof require === "function";
-}
-
-/**
- * Detect Web Crypto availability.
- */
-function hasWebCrypto(): boolean {
-  return (
-    typeof globalThis !== "undefined" &&
-    typeof globalThis.crypto === "object" &&
-    globalThis.crypto !== null &&
-    typeof (globalThis.crypto as Crypto).subtle === "object" &&
-    typeof (globalThis.crypto as Crypto).subtle.importKey === "function"
-  );
-}
-
-/**
- * Synchronous HMAC-SHA256 via Node `crypto.createHmac`.
- * Used in Node runtimes where `require` is available.
- */
-function hmacSyncNode(secret: string, payload: string): string {
-  // Dynamic require: valid in Node ≥ 18; this branch is only taken when
-  // `hasRequire()` returns true.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const nodeCrypto = require("node:crypto") as typeof import("node:crypto");
-  return nodeCrypto.createHmac("sha256", secret).update(payload, "utf8").digest("hex");
-}
+// ─── HMAC-SHA256 via Web Crypto ──────────────────────────────────────────────
 
 /**
  * Async HMAC-SHA256 via Web Crypto (`globalThis.crypto.subtle`).
- * Used in edge runtimes (Cloudflare Workers, Vercel Edge) where `require` is absent.
+ * Available in Node 18+, Cloudflare Workers, and Vercel Edge.
  * The result is returned as a hex string.
  */
-async function hmacAsyncWebCrypto(secret: string, payload: string): Promise<string> {
+async function hmacWebCrypto(secret: string, payload: string): Promise<string> {
   const enc = new TextEncoder();
   const keyMaterial = await globalThis.crypto.subtle.importKey(
     "raw",
@@ -246,20 +210,25 @@ async function hmacAsyncWebCrypto(secret: string, payload: string): Promise<stri
  */
 export interface ConstructEventOptions {
   /**
-   * Maximum age in milliseconds of a webhook event before it is rejected as a
-   * replay. Default: 300_000 (5 minutes).
+   * Maximum age in seconds of a webhook event before it is rejected as a
+   * replay. Default: 300 (5 minutes). Applies in both directions (past and
+   * future skew).
+   *
+   * Note: this was previously `replayWindowMs` (milliseconds). The option is
+   * now in **seconds** to match the server's wire format (Unix seconds). If
+   * you were passing a millisecond value (e.g. `300_000`), divide by 1000.
    */
-  replayWindowMs?: number;
+  replayWindowSecs?: number;
 }
 
-// ─── Core verification logic (shared by sync and async paths) ────────────────
+// ─── Core verification logic ──────────────────────────────────────────────────
 
 function verifyAndParse(
   computedHex: string,
   v1: string,
   timestamp: number,
   bodyStr: string,
-  replayWindowMs: number,
+  replayWindowSecs: number,
 ): CurviateEvent {
   // Step 3 — constant-time HMAC comparison.
   let providedBytes: Uint8Array;
@@ -280,12 +249,14 @@ function verifyAndParse(
     );
   }
 
-  // Step 4 — replay guard.
-  const age = Date.now() - timestamp;
-  if (age > replayWindowMs) {
+  // Step 4 — replay guard (Unix seconds, both past and future).
+  // timestamp is Unix seconds (integer); Date.now()/1000 is the current epoch in seconds.
+  const nowSecs = Date.now() / 1000;
+  const ageSecs = Math.abs(nowSecs - timestamp);
+  if (ageSecs > replayWindowSecs) {
     throw new WebhookSignatureError(
       "replay_detected",
-      `Webhook event is too old (${Math.floor(age / 1000)}s, window is ${Math.floor(replayWindowMs / 1000)}s).`,
+      `Webhook event is outside the replay window (${Math.floor(ageSecs)}s ago/ahead, window is ${replayWindowSecs}s).`,
     );
   }
 
@@ -308,88 +279,65 @@ function verifyAndParse(
   return parsed as CurviateEvent;
 }
 
-// ─── constructEvent (synchronous on Node, async on edge runtimes) ────────────
+// ─── constructEvent ───────────────────────────────────────────────────────────
 
 /**
  * Verify a Curviate webhook signature and parse the event payload.
  *
- * **Node runtimes (18+):** synchronous — safe to call inline in any handler.
- * **Edge runtimes** (Cloudflare Workers, Vercel Edge): uses Web Crypto, which is
- * async. The return type is `CurviateEvent` in both cases — TypeScript consumers
- * that target edge runtimes without `require` should use `await constructEvent(...)`.
- * The returned value is always a `CurviateEvent` (Promise resolves immediately on
- * Node; the Promise is the value on edge runtimes).
- *
- * For a runtime-agnostic API, always `await` the result.
+ * Uses Web Crypto (`globalThis.crypto.subtle`) universally — available in
+ * Node 18+, Cloudflare Workers, and Vercel Edge. Always returns a Promise;
+ * always `await` it.
  *
  * @param rawBody - The raw (un-parsed) request body as a string or Buffer.
  *   **Must be the exact bytes received** — do not JSON.parse then re-serialize.
  * @param signatureHeader - Full value of the `X-Curviate-Signature` header.
  * @param secret - The webhook signing secret from your webhook registration.
  * @param opts - Optional verification settings.
- * @returns A typed `CurviateEvent` (or `Promise<CurviateEvent>` on edge runtimes).
+ * @returns `Promise<CurviateEvent>` — a typed event once verified.
  * @throws {WebhookSignatureError} if the header is malformed, the HMAC is
  *   invalid, or the timestamp is outside the replay window.
  *
  * @example
- * // Express handler (Node — synchronous)
- * app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
- *   const event = constructEvent(req.body, req.headers['x-curviate-signature'], secret);
+ * // Express handler (Node 18+)
+ * app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+ *   const sig = req.headers['x-curviate-signature'] as string;
+ *   let event;
+ *   try {
+ *     event = await constructEvent(req.body, sig, secret);
+ *   } catch (err) {
+ *     if (err instanceof WebhookSignatureError) {
+ *       return res.sendStatus(400);
+ *     }
+ *     throw err;
+ *   }
  *   if (event.type === 'message.received') { ... }
  *   res.sendStatus(200);
  * });
  *
  * @example
- * // Hono handler (edge — always await)
+ * // Hono / Vercel Edge
  * app.post('/webhook', async (c) => {
  *   const rawBody = await c.req.text();
  *   const event = await constructEvent(rawBody, c.req.header('x-curviate-signature')!, secret);
  *   return c.text('ok');
  * });
  */
-export function constructEvent(
+export async function constructEvent(
   rawBody: string | Buffer,
   signatureHeader: string,
   secret: string,
   opts?: ConstructEventOptions,
-): CurviateEvent;
-export function constructEvent(
-  rawBody: string | Buffer,
-  signatureHeader: string,
-  secret: string,
-  opts?: ConstructEventOptions,
-): CurviateEvent | Promise<CurviateEvent>;
-export function constructEvent(
-  rawBody: string | Buffer,
-  signatureHeader: string,
-  secret: string,
-  opts?: ConstructEventOptions,
-): CurviateEvent | Promise<CurviateEvent> {
-  const replayWindowMs = opts?.replayWindowMs ?? 300_000;
+): Promise<CurviateEvent> {
+  const replayWindowSecs = opts?.replayWindowSecs ?? 300;
 
   // Step 1 — parse the header.
   const { timestamp, v1 } = parseHeader(signatureHeader);
 
   // Step 2 — compute HMAC-SHA256(secret, "<timestamp>.<rawBody>").
+  // timestamp on the wire is Unix seconds.
   const bodyStr = typeof rawBody === "string" ? rawBody : rawBody.toString("utf8");
   const hmacPayload = `${timestamp}.${bodyStr}`;
 
-  if (hasRequire()) {
-    // Node runtime — synchronous path.
-    const computedHex = hmacSyncNode(secret, hmacPayload);
-    return verifyAndParse(computedHex, v1, timestamp, bodyStr, replayWindowMs);
-  }
-
-  if (hasWebCrypto()) {
-    // Edge runtime (Cloudflare Workers, Vercel Edge) — async Web Crypto path.
-    return hmacAsyncWebCrypto(secret, hmacPayload).then((computedHex) =>
-      verifyAndParse(computedHex, v1, timestamp, bodyStr, replayWindowMs),
-    );
-  }
-
-  // No crypto available — fail safe.
-  throw new WebhookSignatureError(
-    "invalid_signature",
-    "No cryptographic runtime available (neither Node crypto nor Web Crypto).",
-  );
+  const computedHex = await hmacWebCrypto(secret, hmacPayload);
+  return verifyAndParse(computedHex, v1, timestamp, bodyStr, replayWindowSecs);
 }

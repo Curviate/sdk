@@ -44,6 +44,7 @@
     "gen:types": "node scripts/gen-types.mjs",
     "gen:types:fixture": "node scripts/gen-types.mjs --fixture",
     "check:types": "node scripts/check-types.mjs",
+    "verify:dist": "pnpm build && node scripts/verify-dist.mjs",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
