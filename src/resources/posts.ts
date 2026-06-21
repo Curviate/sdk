@@ -1,5 +1,5 @@
 /**
- * Posts resource — 7 methods (sdk/002 FR-002).
+ * Posts resource — 7 methods.
  *
  * Account-scoped: the bound context injects `account_id` into every request.
  * Create and comment are multipart-only per the OpenAPI spec. The SDK body type

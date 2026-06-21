@@ -1,9 +1,9 @@
 /**
- * Sales Navigator resource — 7 methods (sdk/002 FR-002; tier: sn).
+ * Sales Navigator resource — 7 methods (tier: sn).
  *
  * Account-scoped: the bound context injects `account_id` into every request.
- * startChat accepts optional `attachments: Array<Buffer | File>` and builds
- * `FormData` before calling the transport (sdk/002 FR-004).
+ * `startChat` accepts optional `attachments: Array<Buffer | File>` and builds
+ * `FormData` automatically before calling the transport.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -37,7 +37,7 @@ type StartChatFormFields =
   paths["/v1/sales-navigator/chats"]["post"]["requestBody"]["content"]["multipart/form-data"];
 /**
  * Caller-facing body: scalar fields plus optional `attachments`, `voice_message`,
- * and `video_message` (SDK builds FormData internally — sdk/002 FR-004).
+ * and `video_message` (the SDK builds `FormData` internally when files are present).
  * `account_id` is optional because the account-scoped context injects it.
  */
 export type SNStartChatBody = Omit<
@@ -159,8 +159,8 @@ export class SalesNavigatorResource {
 
   /**
    * Start a new Sales Navigator chat. Accepts optional `attachments[]`,
-   * `voice_message`, and `video_message` — when present the request is sent
-   * as `multipart/form-data` (sdk/002 FR-004). `POST /v1/sales-navigator/chats`
+   * `voice_message`, and `video_message` — when present, the request is sent
+   * as `multipart/form-data`. `POST /v1/sales-navigator/chats`
    */
   startChat(body: SNStartChatBody): Promise<SNStartChatResult> {
     const { attachments, voice_message, video_message, ...scalars } = body;

@@ -1,10 +1,10 @@
 /**
- * Recruiter resource — 17 methods (sdk/002 FR-002; tier: recruiter).
+ * Recruiter resource — 17 methods (tier: recruiter).
  *
  * Account-scoped: the bound context injects `account_id` into every request.
- * startChat accepts optional `attachments[]`, `voice_message`, `video_message`
- * and builds `FormData` (sdk/002 FR-004).
- * downloadResume returns `Promise<ArrayBuffer>` (sdk/002 FR-005).
+ * `startChat` accepts optional `attachments[]`, `voice_message`, and
+ * `video_message`; the SDK builds the `FormData` body automatically.
+ * `downloadResume` returns `Promise<ArrayBuffer>` (binary response).
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -22,7 +22,7 @@ type RecruiterStartChatFormFields =
   paths["/v1/recruiter/chats"]["post"]["requestBody"]["content"]["multipart/form-data"];
 /**
  * Caller-facing body: scalar fields plus optional `attachments`, `voice_message`,
- * and `video_message` (SDK builds FormData internally — sdk/002 FR-004).
+ * and `video_message` (the SDK builds `FormData` internally when files are present).
  * `account_id` is optional because the account-scoped context injects it.
  */
 export type RecruiterStartChatBody = Omit<
@@ -174,8 +174,8 @@ export class RecruiterResource {
 
   /**
    * Start a Recruiter chat (InMail). Accepts optional `attachments[]`,
-   * `voice_message`, and `video_message` — when present the request is sent
-   * as `multipart/form-data` (sdk/002 FR-004). `POST /v1/recruiter/chats`
+   * `voice_message`, and `video_message` — when present, the request is sent
+   * as `multipart/form-data`. `POST /v1/recruiter/chats`
    */
   startChat(body: RecruiterStartChatBody): Promise<RecruiterStartChatResult> {
     const { attachments, voice_message, video_message, ...scalars } = body;
@@ -367,7 +367,7 @@ export class RecruiterResource {
   /**
    * Download an applicant's resume as raw binary.
    * `GET /v1/recruiter/jobs/applicants/{applicant_id}/resume`
-   * Returns `ArrayBuffer` — sdk/002 FR-005 (binary response; never stored by the SDK).
+   * Returns `ArrayBuffer` — binary response; the SDK does not cache or store it.
    */
   downloadResume(applicantId: string): Promise<ArrayBuffer> {
     return this.ctx.request<ArrayBuffer>({

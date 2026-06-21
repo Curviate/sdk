@@ -1,5 +1,5 @@
 /**
- * Cursor pagination helper (sdk/002 FR-003).
+ * Cursor pagination helper.
  *
  * `paginate(fn, params)` returns an `AsyncIterableIterator` that transparently
  * follows the `cursor` field in each page response, yielding individual items

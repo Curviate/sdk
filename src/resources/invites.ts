@@ -1,5 +1,5 @@
 /**
- * Invites resource — 5 methods (sdk/002 FR-002).
+ * Invites resource — 5 methods.
  *
  * Account-scoped: the bound context injects `account_id` into every request.
  */

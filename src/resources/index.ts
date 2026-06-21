@@ -2,9 +2,9 @@
  * Resource namespace assembly.
  *
  * The root client and every `account(id)` accessor expose the same set of
- * resource namespaces (sdk/001 FR-003). All 9 namespaces are fully implemented:
- * accounts, messaging, profiles, invites, search, posts (delegation 2A) +
- * salesNavigator, recruiter, webhooks (delegation 2B).
+ * resource namespaces. All 9 namespaces are fully implemented:
+ * accounts, messaging, profiles, invites, search, posts,
+ * salesNavigator, recruiter, and webhooks.
  */
 import type { RequestContext } from "../internal/context.js";
 import { AccountsResource } from "./accounts.js";

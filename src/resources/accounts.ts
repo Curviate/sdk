@@ -1,10 +1,10 @@
 /**
- * Accounts resource — the reference vertical slice (sdk/001 AC-005).
+ * Accounts resource — account connection management.
  *
- * This is the copy-pattern for delegation 2's other resource namespaces:
+ * Pattern followed by all resource namespaces:
  *   - take a {@link RequestContext} in the constructor,
  *   - map each method to exactly one `/v1/*` operation,
- *   - type request/response from the generated OpenAPI types (sdk/005 FR-006),
+ *   - type request/response from the generated OpenAPI types,
  *   - never re-declare a response interface by hand.
  */
 import type { RequestContext } from "../internal/context.js";

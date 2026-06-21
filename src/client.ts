@@ -1,14 +1,14 @@
 /**
- * The Curviate client (sdk/001).
+ * The Curviate client.
  *
  * `new Curviate({ apiKey })` is the single entry point. The instance is
- * immutable: config is resolved + frozen in the constructor (FR-004), and the
- * constructor makes no network call (FR-001). Resource namespaces are mounted
+ * immutable: config is resolved + frozen in the constructor, and the
+ * constructor makes no network call. Resource namespaces are mounted
  * on the instance; `account(id)` returns an account-scoped view that fixes
- * `account_id` on every call (FR-003).
+ * `account_id` on every call.
  *
  * `paginate(method, params)` follows the `cursor` field transparently across
- * pages, yielding individual items as an `AsyncIterableIterator` (sdk/002 FR-003).
+ * pages, yielding individual items as an `AsyncIterableIterator`.
  */
 import {
   resolveConfig,
@@ -37,7 +37,7 @@ import {
 } from "./resources/index.js";
 
 export class Curviate {
-  /** Frozen, fully-resolved config (FR-004). */
+  /** Frozen, fully-resolved config. */
   readonly config: ResolvedConfig;
 
   readonly accounts: AccountsResource;
@@ -67,7 +67,7 @@ export class Curviate {
 
   /**
    * Return an account-scoped accessor that fixes `account_id` on every call,
-   * so callers need not repeat it per method (FR-003).
+   * so callers need not repeat it per method.
    *
    * @param accountId - a Curviate account id (`acc_…`). Empty throws
    *   `CurviateError({ code: 'INVALID_REQUEST' })` synchronously, no network call.
@@ -89,7 +89,7 @@ export class Curviate {
   }
 
   /**
-   * Transparent cursor-pagination iterator (sdk/002 FR-003).
+   * Transparent cursor-pagination iterator.
    *
    * Calls `fn` repeatedly, injecting the `cursor` from each response into the
    * next call, yielding individual items until `cursor` is null.
