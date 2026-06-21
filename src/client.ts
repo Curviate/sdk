@@ -6,6 +6,9 @@
  * constructor makes no network call (FR-001). Resource namespaces are mounted
  * on the instance; `account(id)` returns an account-scoped view that fixes
  * `account_id` on every call (FR-003).
+ *
+ * `paginate(method, params)` follows the `cursor` field transparently across
+ * pages, yielding individual items as an `AsyncIterableIterator` (sdk/002 FR-003).
  */
 import {
   resolveConfig,
@@ -14,6 +17,10 @@ import {
 } from "./config.js";
 import { CurviateError } from "./errors.js";
 import { createContext } from "./internal/context.js";
+import {
+  paginate as paginateImpl,
+  type PaginatableMethod,
+} from "./internal/paginate.js";
 import {
   buildNamespaces,
   buildAccountScopedNamespaces,
@@ -79,5 +86,29 @@ export class Curviate {
     }
     const ctx = createContext(this.config, accountId);
     return buildAccountScopedNamespaces(ctx);
+  }
+
+  /**
+   * Transparent cursor-pagination iterator (sdk/002 FR-003).
+   *
+   * Calls `fn` repeatedly, injecting the `cursor` from each response into the
+   * next call, yielding individual items until `cursor` is null.
+   *
+   * @param fn     - a bound resource method (e.g. `profiles.listConnections.bind(profiles)`)
+   * @param params - the initial params (minus cursor)
+   *
+   * @example
+   * for await (const profile of curviate.paginate(
+   *   curviate.account('acc_123').profiles.listConnections,
+   *   { limit: 50 }
+   * )) {
+   *   console.log(profile);
+   * }
+   */
+  paginate<TParams extends Record<string, unknown>, TPage extends { items?: unknown[]; data?: unknown[]; cursor?: string | null }>(
+    fn: PaginatableMethod<TParams, TPage>,
+    params: TParams,
+  ): AsyncIterableIterator<TPage extends { items?: Array<infer I> | undefined } ? I : TPage extends { data?: Array<infer D> | undefined } ? D : unknown> {
+    return paginateImpl(fn, params) as AsyncIterableIterator<TPage extends { items?: Array<infer I> | undefined } ? I : TPage extends { data?: Array<infer D> | undefined } ? D : unknown>;
   }
 }
