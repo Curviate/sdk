@@ -27,7 +27,7 @@ import { Curviate } from "@curviate/sdk";
 const curviate = new Curviate({
   apiKey: process.env.CURVIATE_API_KEY!,
   // Optional:
-  // baseUrl: "https://api.curviate.com", // default
+  // baseUrl: "https://app.curviate.com", // default
   // timeout: 30_000,                     // per-attempt timeout, ms
   // maxRetries: 3,                        // GET/HEAD retries with backoff
 });
@@ -37,7 +37,7 @@ const curviate = new Curviate({
 
 ## Account-scoped accessor
 
-Every LinkedIn operation (messages, profiles, invites, posts) is tied to a **managed account** — a LinkedIn session you have connected via `curviate.accounts.create()`. The `curviate.account(id)` accessor fixes the `account_id` on every call so you do not have to thread it manually:
+Every LinkedIn operation (messages, profiles, invites, posts) is tied to a **managed account** — a LinkedIn session you have connected via `curviate.accounts.link()`. The `curviate.account(id)` accessor fixes the `account_id` on every call so you do not have to thread it manually:
 
 ```ts
 // Root-level: tenant-wide operations
@@ -48,7 +48,7 @@ const acc = curviate.account(accounts[0].id);
 
 // Now every resource call is scoped to that account:
 const { items: chats } = await acc.messaging.listChats();
-const profile = await acc.profiles.get({ identifier: "some-handle" });
+const profile = await acc.profiles.get("some-profile-id");
 ```
 
 ---
@@ -75,8 +75,7 @@ async function sendFirstMessage() {
 
   // 3. Send a message to the first chat
   const chat = chats[0];
-  await acc.messaging.sendMessage({
-    chat_id: chat.id,
+  await acc.messaging.sendMessage(chat.id, {
     text: "Hi — following up from our conversation.",
   });
 
@@ -96,7 +95,7 @@ Every API error is a `CurviateError`. Use `isCurviateError` to narrow in `catch`
 import { isCurviateError } from "@curviate/sdk";
 
 try {
-  await acc.messaging.sendMessage({ chat_id: "c_123", text: "hello" });
+  await acc.messaging.sendMessage("c_123", { text: "hello" });
 } catch (err) {
   if (!isCurviateError(err)) throw err; // re-throw network errors etc.
 
@@ -126,7 +125,7 @@ All 34 error codes are documented in the [API reference](https://docs.curviate.c
 
 ## Cursor pagination
 
-Resources that return lists support cursor pagination. `curviate.paginate()` is an async iterator that follows `next_cursor` automatically — pull items one at a time without managing cursors:
+Resources that return lists support cursor pagination. `curviate.paginate()` is an async iterator that follows the `cursor` field automatically — pull items one at a time without managing cursors:
 
 ```ts
 // Iterate over every chat across all pages
@@ -152,14 +151,14 @@ Register a webhook to receive real-time events, then verify each delivery with `
 ```ts
 import { constructEvent, WebhookSignatureError } from "@curviate/sdk";
 
-// Express (Node — synchronous)
-app.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
+// Express (Node 18+)
+app.post("/webhook", express.raw({ type: "application/json" }), async (req, res) => {
   const sig = req.headers["x-curviate-signature"] as string;
   const secret = process.env.CURVIATE_WEBHOOK_SECRET!;
 
   let event;
   try {
-    event = constructEvent(req.body, sig, secret);
+    event = await constructEvent(req.body, sig, secret);
   } catch (err) {
     if (err instanceof WebhookSignatureError) {
       console.warn("Bad webhook:", err.reason); // 'invalid_signature' | 'replay_detected' | 'malformed_header'
@@ -189,6 +188,8 @@ app.post("/webhook", async (c) => {
   return c.text("ok");
 });
 ```
+
+`constructEvent` always returns a `Promise<CurviateEvent>` — always `await` it.
 
 `WebhookSignatureError` is NOT a `CurviateError` — narrow with `instanceof WebhookSignatureError`.
 
