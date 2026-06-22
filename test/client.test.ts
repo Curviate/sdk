@@ -43,7 +43,7 @@ describe("Curviate constructor (FR-001, FR-005)", () => {
   // TS-004 (AC-004) — defaults applied.
   it("applies default baseUrl / timeout / maxRetries", () => {
     const c = new Curviate({ apiKey: "k" });
-    expect(c.config.baseUrl).toBe("https://app.curviate.com");
+    expect(c.config.baseUrl).toBe("https://api.curviate.com");
     expect(c.config.timeout).toBe(30_000);
     expect(c.config.maxRetries).toBe(3);
   });
