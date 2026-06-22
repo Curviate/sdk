@@ -27,7 +27,7 @@ import { Curviate } from "@curviate/sdk";
 const curviate = new Curviate({
   apiKey: process.env.CURVIATE_API_KEY!,
   // Optional:
-  // baseUrl: "https://app.curviate.com", // default
+  // baseUrl: "https://api.curviate.com", // default
   // timeout: 30_000,                     // per-attempt timeout, ms
   // maxRetries: 3,                        // GET/HEAD retries with backoff
 });

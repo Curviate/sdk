@@ -14,7 +14,7 @@ Initial public release.
 ### Added
 
 **Client and auth**
-- `new Curviate({ apiKey })` — configures the SDK with a Bearer API key, base URL (`https://app.curviate.com`), timeout, and max retries.
+- `new Curviate({ apiKey })` — configures the SDK with a Bearer API key, base URL (`https://api.curviate.com`), timeout, and max retries.
 - `curviate.account(accountId)` — returns an account-scoped accessor; all LinkedIn operations are tied to a managed account.
 
 **Resource surface**

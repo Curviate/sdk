@@ -10,7 +10,7 @@ import { CurviateError } from "./errors.js";
 export interface CurviateConfig {
   /** Required. The API key (`cvt_live_…`). */
   apiKey: string;
-  /** Default `https://app.curviate.com`. */
+  /** Default `https://api.curviate.com`. */
   baseUrl?: string;
   /** Per-request timeout in ms. Default `30_000`. */
   timeout?: number;
@@ -29,7 +29,7 @@ export interface ResolvedConfig {
   readonly fetch: typeof fetch | undefined;
 }
 
-export const DEFAULT_BASE_URL = "https://app.curviate.com";
+export const DEFAULT_BASE_URL = "https://api.curviate.com";
 export const DEFAULT_TIMEOUT_MS = 30_000;
 export const DEFAULT_MAX_RETRIES = 3;
 
