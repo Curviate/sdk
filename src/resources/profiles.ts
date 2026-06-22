@@ -152,6 +152,7 @@ export class ProfilesResource {
       method: "POST",
       path: `/v1/profiles/${profileId}/endorse`,
       body,
+      accountIdIn: "body",
     });
   }
 }

@@ -191,12 +191,14 @@ export class RecruiterResource {
           voice_message,
           video_message,
         ),
+        accountIdIn: "body",
       });
     }
     return this.ctx.request<RecruiterStartChatResult>({
       method: "POST",
       path: "/v1/recruiter/chats",
       body: scalars,
+      accountIdIn: "body",
     });
   }
 
@@ -268,6 +270,7 @@ export class RecruiterResource {
       method: "POST",
       path: `/v1/recruiter/projects/candidates/${userId}`,
       body,
+      accountIdIn: "body",
     });
   }
 
@@ -280,6 +283,7 @@ export class RecruiterResource {
       method: "POST",
       path: `/v1/recruiter/projects/applicants/${userId}`,
       body,
+      accountIdIn: "body",
     });
   }
 
@@ -292,6 +296,7 @@ export class RecruiterResource {
       method: "POST",
       path: `/v1/recruiter/projects/applicants/${userId}/reject`,
       body,
+      accountIdIn: "body",
     });
   }
 
@@ -314,6 +319,7 @@ export class RecruiterResource {
       method: "POST",
       path: "/v1/recruiter/jobs",
       body,
+      accountIdIn: "body",
     });
   }
 
@@ -326,6 +332,7 @@ export class RecruiterResource {
       method: "POST",
       path: `/v1/recruiter/jobs/${jobId}/publish`,
       body,
+      accountIdIn: "body",
     });
   }
 
@@ -338,6 +345,7 @@ export class RecruiterResource {
       method: "POST",
       path: `/v1/recruiter/jobs/${jobId}/checkpoint`,
       body,
+      accountIdIn: "body",
     });
   }
 

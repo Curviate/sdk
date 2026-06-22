@@ -48,6 +48,7 @@ export class InvitesResource {
       method: "POST",
       path: "/v1/invites",
       body,
+      accountIdIn: "body",
     });
   }
 
@@ -78,6 +79,7 @@ export class InvitesResource {
       method: "POST",
       path: `/v1/invites/received/${invitationId}`,
       body,
+      accountIdIn: "body",
     });
   }
 

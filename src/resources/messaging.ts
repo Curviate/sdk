@@ -139,12 +139,14 @@ export class MessagingResource {
         method: "POST",
         path: "/v1/chats",
         body: buildFormData(scalars as Record<string, unknown>, attachments),
+        accountIdIn: "body",
       });
     }
     return this.ctx.request<StartChatResult>({
       method: "POST",
       path: "/v1/chats",
       body: scalars,
+      accountIdIn: "body",
     });
   }
 
@@ -176,12 +178,14 @@ export class MessagingResource {
         method: "POST",
         path: `/v1/chats/${chatId}/messages`,
         body: buildFormData(scalars as Record<string, unknown>, attachments),
+        accountIdIn: "body",
       });
     }
     return this.ctx.request<SendMessageResult>({
       method: "POST",
       path: `/v1/chats/${chatId}/messages`,
       body: scalars,
+      accountIdIn: "body",
     });
   }
 
@@ -236,6 +240,7 @@ export class MessagingResource {
       method: "POST",
       path: `/v1/messages/${messageId}/reactions`,
       body,
+      accountIdIn: "body",
     });
   }
 
@@ -245,6 +250,7 @@ export class MessagingResource {
       method: "POST",
       path: "/v1/messages/inmail",
       body,
+      accountIdIn: "body",
     });
   }
 

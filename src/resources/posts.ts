@@ -120,6 +120,7 @@ export class PostsResource {
       method: "POST",
       path: "/v1/posts",
       body: form,
+      accountIdIn: "body",
     });
   }
 
@@ -149,6 +150,7 @@ export class PostsResource {
       method: "POST",
       path: `/v1/posts/${postId}/comments`,
       body: buildFormData(scalars as Record<string, unknown>, attachments),
+      accountIdIn: "body",
     });
   }
 
@@ -167,6 +169,7 @@ export class PostsResource {
       method: "POST",
       path: `/v1/posts/${postId}/reactions`,
       body,
+      accountIdIn: "body",
     });
   }
 }

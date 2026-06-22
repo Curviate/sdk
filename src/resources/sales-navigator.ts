@@ -176,12 +176,14 @@ export class SalesNavigatorResource {
           voice_message,
           video_message,
         ),
+        accountIdIn: "body",
       });
     }
     return this.ctx.request<SNStartChatResult>({
       method: "POST",
       path: "/v1/sales-navigator/chats",
       body: scalars,
+      accountIdIn: "body",
     });
   }
 
@@ -206,6 +208,7 @@ export class SalesNavigatorResource {
       method: "POST",
       path: `/v1/sales-navigator/leads/${userId}`,
       body,
+      accountIdIn: "body",
     });
   }
 
