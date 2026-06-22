@@ -1,4 +1,4 @@
-// sdk/002 — salesNavigator namespace (7 methods; tier: sn)
+// salesNavigator namespace (7 methods; tier: sn)
 // TDD: MSW happy-path for every method + tier-gated error test.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
@@ -27,7 +27,7 @@ describe("salesNavigator.searchPeople", () => {
     expect(Array.isArray(res.items)).toBe(true);
   });
 
-  // TS-006 (AC-007) — TIER_NOT_ACTIVE surfaces as CurviateError with required_tier.
+  // TIER_NOT_ACTIVE surfaces as CurviateError with required_tier.
   it("throws CurviateError with required_tier when TIER_NOT_ACTIVE", async () => {
     server.use(
       http.post(`${BASE}/v1/sales-navigator/search/people`, () =>

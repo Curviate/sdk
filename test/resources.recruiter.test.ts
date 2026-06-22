@@ -1,4 +1,4 @@
-// sdk/002 — recruiter namespace (17 methods; tier: recruiter)
+// recruiter namespace (17 methods; tier: recruiter)
 // TDD: MSW happy-path for every method + binary download + tier error tests.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
@@ -309,7 +309,7 @@ describe("recruiter.getApplicant", () => {
 
 // ─── recruiter.downloadResume (GET /v1/recruiter/jobs/applicants/:applicant_id/resume) ─
 describe("recruiter.downloadResume", () => {
-  it("returns ArrayBuffer with the raw bytes (FR-005)", async () => {
+  it("returns ArrayBuffer with the raw bytes", async () => {
     const bytes = new Uint8Array([80, 68, 70]); // "PDF" header bytes
     server.use(
       http.get(`${BASE}/v1/recruiter/jobs/applicants/app_1/resume`, () =>

@@ -1,6 +1,6 @@
-// sdk/003 — CurviateError typed error model (FR-001..FR-004).
-// constructEvent / WebhookSignatureError / CurviateEvent (FR-005..007) are
-// delegation 3 and intentionally NOT covered here.
+// CurviateError typed error model.
+// constructEvent / WebhookSignatureError / CurviateEvent are
+// covered in webhooks.constructEvent.test.ts.
 import { describe, expect, it } from "vitest";
 import {
   CurviateError,
@@ -9,7 +9,7 @@ import {
 } from "../src/errors.js";
 
 describe("CurviateError", () => {
-  // TS-001 (AC-001) — instanceof Error and CurviateError; code is carried.
+  // instanceof Error and CurviateError; code is carried.
   it("is an instance of both Error and CurviateError and carries its code", () => {
     const e = new CurviateError({
       code: "UNAUTHORIZED",
@@ -25,7 +25,7 @@ describe("CurviateError", () => {
     expect(e.name).toBe("CurviateError");
   });
 
-  // FR-001 — full field surface.
+  // full field surface.
   it("exposes the documented field surface", () => {
     const e = new CurviateError({
       code: "TIER_NOT_ACTIVE",
@@ -42,7 +42,7 @@ describe("CurviateError", () => {
     expect(e.retryHint).toEqual({ kind: "never" });
   });
 
-  // FR-001 — network errors map to INTERNAL with no httpStatus.
+  // network errors map to INTERNAL with no httpStatus.
   it("supports a network-error shape (INTERNAL, undefined httpStatus)", () => {
     const e = new CurviateError({
       code: "INTERNAL",
@@ -55,9 +55,8 @@ describe("CurviateError", () => {
     expect(e.retryHint).toBeNull();
   });
 
-  // TS-003 (AC-003, Hard Rule #2) — the credential never appears in the
-  // serialized error, and neither does the literal "Bearer".
-  it("never serializes the apiKey or the Bearer scheme (Hard Rule #2)", () => {
+  // the credential never appears in the serialized error, and neither does the literal "Bearer".
+  it("never serializes the apiKey or the Bearer scheme", () => {
     const apiKey = "my_secret_api_key";
     // Construct an error the way the transport would on a 401, with a message
     // derived from the response body only — never from the auth header.
@@ -78,7 +77,7 @@ describe("CurviateError", () => {
     expect(parsed["httpStatus"]).toBe(401);
   });
 
-  // FR-003 — even if a caller were to stuff the key into the message (which the
+  // even if a caller were to stuff the key into the message (which the
   // transport never does), toJSON must not widen the surface to include an
   // apiKey/authorization field. We assert the shape has no such key.
   it("toJSON exposes no credential-bearing field", () => {
@@ -95,8 +94,7 @@ describe("CurviateError", () => {
   });
 });
 
-describe("isCurviateError (FR-004)", () => {
-  // TS-004 (AC-004)
+describe("isCurviateError", () => {
   it("returns true for a CurviateError", () => {
     const e = new CurviateError({
       code: "INTERNAL",
@@ -119,8 +117,8 @@ describe("isCurviateError (FR-004)", () => {
   });
 });
 
-describe("ErrorCode union (FR-002)", () => {
-  // TS-002 (AC-002) — exhaustive presence of every observable code, and absence
+describe("ErrorCode union", () => {
+  // exhaustive presence of every observable code, and absence
   // of internal-only codes. A compile-time assignment proves the union accepts
   // the in-scope codes; the runtime check below guards against accidental drift.
   it("accepts every observable code (compile-time) and excludes internal codes", () => {

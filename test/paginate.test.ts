@@ -1,4 +1,4 @@
-// sdk/002 FR-003 — paginate cursor helper (TS-004, TS-005)
+// paginate cursor helper
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";
@@ -7,7 +7,7 @@ import { Curviate } from "../src/index.js";
 const BASE = "https://app.curviate.test";
 
 describe("curviate.paginate", () => {
-  // TS-004 (AC-005): follows cursor across pages, stops on null
+  // follows cursor across pages, stops on null
   it("yields all items across two pages, stops on null cursor", async () => {
     let callCount = 0;
     server.use(
@@ -34,7 +34,7 @@ describe("curviate.paginate", () => {
     expect(callCount).toBe(2);
   });
 
-  // TS-005 (AC-005): stops immediately on a single-page response with cursor:null
+  // stops immediately on a single-page response with cursor:null
   it("stops immediately if first page has null cursor", async () => {
     server.use(
       http.get(`${BASE}/v1/profiles/relations`, () =>

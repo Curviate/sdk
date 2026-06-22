@@ -1,4 +1,4 @@
-// sdk/001 — Curviate client, auth, config, account-scoped accessor, and the
+// Curviate client: auth, config, account-scoped accessor, and the
 // accounts.list() reference vertical slice (client → transport → generated
 // types → error handling).
 import { http, HttpResponse } from "msw";
@@ -9,8 +9,8 @@ import { CurviateError, isCurviateError } from "../src/errors.js";
 
 const BASE = "https://app.curviate.test";
 
-describe("Curviate constructor (FR-001, FR-005)", () => {
-  // TS-001 (AC-001) — happy path, no network call.
+describe("Curviate constructor", () => {
+  // happy path, no network call.
   it("constructs without throwing and fires no network call", () => {
     const fetchSpy = vi.fn();
     expect(
@@ -19,7 +19,7 @@ describe("Curviate constructor (FR-001, FR-005)", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  // TS-002 (AC-002/003) — empty apiKey throws synchronously, no fetch.
+  // empty apiKey throws synchronously, no fetch.
   it("throws INVALID_REQUEST synchronously on an empty apiKey", () => {
     const fetchSpy = vi.fn();
     let caught: unknown;
@@ -33,14 +33,14 @@ describe("Curviate constructor (FR-001, FR-005)", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  // TS-003 (AC-002) — undefined apiKey coerced → throw.
+  // undefined apiKey coerced → throw.
   it("throws INVALID_REQUEST when apiKey is undefined", () => {
     expect(() => new Curviate({ apiKey: undefined as unknown as string })).toThrow(
       CurviateError,
     );
   });
 
-  // TS-004 (AC-004) — defaults applied.
+  // defaults applied.
   it("applies default baseUrl / timeout / maxRetries", () => {
     const c = new Curviate({ apiKey: "k" });
     expect(c.config.baseUrl).toBe("https://api.curviate.com");
@@ -48,16 +48,16 @@ describe("Curviate constructor (FR-001, FR-005)", () => {
     expect(c.config.maxRetries).toBe(3);
   });
 
-  // FR-004 — immutable config (no setApiKey, frozen config view).
-  it("exposes an immutable config view (FR-004)", () => {
+  // immutable config (no setApiKey, frozen config view).
+  it("exposes an immutable config view", () => {
     const c = new Curviate({ apiKey: "k" });
     expect(Object.isFrozen(c.config)).toBe(true);
     expect((c as unknown as Record<string, unknown>)["setApiKey"]).toBeUndefined();
   });
 });
 
-describe("accounts.list() reference slice (FR-002, sdk/004)", () => {
-  // TS-005 (AC-005) — auth header on the outgoing request.
+describe("accounts.list() reference slice", () => {
+  // auth header on the outgoing request.
   it("sends Authorization: Bearer <apiKey> exactly", async () => {
     let auth: string | null = null;
     server.use(
@@ -100,7 +100,7 @@ describe("accounts.list() reference slice (FR-002, sdk/004)", () => {
   });
 
   // The reference 401 path: server error envelope → typed CurviateError.
-  it("maps a 401 to CurviateError without leaking the apiKey (Hard Rule #2)", async () => {
+  it("maps a 401 to CurviateError without leaking the apiKey", async () => {
     server.use(
       http.get(`${BASE}/v1/accounts`, () =>
         HttpResponse.json(
@@ -120,8 +120,8 @@ describe("accounts.list() reference slice (FR-002, sdk/004)", () => {
   });
 });
 
-describe("account-scoped accessor (FR-003)", () => {
-  // TS-007 (AC-008) — account('') throws synchronously.
+describe("account-scoped accessor", () => {
+  // account('') throws synchronously.
   it("throws INVALID_REQUEST synchronously on an empty account id", () => {
     const c = new Curviate({ apiKey: "k", baseUrl: BASE });
     let caught: unknown;
@@ -134,7 +134,7 @@ describe("account-scoped accessor (FR-003)", () => {
     expect((caught as CurviateError).code).toBe("INVALID_REQUEST");
   });
 
-  // TS-006 (AC-006) — same resource namespaces as the root client.
+  // same resource namespaces as the root client.
   it("exposes the documented resource namespaces", () => {
     const scoped = new Curviate({ apiKey: "k", baseUrl: BASE }).account("acc_123");
     for (const ns of [
@@ -151,7 +151,7 @@ describe("account-scoped accessor (FR-003)", () => {
     }
   });
 
-  it("returns a fresh accessor object per call (no shared mutable state, FR-004)", () => {
+  it("returns a fresh accessor object per call (no shared mutable state)", () => {
     const c = new Curviate({ apiKey: "k", baseUrl: BASE });
     expect(c.account("acc_1")).not.toBe(c.account("acc_2"));
   });

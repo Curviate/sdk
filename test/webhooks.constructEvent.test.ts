@@ -1,5 +1,5 @@
 /**
- * sdk/003 FR-005..FR-007 — constructEvent, WebhookSignatureError, CurviateEvent.
+ * constructEvent, WebhookSignatureError, CurviateEvent.
  *
  * Crypto in tests: use Node's built-in `crypto` to derive a valid HMAC header
  * so we don't depend on constructEvent for setup.
@@ -36,9 +36,9 @@ const SECRET = "whsec_test_secret";
 const BODY = JSON.stringify({ type: "message.received", data: { message_id: "msg_1", account_id: "acc_1" } });
 const BODY_ACCOUNT = JSON.stringify({ type: "account.connected", data: { account_id: "acc_1" } });
 
-// ─── TS-005 (AC-005) — happy path ────────────────────────────────────────────
+// ─── happy path ──────────────────────────────────────────────────────────────
 
-describe("constructEvent — happy path (TS-005 / AC-005)", () => {
+describe("constructEvent — happy path", () => {
   it("returns a typed CurviateEvent with correct type and data", async () => {
     const t = nowSecs();
     const header = makeHeader(BODY, SECRET, t);
@@ -73,9 +73,9 @@ describe("constructEvent — happy path (TS-005 / AC-005)", () => {
   });
 });
 
-// ─── TS-006 (AC-006) — tampered signature ─────────────────────────────────
+// ─── tampered signature ───────────────────────────────────────────────────────
 
-describe("constructEvent — tampered signature (TS-006 / AC-006)", () => {
+describe("constructEvent — tampered signature", () => {
   it("throws WebhookSignatureError with reason: invalid_signature", async () => {
     const t = nowSecs();
     const tamperedHeader = `t=${t},v1=bad_hmac_value_1234567890abcdef`;
@@ -102,9 +102,9 @@ describe("constructEvent — tampered signature (TS-006 / AC-006)", () => {
   });
 });
 
-// ─── TS-007 (AC-007) — replay detection ───────────────────────────────────
+// ─── replay detection ────────────────────────────────────────────────────────
 
-describe("constructEvent — replay detection (TS-007 / AC-007)", () => {
+describe("constructEvent — replay detection", () => {
   it("throws replay_detected for a timestamp from Unix epoch (always outside window)", async () => {
     // t=0 (1970-01-01) is always more than 300s in the past
     const oldTimestampSecs = 0;
@@ -149,9 +149,9 @@ describe("constructEvent — replay detection (TS-007 / AC-007)", () => {
   });
 });
 
-// ─── TS-008 (AC-008) — malformed header ────────────────────────────────────
+// ─── malformed header ────────────────────────────────────────────────────────
 
-describe("constructEvent — malformed header (TS-008 / AC-008)", () => {
+describe("constructEvent — malformed header", () => {
   it("throws WebhookSignatureError with reason: malformed_header for 'garbage'", async () => {
     await expect(constructEvent(BODY, "garbage", SECRET)).rejects.toBeInstanceOf(WebhookSignatureError);
     await expect(constructEvent(BODY, "garbage", SECRET)).rejects.toMatchObject({
@@ -186,9 +186,9 @@ describe("constructEvent — malformed header (TS-008 / AC-008)", () => {
   });
 });
 
-// ─── TS-009 (AC-010) — WebhookSignatureError not instanceof CurviateError ──
+// ─── WebhookSignatureError identity ──────────────────────────────────────────
 
-describe("WebhookSignatureError identity (TS-009 / AC-010)", () => {
+describe("WebhookSignatureError identity", () => {
   it("is an instance of Error but NOT an instance of CurviateError", async () => {
     let caught: unknown;
     try {
