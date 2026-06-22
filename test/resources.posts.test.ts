@@ -1,4 +1,4 @@
-// sdk/002 — posts namespace (7 methods, account-scoped)
+// posts namespace (7 methods, account-scoped)
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";

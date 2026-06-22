@@ -1,5 +1,5 @@
-// sdk/002 — webhooks namespace (6 methods; root-scoped)
-// TDD: MSW happy-path for every method + coverage test asserting 80 total methods.
+// webhooks namespace (6 methods; root-scoped)
+// MSW happy-path for every method + coverage test asserting 80 total methods.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";
@@ -142,8 +142,8 @@ describe("webhooks.getStateDiff", () => {
   });
 });
 
-// ─── AC-009 / TS-007 — coverage: total public method count == 80 ──────────────
-describe("coverage: total public method count == 80 (AC-009, NFR-001)", () => {
+// ─── coverage: total public method count == 80 ───────────────────────────────
+describe("coverage: total public method count == 80", () => {
   it("counts all public function properties across all resource namespaces (target: 80)", () => {
     const c = new Curviate({ apiKey: "k", baseUrl: BASE });
 

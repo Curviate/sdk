@@ -1,9 +1,9 @@
-// check:types — drift check (sdk/005 FR-004) + vendor-name grep (FR-005).
+// check:types — drift check + vendor-name grep.
 //
 // Regenerates types from the committed fixture (offline — no live server) and
 // diffs against the committed src/generated/types.ts. Exits non-zero on any diff
 // or if the vendor name appears in the generated output. This is the pre-publish
-// drift gate; it must pass in CI without starting `pnpm dev`.
+// drift gate; it must pass without starting the dev server.
 
 import { readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -30,7 +30,7 @@ stripLocalDiscriminatorMappings(doc);
 const ast = await openapiTS(doc);
 const fresh = HEADER + astToString(ast);
 
-// FR-005 — vendor-name grep on the freshly generated output.
+// vendor-name grep on the freshly generated output.
 if (forbiddenVendorPattern().test(fresh)) {
   console.error("FAIL: vendor name in generated types");
   process.exit(1);

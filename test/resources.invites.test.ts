@@ -1,4 +1,4 @@
-// sdk/002 — invites namespace (5 methods, account-scoped)
+// invites namespace (5 methods, account-scoped)
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";

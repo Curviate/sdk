@@ -1,4 +1,4 @@
-// sdk/002 — accounts namespace methods (all 9 remaining after list() in the reference slice)
+// accounts namespace methods (all 9 remaining after list() in the reference slice)
 // TDD: MSW happy-path for every method + a smoke test for the full method count.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";

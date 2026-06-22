@@ -1,4 +1,4 @@
-// sdk/002 — messaging namespace methods (14 methods, account-scoped)
+// messaging namespace methods (14 methods, account-scoped)
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";
@@ -172,7 +172,7 @@ describe("messaging.deleteMessage", () => {
 
 // ─── messaging.getAttachment (GET /v1/messages/:message_id/attachments/:att_id) ─
 describe("messaging.getAttachment", () => {
-  it("returns ArrayBuffer (binary, not JSON) (AC-006, FR-005)", async () => {
+  it("returns ArrayBuffer (binary, not JSON)", async () => {
     const bytes = new Uint8Array([1, 2, 3]);
     server.use(
       http.get(`${BASE}/v1/messages/msg_1/attachments/att_1`, () =>

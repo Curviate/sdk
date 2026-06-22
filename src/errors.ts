@@ -150,9 +150,9 @@ export class CurviateError extends Error {
   }
 
   /**
-   * Explicit, credential-safe serialization (Hard Rule #2). Only the documented
-   * structured fields are emitted — never a credential, auth header, or any
-   * reference to the client. `JSON.stringify(error)` calls this automatically.
+   * Explicit, credential-safe serialization. Only the documented structured
+   * fields are emitted — never a credential, auth header, or any reference to
+   * the client. `JSON.stringify(error)` calls this automatically.
    */
   toJSON(): CurviateErrorJSON {
     const json: CurviateErrorJSON = {

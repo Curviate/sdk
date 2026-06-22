@@ -5,9 +5,8 @@
 // used by check:types). The fetched/read document is sanitized (see
 // openapi-sanitize.mjs) before openapi-typescript runs.
 //
-// Honors sdk/005 FR-001 (gen:types fetches the document and runs openapi-typescript)
-// and FR-005 (vendor-name grep on the generated output). Wrapped in a script rather
-// than a one-liner because the document needs the sanitize transform first.
+// Wrapped in a script rather than a one-liner because the document needs the
+// sanitize transform first (vendor-name grep on the generated output).
 
 import { writeFile } from "node:fs/promises";
 import { readFile } from "node:fs/promises";
@@ -62,7 +61,7 @@ const ast = await openapiTS(doc);
 const body = astToString(ast);
 await writeFile(OUTPUT, HEADER + body, "utf8");
 
-// FR-005 — vendor-name grep on the generated output.
+// vendor-name grep on the generated output.
 if (forbiddenVendorPattern().test(HEADER + body)) {
   console.error("FAIL: vendor name present in generated types");
   process.exit(1);

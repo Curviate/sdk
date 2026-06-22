@@ -1,5 +1,5 @@
-// sdk/004 — HTTP transport: serialisation, parsing, retry, backoff, rate-limit,
-// timeout, multipart, binary. MSW is the fast (Docker-free) seam.
+// HTTP transport: serialisation, parsing, retry, backoff, rate-limit,
+// timeout, multipart, binary. MSW is the fast (no-server) seam.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { server } from "./msw/server.js";
@@ -21,8 +21,8 @@ function det(overrides: Record<string, unknown> = {}) {
   };
 }
 
-describe("request serialisation (FR-001, FR-002)", () => {
-  // TS-001 (AC-001) — GET: no body, auth header present, no content-type.
+describe("request serialisation", () => {
+  // GET: no body, auth header present, no content-type.
   it("GET sends no body, an Authorization header, and no Content-Type", async () => {
     let captured: Request | undefined;
     server.use(
@@ -37,7 +37,7 @@ describe("request serialisation (FR-001, FR-002)", () => {
     expect(captured?.headers.get("content-type")).toBeNull();
   });
 
-  // TS-002 (AC-002) — POST JSON: content-type + JSON.stringify body.
+  // POST JSON: content-type + JSON.stringify body.
   it("POST JSON sets application/json and stringifies the body", async () => {
     let body: unknown;
     let ct: string | null = null;
@@ -53,7 +53,7 @@ describe("request serialisation (FR-001, FR-002)", () => {
     expect(body).toEqual({ username: "u" });
   });
 
-  // TS-003 (AC-003) — POST FormData: multipart content-type, no JSON.
+  // POST FormData: multipart content-type, no JSON.
   it("POST FormData omits Content-Type so the runtime sets the boundary", async () => {
     let ct: string | null = null;
     server.use(
@@ -69,7 +69,7 @@ describe("request serialisation (FR-001, FR-002)", () => {
     expect(ct).not.toContain("application/json");
   });
 
-  // FR-001 — GET query params appended via URLSearchParams.
+  // GET query params appended via URLSearchParams.
   it("GET appends query params to the URL", async () => {
     let url: string | undefined;
     server.use(
@@ -85,8 +85,8 @@ describe("request serialisation (FR-001, FR-002)", () => {
   });
 });
 
-describe("response parsing (FR-003)", () => {
-  // TS-004 (AC-004) — JSON success.
+describe("response parsing", () => {
+  // JSON success.
   it("parses a 200 application/json response", async () => {
     server.use(
       http.get(`${BASE}/v1/accounts`, () => HttpResponse.json({ items: [{ id: "a" }] })),
@@ -95,7 +95,7 @@ describe("response parsing (FR-003)", () => {
     expect(out.items[0]!.id).toBe("a");
   });
 
-  // TS-004 (AC-005) — binary octet-stream → ArrayBuffer.
+  // binary octet-stream → ArrayBuffer.
   it("returns an ArrayBuffer for application/octet-stream", async () => {
     server.use(
       http.get(`${BASE}/v1/messages/m1/attachments/a1`, () =>
@@ -114,8 +114,8 @@ describe("response parsing (FR-003)", () => {
   });
 });
 
-describe("error mapping (FR-003)", () => {
-  // TS-005 (AC-006) — 401 maps to CurviateError with code + httpStatus.
+describe("error mapping", () => {
+  // 401 maps to CurviateError with code + httpStatus.
   it("maps a 401 error envelope to CurviateError", async () => {
     server.use(
       http.get(`${BASE}/v1/accounts`, () =>
@@ -137,7 +137,7 @@ describe("error mapping (FR-003)", () => {
     expect((err as CurviateError).userFixable).toBe(false);
   });
 
-  // AC-007 — 500 with non-JSON body → INTERNAL.
+  // 500 with non-JSON body → INTERNAL.
   it("wraps a 500 non-JSON body as INTERNAL", async () => {
     server.use(
       http.get(`${BASE}/v1/accounts`, () =>
@@ -153,7 +153,7 @@ describe("error mapping (FR-003)", () => {
     expect((err as CurviateError).httpStatus).toBe(500);
   });
 
-  // AC-008 — network failure → INTERNAL with undefined httpStatus.
+  // network failure → INTERNAL with undefined httpStatus.
   it("wraps a fetch network failure as INTERNAL with undefined httpStatus", async () => {
     server.use(
       http.get(`${BASE}/v1/accounts`, () => HttpResponse.error()),
@@ -164,8 +164,8 @@ describe("error mapping (FR-003)", () => {
     expect((err as CurviateError).httpStatus).toBeUndefined();
   });
 
-  // Hard Rule #2 — the apiKey never appears in a thrown/ serialized transport error.
-  it("never leaks the apiKey in a thrown error (Hard Rule #2)", async () => {
+  // the apiKey never appears in a thrown or serialized transport error.
+  it("never leaks the apiKey in a thrown error", async () => {
     server.use(
       http.get(`${BASE}/v1/accounts`, () =>
         HttpResponse.json(
@@ -183,8 +183,8 @@ describe("error mapping (FR-003)", () => {
   });
 });
 
-describe("retry logic (FR-004)", () => {
-  // TS-006 (AC-009) — GET retries on 500 then succeeds; exactly 3 fetches.
+describe("retry logic", () => {
+  // GET retries on 500 then succeeds; exactly 3 fetches.
   it("retries a GET on 500 and returns the eventual 200 (3 fetches)", async () => {
     let calls = 0;
     server.use(
@@ -204,7 +204,7 @@ describe("retry logic (FR-004)", () => {
     expect(calls).toBe(3);
   });
 
-  // TS-006 (AC-010) — POST is NOT auto-retried; exactly 1 fetch.
+  // POST is NOT auto-retried; exactly 1 fetch.
   it("does not retry a POST on 500 (1 fetch, throws)", async () => {
     let calls = 0;
     server.use(
@@ -221,7 +221,7 @@ describe("retry logic (FR-004)", () => {
     expect(calls).toBe(1);
   });
 
-  // FR-004 exception — a write that gets 429 + Retry-After waits the delay but
+  // a write that gets 429 + Retry-After waits the delay but
   // does NOT re-fire; it throws with the retry-after surfaced (1 fetch).
   it("waits the Retry-After on a 429 write but does not re-fire it", async () => {
     const sleeps: number[] = [];
@@ -247,7 +247,7 @@ describe("retry logic (FR-004)", () => {
     expect((err as CurviateError).retryLikelyToSucceed).toBe(true);
   });
 
-  // FR-004 — a non-retryable code (404) on a GET throws immediately (1 fetch).
+  // a non-retryable code (404) on a GET throws immediately (1 fetch).
   it("does not retry a non-retryable GET error (404, 1 fetch)", async () => {
     let calls = 0;
     server.use(
@@ -264,8 +264,8 @@ describe("retry logic (FR-004)", () => {
   });
 });
 
-describe("backoff computation (FR-005)", () => {
-  // TS-007 (AC-011) — deterministic backoff sequence [500, 1000, 2000] with jitter=0.
+describe("backoff computation", () => {
+  // deterministic backoff sequence [500, 1000, 2000] with jitter=0.
   it("computes exponential backoff 500/1000/2000 with jitter disabled", async () => {
     const sleeps: number[] = [];
     let calls = 0;
@@ -291,7 +291,7 @@ describe("backoff computation (FR-005)", () => {
     expect(sleeps).toEqual([500, 1000, 2000]);
   });
 
-  // TS-008 (AC-012) — Retry-After header overrides the backoff formula.
+  // Retry-After header overrides the backoff formula.
   it("Retry-After header overrides the backoff delay", async () => {
     const sleeps: number[] = [];
     let calls = 0;
@@ -316,7 +316,7 @@ describe("backoff computation (FR-005)", () => {
     expect(sleeps[0]).toBe(42_000);
   });
 
-  // AC-013 — retry_hint.delay_ms overrides backoff (but Retry-After beats it).
+  // retry_hint.delay_ms overrides backoff (but Retry-After beats it).
   it("retry_hint.delay_ms overrides the backoff delay", async () => {
     const sleeps: number[] = [];
     let calls = 0;
@@ -348,8 +348,8 @@ describe("backoff computation (FR-005)", () => {
   });
 });
 
-describe("rate-limit surfacing (FR-007)", () => {
-  // TS-010 (AC-015) — retryAfterMs populated on a 429 error.
+describe("rate-limit surfacing", () => {
+  // retryAfterMs populated on a 429 error.
   it("populates retryAfterMs from Retry-After on a thrown 429", async () => {
     server.use(
       http.get(`${BASE}/v1/accounts`, () =>
@@ -364,8 +364,8 @@ describe("rate-limit surfacing (FR-007)", () => {
   });
 });
 
-describe("timeout (FR-006)", () => {
-  // TS-009 (AC-014) — per-attempt timeout fires AbortError → INTERNAL 'timed out'.
+describe("timeout", () => {
+  // per-attempt timeout fires AbortError → INTERNAL 'timed out'.
   it("aborts and throws INTERNAL 'timed out' when the request exceeds timeout", async () => {
     server.use(
       http.get(`${BASE}/v1/slow`, async () => {

@@ -1,4 +1,4 @@
-// sdk/002 — profiles namespace (9 methods, account-scoped)
+// profiles namespace (9 methods, account-scoped)
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";

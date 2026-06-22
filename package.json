@@ -37,13 +37,14 @@
   },
   "scripts": {
     "build": "tsup",
-    "prepack": "tsup",
+    "prepack": "node scripts/check-clean.mjs && tsup",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "gen:types": "node scripts/gen-types.mjs",
     "gen:types:fixture": "node scripts/gen-types.mjs --fixture",
     "check:types": "node scripts/check-types.mjs",
+    "check:clean": "node scripts/check-clean.mjs",
     "verify:dist": "pnpm build && node scripts/verify-dist.mjs",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
