@@ -211,7 +211,7 @@ export class RecruiterResource {
       method: "GET",
       path: `/v1/recruiter/profiles/${identifier}`,
       // cast needed: linkedin_sections is string[] but transport encodes arrays as repeated params
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
@@ -358,7 +358,7 @@ export class RecruiterResource {
       method: "GET",
       path: `/v1/recruiter/jobs/${jobId}/applicants`,
       // cast needed: include_degree / exclude_degree can be string[] but transport encodes arrays as repeated params
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 

@@ -31,7 +31,11 @@ export type AccountIdLocation = "body" | "query";
 export interface RequestArgs {
   method: HttpMethod;
   path: string;
-  query?: Record<string, string | number | boolean | undefined | null>;
+  /**
+   * Query params. Array values serialize as repeated params (e.g. `?k=a&k=b`)
+   * to support multi-value fields like `linkedin_sections`.
+   */
+  query?: Record<string, string | number | boolean | string[] | undefined | null>;
   body?: unknown;
   /**
    * Where to inject the context's fixed `account_id`. Defaults to `"query"`.

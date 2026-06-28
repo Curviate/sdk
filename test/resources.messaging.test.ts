@@ -69,6 +69,26 @@ describe("messaging.getChat", () => {
     const res = await acc.messaging.getChat("chat_1");
     expect(res.id).toBe("chat_1");
   });
+
+  it("Chat carries subject as string when set", async () => {
+    server.use(
+      http.get(`${BASE}/v1/chats/chat_inmail`, () =>
+        HttpResponse.json({ object: "chat", id: "chat_inmail", subject: "Opportunity at Acme" }),
+      ),
+    );
+    const res = await acc.messaging.getChat("chat_inmail");
+    expect(res.subject).toBe("Opportunity at Acme");
+  });
+
+  it("Chat carries subject as null for direct messages", async () => {
+    server.use(
+      http.get(`${BASE}/v1/chats/chat_dm`, () =>
+        HttpResponse.json({ object: "chat", id: "chat_dm", subject: null }),
+      ),
+    );
+    const res = await acc.messaging.getChat("chat_dm");
+    expect(res.subject).toBeNull();
+  });
 });
 
 // ─── messaging.listMessages (GET /v1/chats/:chat_id/messages) ───────────────

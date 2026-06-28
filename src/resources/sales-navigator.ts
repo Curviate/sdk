@@ -196,7 +196,7 @@ export class SalesNavigatorResource {
       method: "GET",
       path: `/v1/sales-navigator/profiles/${identifier}`,
       // cast needed: linkedin_sections is string[] but transport encodes arrays as repeated params
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 

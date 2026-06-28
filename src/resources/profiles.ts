@@ -17,6 +17,10 @@ type WithoutAccountId<T> = Omit<T, "account_id">;
 
 export type ProfileDetail =
   paths["/v1/profiles/me"]["get"]["responses"]["200"]["content"]["application/json"];
+/** Caller-facing query params for `profiles.getMe()` — `account_id` is injected by context. */
+export type ProfileGetMeParams = WithoutAccountId<
+  paths["/v1/profiles/me"]["get"]["parameters"]["query"]
+>;
 
 export type ProfileGetResult =
   paths["/v1/profiles/{profile_id}"]["get"]["responses"]["200"]["content"]["application/json"];
@@ -68,11 +72,16 @@ export type EndorseResult =
 export class ProfilesResource {
   constructor(protected readonly ctx: RequestContext) {}
 
-  /** Get the account's own LinkedIn profile. `GET /v1/profiles/me` */
-  getMe(): Promise<ProfileDetail> {
+  /**
+   * Get the account's own LinkedIn profile. `GET /v1/profiles/me`
+   * Pass `{ linkedin_sections: ['about', 'experience', ...] }` to request enriched sections.
+   * The `account_id` is injected by the account-scoped context.
+   */
+  getMe(params?: ProfileGetMeParams): Promise<ProfileDetail> {
     return this.ctx.request<ProfileDetail>({
       method: "GET",
       path: "/v1/profiles/me",
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
@@ -86,7 +95,7 @@ export class ProfilesResource {
     return this.ctx.request<ProfileGetResult>({
       method: "GET",
       path: `/v1/profiles/${profileId}`,
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
@@ -95,7 +104,7 @@ export class ProfilesResource {
     return this.ctx.request<ConnectionListPage>({
       method: "GET",
       path: "/v1/profiles/relations",
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
@@ -104,7 +113,7 @@ export class ProfilesResource {
     return this.ctx.request<FollowerListPage>({
       method: "GET",
       path: `/v1/profiles/${profileId}/followers`,
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
@@ -116,7 +125,7 @@ export class ProfilesResource {
     return this.ctx.request<ProfilePostListPage>({
       method: "GET",
       path: `/v1/profiles/${profileId}/posts`,
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
@@ -125,7 +134,7 @@ export class ProfilesResource {
     return this.ctx.request<ProfileCommentListPage>({
       method: "GET",
       path: `/v1/profiles/${profileId}/comments`,
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
@@ -134,7 +143,7 @@ export class ProfilesResource {
     return this.ctx.request<ProfileReactionListPage>({
       method: "GET",
       path: `/v1/profiles/${profileId}/reactions`,
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 

@@ -57,7 +57,7 @@ export class InvitesResource {
     return this.ctx.request<SentInviteListPage>({
       method: "GET",
       path: "/v1/invites/sent",
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
@@ -66,7 +66,7 @@ export class InvitesResource {
     return this.ctx.request<ReceivedInviteListPage>({
       method: "GET",
       path: "/v1/invites/received",
-      ...(params ? { query: params as Record<string, string | number | boolean | null | undefined> } : {}),
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 

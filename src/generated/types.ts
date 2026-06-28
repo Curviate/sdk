@@ -2472,6 +2472,8 @@ export interface paths {
                                  * @enum {number}
                                  */
                                 pinned?: 0 | 1;
+                                /** @description The conversation subject or InMail subject line; null when none. */
+                                subject?: ((string | null) | null) | null;
                             }[];
                             /** @description Next-page cursor; null on the last page. */
                             cursor?: string | null;
@@ -2856,6 +2858,8 @@ export interface paths {
                              * @enum {number}
                              */
                             pinned?: 0 | 1;
+                            /** @description The conversation subject or InMail subject line; null when none. */
+                            subject?: ((string | null) | null) | null;
                             /** @description The most recent message in the chat, or null if empty. */
                             lastMessage?: {
                                 /**
@@ -4963,13 +4967,13 @@ export interface paths {
                         account_id: string;
                         /** @description Post body text (1–3000 chars). Not stored or logged. */
                         text: string;
-                        /** @description social_id of a post to repost. Reachability verified live by qa. */
+                        /** @description social_id of a post to repost. */
                         repost?: string;
-                        /** @description External URL to include in the post. Reachability verified live by qa. */
+                        /** @description External URL to include in the post. */
                         external_link?: string;
-                        /** @description Company page social_id to post as. Reachability verified live by qa. */
+                        /** @description Company page social_id to post as. */
                         as_organization?: string;
-                        /** @description JSON-encoded array of mention objects ({name, profile_id, is_company}). Reachability verified live by qa. */
+                        /** @description JSON-encoded array of mention objects ({name, profile_id, is_company}). */
                         mentions?: {
                             /** @description Display name of the mentioned person or company. */
                             name: string;
@@ -4978,7 +4982,7 @@ export interface paths {
                             /** @description true if the mention is a company page. */
                             is_company: boolean;
                         }[];
-                        /** @description Include a job posting in the post. Reachability verified live by qa. */
+                        /** @description Include a job posting in the post. */
                         include_job_posting?: boolean;
                         /**
                          * Format: binary
@@ -5139,7 +5143,7 @@ export interface paths {
                 query: {
                     /** @description Account ID to use for the request. */
                     account_id: string;
-                    /** @description When supplied, returns replies to this comment instead of top-level comments. Reachability verified live by qa. */
+                    /** @description When supplied, returns replies to this comment instead of top-level comments. */
                     comment_id?: string;
                     /** @description Maximum comments to return (1–50, default 20). */
                     limit?: number;
@@ -5306,9 +5310,9 @@ export interface paths {
                         account_id: string;
                         /** @description Comment text (1–1250 chars). Not stored or logged. */
                         text: string;
-                        /** @description When supplied, this comment is a reply to that comment rather than a top-level reply to the post. Reachability verified live by qa. */
+                        /** @description When supplied, this comment is a reply to that comment rather than a top-level reply to the post. */
                         comment_id?: string;
-                        /** @description JSON-encoded array of mention objects ({name, profile_id, is_company}). Reachability verified live by qa. */
+                        /** @description JSON-encoded array of mention objects ({name, profile_id, is_company}). */
                         mentions?: {
                             /** @description Display name of the mentioned person or company. */
                             name: string;
@@ -5317,9 +5321,9 @@ export interface paths {
                             /** @description true if the mention is a company page. */
                             is_company: boolean;
                         }[];
-                        /** @description Company page social_id to comment as. Reachability verified live by qa. */
+                        /** @description Company page social_id to comment as. */
                         as_organization?: string;
-                        /** @description External URL to include in the comment. Reachability verified live by qa. */
+                        /** @description External URL to include in the comment. */
                         external_link?: string;
                         /**
                          * Format: binary
@@ -5468,7 +5472,7 @@ export interface paths {
         };
         /**
          * List a post's reactions
-         * @description Returns reactions on a post. Each item includes the UPPERCASE reaction value and author. Error mapping is conservative — raw-path errors map to 502 unless qa verifies a cleaner status.
+         * @description Returns reactions on a post. Each item includes the UPPERCASE reaction value and author.
          */
         get: {
             parameters: {
@@ -5643,9 +5647,9 @@ export interface paths {
                          * @enum {string}
                          */
                         reaction: "like" | "celebrate" | "support" | "love" | "insightful" | "funny";
-                        /** @description When supplied, the reaction applies to this comment rather than the post. Reachability verified live by qa. */
+                        /** @description When supplied, the reaction applies to this comment rather than the post. */
                         comment_id?: string;
-                        /** @description Company page to react as. Reachability verified live by qa. */
+                        /** @description Company page to react as. */
                         as_organization?: string;
                     };
                 };
@@ -5774,13 +5778,15 @@ export interface paths {
         };
         /**
          * Retrieve your own profile
-         * @description Returns the connected account's own LinkedIn profile — name, headline, location, email, and premium/open-profile status.
+         * @description Returns the connected account's own LinkedIn profile — name, headline, location, email, and premium/open-profile status. Request extra sections via linkedin_sections.
          */
         get: {
             parameters: {
                 query: {
                     /** @description The connected LinkedIn account to read with (acc_…). Required. */
                     account_id: string;
+                    /** @description Which profile sections to fetch (repeatable). Allowed values: * (all sections), *_preview, about, experience, education, languages, skills, certifications, volunteering_experience, projects, recommendations_received, recommendations_given, and the _preview variant of each section. Omit for base fields only. */
+                    linkedin_sections?: ("*" | "*_preview" | "about" | "about_preview" | "experience" | "experience_preview" | "education" | "education_preview" | "languages" | "languages_preview" | "skills" | "skills_preview" | "certifications" | "certifications_preview" | "volunteering_experience" | "volunteering_experience_preview" | "projects" | "projects_preview" | "recommendations_received" | "recommendations_received_preview" | "recommendations_given" | "recommendations_given_preview")[];
                 };
                 header?: never;
                 path?: never;
@@ -5813,12 +5819,12 @@ export interface paths {
                             /** @description Last name. */
                             last_name?: string;
                             /** @description LinkedIn public identifier (the slug after linkedin.com/in/). */
-                            public_identifier?: string;
-                            /** @description Full LinkedIn public profile URL. */
+                            public_identifier?: string | null;
+                            /** @description Full LinkedIn public profile URL, synthesized from the public identifier; null if the account has none. */
                             public_profile_url?: string | null;
                             /** @description Profile picture URL, or null if not set. */
                             profile_picture_url?: string | null;
-                            /** @description LinkedIn headline. */
+                            /** @description LinkedIn headline. Empty by default for the account's own profile; supply linkedin_sections to return the populated headline (enrichment path). */
                             headline?: string | null;
                             /** @description Location as set on the profile. */
                             location?: string | null;
@@ -5827,11 +5833,35 @@ export interface paths {
                             /** @description Current occupation or role. */
                             occupation?: string | null;
                             /** @description true if this is a LinkedIn Premium account. */
-                            premium?: boolean;
+                            is_premium?: boolean;
                             /** @description true if the account has an open profile enabled. */
-                            open_profile?: boolean;
+                            is_open_profile?: boolean;
                             /** @description Organizations the account is associated with. */
                             organizations?: Record<string, never>[];
+                            /** @description Total follower count. Absent by default; present only when linkedin_sections is supplied (enrichment path). */
+                            follower_count?: number;
+                            /** @description Total connection count. Absent by default; present only when linkedin_sections is supplied (enrichment path). */
+                            connections_count?: number;
+                            /** @description About/summary text (content pass-through — never stored). Present only when requested via linkedin_sections. */
+                            summary?: string | null;
+                            /** @description Work experience entries. Present only when requested via linkedin_sections. */
+                            work_experience?: Record<string, never>[];
+                            /** @description Education entries. Present only when requested via linkedin_sections. */
+                            education?: Record<string, never>[];
+                            /** @description Skills list. Present only when requested via linkedin_sections. */
+                            skills?: string[];
+                            /** @description Languages. Present only when requested via linkedin_sections. */
+                            languages?: string[];
+                            /** @description Certifications. Present only when requested via linkedin_sections. */
+                            certifications?: Record<string, never>[];
+                            /** @description Projects. Present only when requested via linkedin_sections. */
+                            projects?: Record<string, never>[];
+                            /** @description Volunteering experience entries. Present only when requested via linkedin_sections. */
+                            volunteering_experience?: Record<string, never>[];
+                            /** @description Recommendations (content pass-through — never stored). Present only when requested via linkedin_sections. */
+                            recommendations?: Record<string, never>[];
+                            /** @description Sections LinkedIn rate-limited away for this request. */
+                            throttled_sections?: string[];
                         };
                     };
                 };
@@ -8208,7 +8238,7 @@ export interface paths {
         };
         /**
          * Resolve search-filter IDs (Recruiter)
-         * @description Resolve human-readable terms to opaque Recruiter filter IDs for use in people search requests. The type parameter selects the filter family; type must be one of the 6 verified Recruiter values: GROUPS, DEPARTMENT, HIRING_PROJECTS, SAVED_SEARCHES, SAVED_FILTERS, DEGREE. Classic-only types (JOB_TITLE, LOCATION, PEOPLE, COMPANY, etc.) are rejected with 400 at schema validation, before any external call. Requires a Recruiter seat.
+         * @description Resolve human-readable terms to opaque Recruiter filter IDs for use in people search requests. The type parameter selects the filter family; type must be one of the 6 Recruiter values: GROUPS, DEPARTMENT, HIRING_PROJECTS, SAVED_SEARCHES, SAVED_FILTERS, DEGREE. Classic-only types (JOB_TITLE, LOCATION, PEOPLE, COMPANY, etc.) are rejected with 400 at schema validation, before any external call. Requires a Recruiter seat.
          */
         get: {
             parameters: {
@@ -12187,7 +12217,7 @@ export interface paths {
         };
         /**
          * Resolve search-filter IDs (Sales Navigator)
-         * @description Resolve human-readable terms to opaque Sales Navigator filter IDs for use in people or company search requests. The type parameter selects the filter family; type must be one of the 12 verified SN values. Classic-only types (LOCATION, PEOPLE, JOB_TITLE, etc.) are rejected with 400 at schema validation, before any external call. To resolve PEOPLE IDs (for the connections_of filter), use GET /v1/search/parameters instead. Requires a Sales Navigator seat.
+         * @description Resolve human-readable terms to opaque Sales Navigator filter IDs for use in people or company search requests. The type parameter selects the filter family; type must be one of the 12 Sales Navigator values. Classic-only types (LOCATION, PEOPLE, JOB_TITLE, etc.) are rejected with 400 at schema validation, before any external call. To resolve PEOPLE IDs (for the connections_of filter), use GET /v1/search/parameters instead. Requires a Sales Navigator seat.
          */
         get: {
             parameters: {
@@ -14192,7 +14222,7 @@ export interface paths {
                         }[];
                         /** @description Messaging events to subscribe to (default: [message.received]) */
                         events?: ("message.received" | "message.delivered" | "message.read" | "message.reaction" | "message.edited" | "message.deleted")[];
-                        /** @description Field-remapping keys for the messaging delivery payload (Array 1) */
+                        /** @description Field-remapping keys for the messaging delivery payload */
                         data?: string[];
                     } | {
                         /** @constant */
@@ -14217,7 +14247,7 @@ export interface paths {
                         }[];
                         /** @description User/relation events to subscribe to (default: [connection.accepted]) */
                         events?: "connection.accepted"[];
-                        /** @description Field-remapping keys for the user/relation delivery payload (Array 2) */
+                        /** @description Field-remapping keys for the user/relation delivery payload */
                         data?: ("user_provider_id" | "user_full_name" | "user_public_identifier" | "user_profile_url" | "user_picture_url")[];
                     } | {
                         /** @constant */
