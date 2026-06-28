@@ -7,6 +7,20 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.2.0] — 2026-06-28
+
+### Added
+
+- `profiles.getMe(params?)` now accepts an optional `linkedin_sections` array to request specific LinkedIn profile sections (e.g. education, experience, skills); responses include only the requested enrichment fields.
+- `OwnProfile` type is normalized: `is_premium` and `is_open_profile` are always present on the response. Enriched section fields (`headline`, `summary`, `work_experience`, `education`, `skills`, and more) are present when the corresponding section was requested.
+- `Chat` type now includes a `subject` field (nullable string) reflecting the conversation subject where available.
+
+### Changed
+
+- Array-valued query parameters are now serialized as repeated keys (`?key=a&key=b`) rather than as a comma-joined string. This matches the server's expected format for array parameters such as `linkedin_sections`.
+
+---
+
 ## [0.1.1] — 2026-06-22
 
 ### Fixed
