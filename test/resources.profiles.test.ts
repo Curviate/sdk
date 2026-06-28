@@ -18,6 +18,69 @@ describe("profiles.getMe", () => {
     const res = await acc.profiles.getMe();
     expect(res.first_name).toBe("Alice");
   });
+
+  it("forwards linkedin_sections as a repeated query param", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/profiles/me`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({ object: "own_profile", provider_id: "ACoABC", first_name: "Alice", last_name: "Smith" });
+      }),
+    );
+    await acc.profiles.getMe({ linkedin_sections: ["about", "experience"] });
+    const params = new URL(url!).searchParams;
+    // repeated param — getAll returns an array
+    expect(params.getAll("linkedin_sections")).toEqual(["about", "experience"]);
+  });
+
+  it("OwnProfile response carries is_premium and is_open_profile (not premium / open_profile)", async () => {
+    server.use(
+      http.get(`${BASE}/v1/profiles/me`, () =>
+        HttpResponse.json({
+          object: "own_profile",
+          provider_id: "ACoABC",
+          first_name: "Alice",
+          last_name: "Smith",
+          is_premium: true,
+          is_open_profile: false,
+        }),
+      ),
+    );
+    const res = await acc.profiles.getMe();
+    // is_premium / is_open_profile are the canonical field names
+    expect(res.is_premium).toBe(true);
+    expect(res.is_open_profile).toBe(false);
+    // old names must NOT be typed (TypeScript would catch this at typecheck, runtime check here)
+    expect((res as Record<string, unknown>)["premium"]).toBeUndefined();
+    expect((res as Record<string, unknown>)["open_profile"]).toBeUndefined();
+  });
+
+  it("OwnProfile carries optional enriched fields when linkedin_sections supplied", async () => {
+    server.use(
+      http.get(`${BASE}/v1/profiles/me`, () =>
+        HttpResponse.json({
+          object: "own_profile",
+          provider_id: "ACoABC",
+          first_name: "Alice",
+          last_name: "Smith",
+          follower_count: 1200,
+          connections_count: 500,
+          summary: "AI engineer",
+          work_experience: [{ title: "Engineer" }],
+          education: [{ school: "MIT" }],
+          skills: ["TypeScript"],
+          throttled_sections: [],
+        }),
+      ),
+    );
+    const res = await acc.profiles.getMe({ linkedin_sections: ["*"] });
+    expect(res.follower_count).toBe(1200);
+    expect(res.connections_count).toBe(500);
+    expect(res.summary).toBe("AI engineer");
+    expect(Array.isArray(res.work_experience)).toBe(true);
+    expect(Array.isArray(res.education)).toBe(true);
+    expect(res.skills).toContain("TypeScript");
+  });
 });
 
 describe("profiles.get", () => {
