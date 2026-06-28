@@ -29,8 +29,12 @@ export interface ExecuteOptions {
   timeout: number;
   /** Max retry attempts for retryable GET/HEAD failures. */
   maxRetries: number;
-  /** Query params appended via URLSearchParams (GET). */
-  query?: Record<string, string | number | boolean | undefined | null>;
+  /**
+   * Query params appended via URLSearchParams (GET).
+   * Array values are serialized as repeated params (e.g. `?k=a&k=b`),
+   * which is the standard for multi-value fields like `linkedin_sections`.
+   */
+  query?: Record<string, string | number | boolean | string[] | undefined | null>;
   /** Request body: a plain object (JSON) or a FormData (multipart). */
   body?: unknown;
   /** Injectable fetch (edge runtimes / tests). Defaults to global fetch. */
@@ -176,7 +180,15 @@ function buildUrl(path: string, opts: ExecuteOptions): string {
   const url = new URL(path, opts.baseUrl);
   if (opts.query) {
     for (const [key, value] of Object.entries(opts.query)) {
-      if (value !== undefined && value !== null) url.searchParams.set(key, String(value));
+      if (value === undefined || value === null) continue;
+      if (Array.isArray(value)) {
+        // Repeated params: ?k=a&k=b (the standard for multi-value fields).
+        for (const v of value) {
+          url.searchParams.append(key, String(v));
+        }
+      } else {
+        url.searchParams.set(key, String(value));
+      }
     }
   }
   return url.toString();
