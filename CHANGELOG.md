@@ -7,6 +7,14 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.2.1] — 2026-06-29
+
+### Fixed
+
+- `deleteMessage` and `addReaction` no longer inject `account_id` into the request. The server resolves the owning account from the message id — sending a client-supplied `account_id` was rejected by the server's strict schema, making both methods unusable via `client.account(id)`. The server's schemas are also relaxed (patch on the server side) so existing SDK installs continue to work without updating.
+
+---
+
 ## [0.2.0] — 2026-06-28
 
 ### Added

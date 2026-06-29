@@ -97,10 +97,11 @@ describe("account_id in body — JSON write POSTs", () => {
     expect(cap.query).toBeNull();
   });
 
-  it("messaging.addReaction (POST /v1/messages/:id/reactions) puts account_id in the body", async () => {
+  it("messaging.addReaction (POST /v1/messages/:id/reactions) sends NO account_id — endpoint resolves server-side (#324)", async () => {
     const cap = captureJsonBody("post", `${BASE}/v1/messages/msg_1/reactions`);
     await acc.messaging.addReaction("msg_1", { reaction: "👍" } as never);
-    expect(cap.body?.account_id).toBe(ACC);
+    // accountIdIn:'none' — SDK does not inject account_id into body or query
+    expect(cap.body?.account_id).toBeUndefined();
     expect(cap.query).toBeNull();
   });
 
@@ -215,10 +216,11 @@ describe("account_id in query — GET reads", () => {
 
 // ─── Body-less DELETEs keep account_id in the query (no regression) ─────────
 describe("account_id in query — body-less DELETEs", () => {
-  it("messaging.deleteMessage (DELETE /v1/messages/:id) keeps account_id in the query", async () => {
+  it("messaging.deleteMessage (DELETE /v1/messages/:id) sends NO account_id — endpoint resolves server-side (#324)", async () => {
     const cap = captureQuery("delete", `${BASE}/v1/messages/msg_1`);
     await acc.messaging.deleteMessage("msg_1");
-    expect(cap.query).toBe(ACC);
+    // accountIdIn:'none' — SDK does not inject account_id into query
+    expect(cap.query).toBeNull();
   });
 
   it("invites.cancel (DELETE /v1/invites/:id) keeps account_id in the query", async () => {
@@ -265,6 +267,43 @@ describe("caller-supplied account_id wins", () => {
     const cap = captureFormBody(`${BASE}/v1/posts`);
     await acc.posts.create({ text: "hi", account_id: "acc_override" } as never);
     expect(cap.accountField).toBe("acc_override");
+    expect(cap.query).toBeNull();
+  });
+});
+
+// ─── TS-024 (#324): accountIdIn:'none' — deleteMessage + addReaction send no account_id ─
+describe("TS-024 (#324) — accountIdIn:none — deleteMessage + addReaction", () => {
+  it("deleteMessage sends DELETE with NO account_id in query string", async () => {
+    const cap = captureQuery("delete", `${BASE}/v1/messages/msg_ts024`);
+    await acc.messaging.deleteMessage("msg_ts024");
+    expect(cap.query).toBeNull();
+  });
+
+  it("addReaction sends POST with body exactly {reaction} — NO account_id in body or query", async () => {
+    const cap = captureJsonBody("post", `${BASE}/v1/messages/msg_ts024/reactions`);
+    await acc.messaging.addReaction("msg_ts024", { reaction: "👍" } as never);
+    // body must be exactly {reaction} — no account_id key
+    expect(cap.body?.reaction).toBe("👍");
+    expect(cap.body?.account_id).toBeUndefined();
+    expect(cap.query).toBeNull();
+  });
+
+  // Regression: methods that still use body/query injection are unaffected by the 'none' change
+  it("listChats (GET) still injects account_id in the query — injection not globally disabled", async () => {
+    const cap = captureQuery("get", `${BASE}/v1/chats`);
+    await acc.messaging.listChats();
+    expect(cap.query).toBe(ACC);
+  });
+
+  it("sendInMail (POST body-inject) still injects account_id in the body — injection not globally disabled", async () => {
+    const cap = captureJsonBody("post", `${BASE}/v1/messages/inmail`, 201);
+    await acc.messaging.sendInMail({
+      recipient_urn: "urn:li:member:1",
+      surface: "sales_nav",
+      subject: "Hi",
+      text: "Hello",
+    } as never);
+    expect(cap.body?.account_id).toBe(ACC);
     expect(cap.query).toBeNull();
   });
 });

@@ -219,6 +219,7 @@ export class MessagingResource {
     return this.ctx.request<DeleteMessageResult>({
       method: "DELETE",
       path: `/v1/messages/${messageId}`,
+      accountIdIn: "none", // server resolves owning account from message id (#324)
     });
   }
 
@@ -240,7 +241,7 @@ export class MessagingResource {
       method: "POST",
       path: `/v1/messages/${messageId}/reactions`,
       body,
-      accountIdIn: "body",
+      accountIdIn: "none", // server resolves owning account from message id (#324)
     });
   }
 
