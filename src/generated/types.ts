@@ -3614,7 +3614,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a message
-         * @description Deletes a previously sent message within the ~60-minute delete window. A persistent 502 on an older message most likely means the window has passed. A bare DELETE with account_id query param is all that is required.
+         * @description Deletes a previously sent message within the ~60-minute delete window. A persistent 502 on an older message most likely means the window has passed. A bare DELETE is all that is required; the owning account is resolved server-side.
          */
         delete: {
             parameters: {
@@ -4280,7 +4280,7 @@ export interface paths {
         put?: never;
         /**
          * Send an InMail
-         * @description Sends a LinkedIn InMail to a member who is not a direct connection. The surface field selects whether the send is attributed to a prospecting or recruiting seat.
+         * @description Sends a LinkedIn InMail to a member who is not a direct connection. The surface field selects the sending context: classic uses the account's own premium InMail credits, while sales_nav and recruiter attribute the send to the matching seat.
          */
         post: {
             parameters: {
@@ -4294,13 +4294,13 @@ export interface paths {
                     "application/json": {
                         /** @description The connected LinkedIn account to send the InMail from. */
                         account_id: string;
-                        /** @description LinkedIn member URN of the InMail recipient (e.g. urn:li:member:99999). */
+                        /** @description LinkedIn member URN (`urn:li:member:<id>`) or member provider id (`ACo…`). */
                         recipient_urn: string;
                         /**
-                         * @description InMail surface — determines which access level is required (sales_nav or recruiter).
+                         * @description InMail surface — determines which access level is required (classic, sales_nav, or recruiter).
                          * @enum {string}
                          */
-                        surface: "sales_nav" | "recruiter";
+                        surface: "sales_nav" | "recruiter" | "classic";
                         /** @description InMail subject line (1–200 chars). */
                         subject: string;
                         /** @description InMail body text (1–8000 chars). */
@@ -4348,7 +4348,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The account plan does not include Sales Navigator or Recruiter access — upgrade required. */
+                /** @description The classic surface requires only a connected account; the sales_nav and recruiter surfaces require the matching plan access — upgrade required. Also returned when the account lacks the InMail credits or feature needed to send. */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -4590,7 +4590,7 @@ export interface paths {
                 };
                 header?: never;
                 path: {
-                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. LinkedIn post URL id-forms accepted: if the URL contains `activity-` use the bare numeric id (e.g. `…-activity-7332661864792854528-…` → `7332661864792854528`); if it contains `ugcPost-` use `urn:li:ugcPost:ID`; if it contains `share-` use `urn:li:share:ID`. Alternatively, use the `social_id` returned by GET /v1/posts, list endpoints, or create. */
+                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. Full LinkedIn share URLs are accepted directly (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
                     post_id: string;
                 };
                 cookie?: never;
@@ -5152,7 +5152,7 @@ export interface paths {
                 };
                 header?: never;
                 path: {
-                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. LinkedIn post URL id-forms accepted: if the URL contains `activity-` use the bare numeric id (e.g. `…-activity-7332661864792854528-…` → `7332661864792854528`); if it contains `ugcPost-` use `urn:li:ugcPost:ID`; if it contains `share-` use `urn:li:share:ID`. Alternatively, use the `social_id` returned by GET /v1/posts, list endpoints, or create. */
+                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. Full LinkedIn share URLs are accepted directly (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
                     post_id: string;
                 };
                 cookie?: never;
@@ -5298,7 +5298,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. LinkedIn post URL id-forms accepted: if the URL contains `activity-` use the bare numeric id (e.g. `…-activity-7332661864792854528-…` → `7332661864792854528`); if it contains `ugcPost-` use `urn:li:ugcPost:ID`; if it contains `share-` use `urn:li:share:ID`. Alternatively, use the `social_id` returned by GET /v1/posts, list endpoints, or create. */
+                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. Full LinkedIn share URLs are accepted directly (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
                     post_id: string;
                 };
                 cookie?: never;
@@ -5479,14 +5479,14 @@ export interface paths {
                 query: {
                     /** @description Account ID to use for the request. */
                     account_id: string;
-                    /** @description Maximum reactions to return (1–50, default 20). */
+                    /** @description Maximum reactions to return (1–50, default 20). A cursor: null in the response does not confirm all reactions were returned — the list may be truncated at the requested limit. Use the --all flag or the paginate() helper for exhaustive reads. */
                     limit?: number;
                     /** @description Pagination cursor from a previous response. */
                     cursor?: string;
                 };
                 header?: never;
                 path: {
-                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. LinkedIn post URL id-forms accepted: if the URL contains `activity-` use the bare numeric id (e.g. `…-activity-7332661864792854528-…` → `7332661864792854528`); if it contains `ugcPost-` use `urn:li:ugcPost:ID`; if it contains `share-` use `urn:li:share:ID`. Alternatively, use the `social_id` returned by GET /v1/posts, list endpoints, or create. */
+                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. Full LinkedIn share URLs are accepted directly (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
                     post_id: string;
                 };
                 cookie?: never;
@@ -5632,7 +5632,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. LinkedIn post URL id-forms accepted: if the URL contains `activity-` use the bare numeric id (e.g. `…-activity-7332661864792854528-…` → `7332661864792854528`); if it contains `ugcPost-` use `urn:li:ugcPost:ID`; if it contains `share-` use `urn:li:share:ID`. Alternatively, use the `social_id` returned by GET /v1/posts, list endpoints, or create. */
+                    /** @description The post's `social_id`, as returned by the get-post / list-posts response. Full LinkedIn share URLs are accepted directly (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
                     post_id: string;
                 };
                 cookie?: never;

@@ -239,6 +239,31 @@ describe("messaging.sendInMail", () => {
     });
     expect(res.message_id).toBe("inmail_1");
   });
+
+  it("POST /v1/messages/inmail accepts the classic surface with a provider-id recipient", async () => {
+    let captured: Record<string, unknown> | undefined;
+    server.use(
+      http.post(`${BASE}/v1/messages/inmail`, async ({ request }) => {
+        captured = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(
+          { object: "inmail_sent", message_id: "inmail_2", chat_id: "chat_y" },
+          { status: 201 },
+        );
+      }),
+    );
+    const res = await acc.messaging.sendInMail({
+      account_id: "acc_1",
+      recipient_urn: "ACoAAA1B2c3D4e5F6g7H8i9J0kLmNoPqRsTuVwX",
+      surface: "classic",
+      subject: "Exploring synergies",
+      text: "Hi — I came across your profile and would love to connect.",
+    });
+    expect(res.message_id).toBe("inmail_2");
+    // account_id travels in the body for this account-scoped write (accountIdIn:'body').
+    expect(captured?.["account_id"]).toBe("acc_1");
+    expect(captured?.["surface"]).toBe("classic");
+    expect(captured?.["recipient_urn"]).toBe("ACoAAA1B2c3D4e5F6g7H8i9J0kLmNoPqRsTuVwX");
+  });
 });
 
 // ─── messaging.getInMailBalance (GET /v1/messaging/inmail-balance) ─────────────
