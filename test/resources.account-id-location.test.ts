@@ -97,7 +97,7 @@ describe("account_id in body — JSON write POSTs", () => {
     expect(cap.query).toBeNull();
   });
 
-  it("messaging.addReaction (POST /v1/messages/:id/reactions) sends NO account_id — endpoint resolves server-side (#324)", async () => {
+  it("messaging.addReaction (POST /v1/messages/:id/reactions) sends NO account_id — endpoint resolves server-side", async () => {
     const cap = captureJsonBody("post", `${BASE}/v1/messages/msg_1/reactions`);
     await acc.messaging.addReaction("msg_1", { reaction: "👍" } as never);
     // accountIdIn:'none' — SDK does not inject account_id into body or query
@@ -216,7 +216,7 @@ describe("account_id in query — GET reads", () => {
 
 // ─── Body-less DELETEs keep account_id in the query (no regression) ─────────
 describe("account_id in query — body-less DELETEs", () => {
-  it("messaging.deleteMessage (DELETE /v1/messages/:id) sends NO account_id — endpoint resolves server-side (#324)", async () => {
+  it("messaging.deleteMessage (DELETE /v1/messages/:id) sends NO account_id — endpoint resolves server-side", async () => {
     const cap = captureQuery("delete", `${BASE}/v1/messages/msg_1`);
     await acc.messaging.deleteMessage("msg_1");
     // accountIdIn:'none' — SDK does not inject account_id into query
@@ -271,8 +271,8 @@ describe("caller-supplied account_id wins", () => {
   });
 });
 
-// ─── TS-024 (#324): accountIdIn:'none' — deleteMessage + addReaction send no account_id ─
-describe("TS-024 (#324) — accountIdIn:none — deleteMessage + addReaction", () => {
+// ─── accountIdIn:'none' — deleteMessage + addReaction send no account_id ─
+describe("accountIdIn:none — deleteMessage + addReaction", () => {
   it("deleteMessage sends DELETE with NO account_id in query string", async () => {
     const cap = captureQuery("delete", `${BASE}/v1/messages/msg_ts024`);
     await acc.messaging.deleteMessage("msg_ts024");

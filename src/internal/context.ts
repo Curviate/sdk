@@ -25,7 +25,7 @@ import type { ResolvedConfig } from "../config.js";
  *   - `"none"`  — the endpoint resolves the owning account server-side; the
  *     SDK sends no `account_id` in the query or body. Use for id-scoped
  *     operations where the server infers ownership from the resource id
- *     (e.g. `deleteMessage`, `addReaction` — #324).
+ *     (e.g. `deleteMessage`, `addReaction`).
  *
  * Defaults to `"query"` so a method that omits it keeps the read-style location.
  */
@@ -99,7 +99,7 @@ export function createContext(
         body = injectAccountIdIntoBody(body, accountId);
       } else if (target === "none") {
         // "none": endpoint resolves the owning account server-side from the
-        // resource id — SDK sends no account_id in query or body (#324).
+        // resource id — SDK sends no account_id in query or body.
       } else {
         // Default: query. Caller-supplied query wins via the spread order.
         query = { account_id: accountId, ...args.query };
