@@ -7,6 +7,14 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.4.1] — 2026-06-30
+
+### Added
+
+- `people_search_result` item now includes `id: string` — the raw LinkedIn provider id for the person (e.g. `ACoAA…` format). This is the first property on the item type.
+
+---
+
 ## [0.4.0] — 2026-06-30
 
 ### Added
