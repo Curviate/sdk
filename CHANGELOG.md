@@ -7,6 +7,19 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.4.0] — 2026-06-30
+
+### Added
+
+- `primary_locale` (`{ country, language } | null`) on the `Profile` and `OwnProfile` types — a profile's primary locale as set by LinkedIn (`language` is a BCP 47 tag, `country` an ISO 3166-1 alpha-2 code). Present on `GET /v1/profiles/{id}`; on `/me` it is populated when `linkedin_sections` is supplied.
+
+### Changed
+
+- The account re-sync response (`GET /v1/messages/sync`) field is now `status` (was `sync_status`), aligning with the chat-history sync response. Sales Navigator and Recruiter re-sync responses are unchanged (`sync_status`).
+- Regenerated types from the current API: refreshed endpoint and error descriptions to neutral wording. No request shapes changed.
+
+---
+
 ## [0.3.0] — 2026-06-29
 
 ### Added

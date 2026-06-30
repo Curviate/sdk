@@ -102,7 +102,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Service unavailable — a downstream dependency is temporarily unavailable. */
+                /** @description Service unavailable. */
                 503: {
                     headers: {
                         [name: string]: unknown;
@@ -111,7 +111,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Gateway timeout — a downstream read did not complete in time. */
+                /** @description Gateway timeout. */
                 504: {
                     headers: {
                         [name: string]: unknown;
@@ -321,7 +321,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -556,7 +556,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -685,7 +685,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -826,7 +826,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -1048,7 +1048,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -1163,7 +1163,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -1325,7 +1325,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -1457,7 +1457,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -1682,7 +1682,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Platform error — upstream returned an unexpected response. */
+                /** @description A temporary error occurred while processing the request. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -1860,7 +1860,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Platform error — upstream returned an unexpected response. */
+                /** @description A temporary error occurred while processing the request. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -2040,7 +2040,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Platform error — upstream returned an unexpected response. */
+                /** @description A temporary error occurred while processing the request. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -2202,7 +2202,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Platform error — upstream returned an unexpected response. */
+                /** @description A temporary error occurred while processing the request. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -2347,7 +2347,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Platform error — upstream returned an unexpected response. */
+                /** @description A temporary error occurred while processing the request. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -2537,7 +2537,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -2745,7 +2745,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -2954,7 +2954,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -3136,7 +3136,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -3310,7 +3310,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -3354,7 +3354,7 @@ export interface paths {
         };
         /**
          * Retrieve an attachment from a message
-         * @description Streams the raw bytes of a message attachment with its upstream content type. No attachment bytes are stored by Curviate — they are proxied on demand.
+         * @description Streams the raw bytes of a message attachment with its original content type. No attachment bytes are stored by Curviate — they are served on demand.
          */
         get: {
             parameters: {
@@ -3370,7 +3370,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description The raw attachment bytes, proxied from the platform with the original content type. No attachment bytes are stored by Curviate. */
+                /** @description The raw attachment bytes, served on demand with the original content type. No attachment bytes are stored by Curviate. */
                 200: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -3420,7 +3420,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -3581,7 +3581,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -3686,7 +3686,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Upstream platform error. Deletes are window-limited (~60 minutes after sending); a persistent 502 on an older message most likely means the deletion window has passed. */
+                /** @description A temporary error occurred. Deletes are only possible within ~60 minutes of sending; a persistent 502 on an older message most likely means the deletion window has passed. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -3816,7 +3816,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -3957,7 +3957,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -4032,7 +4032,7 @@ export interface paths {
                             /** @description The chat being synced. */
                             chat_id?: string;
                             /**
-                             * @description White-labeled sync status.
+                             * @description Sync status.
                              * @enum {string}
                              */
                             status?: "sync_started" | "running" | "done" | "error" | "chat_deleted";
@@ -4078,7 +4078,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -4124,7 +4124,7 @@ export interface paths {
         };
         /**
          * Re-synchronise account message history
-         * @description Triggers a full or windowed re-sync of the account's classic-inbox message history. Returns a sync_status (200).
+         * @description Triggers a full or windowed re-sync of the account's classic-inbox message history. Returns a status (200).
          */
         get: {
             parameters: {
@@ -4162,7 +4162,7 @@ export interface paths {
                             object?: "account_sync";
                             account_id?: string;
                             /** @enum {string} */
-                            sync_status?: "sync_started" | "running" | "done" | "error";
+                            status?: "sync_started" | "running" | "done" | "error";
                         };
                     };
                 };
@@ -4232,7 +4232,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -4396,7 +4396,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -4534,7 +4534,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -4719,7 +4719,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -4919,7 +4919,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -5092,7 +5092,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -5259,7 +5259,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -5428,7 +5428,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -5593,7 +5593,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error — raw-request path; error mapping is conservative. */
+                /** @description A temporary error occurred — raw-request path; error mapping is conservative. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -5734,7 +5734,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -5842,6 +5842,13 @@ export interface paths {
                             follower_count?: number;
                             /** @description Total connection count. Absent by default; present only when linkedin_sections is supplied (enrichment path). */
                             connections_count?: number;
+                            /** @description Profile's primary locale as set by LinkedIn. `language` is a BCP 47 language tag (e.g. `en`, `de`); `country` is an ISO 3166-1 alpha-2 country code (e.g. `DE`, `US`). `null` on the lean path; populated when linkedin_sections is supplied (enrichment path). */
+                            primary_locale?: {
+                                /** @description ISO 3166-1 alpha-2 country code (e.g. `DE`, `US`). */
+                                country?: string;
+                                /** @description BCP 47 language tag (e.g. `en`, `de`). */
+                                language?: string;
+                            } | null;
                             /** @description About/summary text (content pass-through — never stored). Present only when requested via linkedin_sections. */
                             summary?: string | null;
                             /** @description Work experience entries. Present only when requested via linkedin_sections. */
@@ -5922,7 +5929,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -6038,6 +6045,13 @@ export interface paths {
                             follower_count?: number | null;
                             /** @description Total connection count, or null if not available. */
                             connections_count?: number | null;
+                            /** @description Profile's primary locale as set by LinkedIn. `language` is a BCP 47 language tag (e.g. `en`, `de`); `country` is an ISO 3166-1 alpha-2 country code (e.g. `DE`, `US`). `null` if the profile does not have one set. */
+                            primary_locale?: {
+                                /** @description ISO 3166-1 alpha-2 country code (e.g. `DE`, `US`). */
+                                country?: string;
+                                /** @description BCP 47 language tag (e.g. `en`, `de`). */
+                                language?: string;
+                            } | null;
                             /** @description About/summary text (content pass-through — never stored). Present only when requested via linkedin_sections. */
                             summary?: string | null;
                             /** @description Work experience entries. Present only when requested via linkedin_sections. */
@@ -6118,7 +6132,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -6287,7 +6301,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -6451,7 +6465,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -6645,7 +6659,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -6817,7 +6831,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -6996,7 +7010,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -7284,7 +7298,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -7449,7 +7463,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -7676,7 +7690,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -8194,7 +8208,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -8350,7 +8364,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. Typically a temporary condition. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Typically a temporary condition. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -8584,7 +8598,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. Typically temporary. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Typically temporary. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -8804,7 +8818,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. Typically temporary. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Typically temporary. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -9027,7 +9041,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -9343,7 +9357,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -9495,7 +9509,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -9737,7 +9751,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -9905,7 +9919,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -10494,7 +10508,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an unexpected error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -10674,7 +10688,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_ERROR — the connection platform returned an unexpected error. */
+                /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -10735,7 +10749,7 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description The raw resume bytes, proxied from the platform with the original content type. No resume bytes are stored by Curviate. */
+                /** @description The raw resume bytes, served on demand with the original content type. No resume bytes are stored by Curviate. */
                 200: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -11480,7 +11494,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -11874,7 +11888,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -12173,7 +12187,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -12338,7 +12352,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -12539,7 +12553,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -12707,7 +12721,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -12876,7 +12890,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -13028,7 +13042,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -13306,7 +13320,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -13510,7 +13524,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -13778,7 +13792,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -14038,7 +14052,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;
@@ -14783,7 +14797,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The connection platform returned an error. */
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;

@@ -284,10 +284,10 @@ describe("messaging.syncMessages", () => {
   it("GET /v1/messages/sync returns sync status", async () => {
     server.use(
       http.get(`${BASE}/v1/messages/sync`, () =>
-        HttpResponse.json({ object: "account_sync", account_id: "acc_1", sync_status: "running" }),
+        HttpResponse.json({ object: "account_sync", account_id: "acc_1", status: "running" }),
       ),
     );
     const res = await acc.messaging.syncMessages();
-    expect(res.sync_status).toBe("running");
+    expect(res.status).toBe("running");
   });
 });
