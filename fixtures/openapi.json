@@ -23111,7 +23111,7 @@
         "parameters": [],
         "responses": {
           "201": {
-            "description": "Recruiter chat started. Returns the object discriminator, the chat_id, and the attendee_ids. Message content is never echoed back. The InMail daily quota is consumed; remaining capacity is read from GET /v1/accounts/{account_id}, never echoed here. Requires a Recruiter seat.",
+            "description": "Recruiter chat started. Returns the object discriminator, the chat_id, and the message_id of the opening message. Message content is never echoed back. The InMail daily quota is consumed; remaining capacity is read from GET /v1/accounts/{account_id}, never echoed here. Requires a Recruiter seat.",
             "content": {
               "application/json": {
                 "schema": {
@@ -23125,24 +23125,18 @@
                       "description": "Response type discriminator."
                     },
                     "chat_id": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
+                      "type": "string",
                       "description": "The newly created chat's identifier."
                     },
-                    "attendee_ids": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "The Recruiter member IDs the chat was started with."
+                    "message_id": {
+                      "type": "string",
+                      "description": "The opening message identifier."
                     }
                   },
                   "required": [
                     "object",
                     "chat_id",
-                    "attendee_ids"
+                    "message_id"
                   ]
                 },
                 "examples": {
@@ -23151,9 +23145,7 @@
                     "value": {
                       "object": "chat_started",
                       "chat_id": "chat_rec_fake_001",
-                      "attendee_ids": [
-                        "AE_recruiter_member_001"
-                      ]
+                      "message_id": "msg_rec_fake_001"
                     }
                   }
                 }

@@ -7,6 +7,17 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.7.0] — 2026-07-01
+
+### Changed
+
+- **Breaking (typed consumers):** `recruiter.startChat` 201 response — the `attendee_ids` field is removed and replaced by `message_id` (the opening message identifier). Final shape: `{ object: "chat_started", chat_id, message_id }`, matching `messaging.startChat` and `salesNavigator.startChat`. `chat_id` is now non-nullable on a 201. Type: `RecruiterStartChatResult`. Migration: read `res.message_id`.
+  - *Why:* product-API + core / Sales Navigator parity — the underlying LinkedIn start-chat operation returns an identical `{ object, chat_id, message_id }` for every product; the prior `attendee_ids` echo had no product-API basis.
+- The `recruiter.startChat` request body is unchanged (`attendees_ids` plus all recruiter-specific params).
+- Regenerated types from the updated API surface.
+
+---
+
 ## [0.6.0] — 2026-07-01
 
 ### Added

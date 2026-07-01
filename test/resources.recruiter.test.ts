@@ -51,7 +51,7 @@ describe("recruiter.startChat", () => {
     server.use(
       http.post(`${BASE}/v1/recruiter/chats`, () =>
         HttpResponse.json(
-          { object: "chat_started", chat_id: "recchat_1", attendee_ids: ["AEa_abc"] },
+          { object: "chat_started", chat_id: "recchat_1", message_id: "recmsg_1" },
           { status: 201 },
         ),
       ),
@@ -63,6 +63,7 @@ describe("recruiter.startChat", () => {
     });
     expect(res.object).toBe("chat_started");
     expect(res.chat_id).toBe("recchat_1");
+    expect(res.message_id).toBe("recmsg_1");
   });
 
   it("sends multipart/form-data when attachments provided", async () => {
@@ -71,7 +72,7 @@ describe("recruiter.startChat", () => {
       http.post(`${BASE}/v1/recruiter/chats`, ({ request }) => {
         ct = request.headers.get("content-type");
         return HttpResponse.json(
-          { object: "chat_started", chat_id: "recchat_2", attendee_ids: ["AEa_abc"] },
+          { object: "chat_started", chat_id: "recchat_2", message_id: "recmsg_2" },
           { status: 201 },
         );
       }),

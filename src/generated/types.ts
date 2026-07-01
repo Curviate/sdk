@@ -9627,7 +9627,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Recruiter chat started. Returns the object discriminator, the chat_id, and the attendee_ids. Message content is never echoed back. The InMail daily quota is consumed; remaining capacity is read from GET /v1/accounts/{account_id}, never echoed here. Requires a Recruiter seat. */
+                /** @description Recruiter chat started. Returns the object discriminator, the chat_id, and the message_id of the opening message. Message content is never echoed back. The InMail daily quota is consumed; remaining capacity is read from GET /v1/accounts/{account_id}, never echoed here. Requires a Recruiter seat. */
                 201: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -9642,9 +9642,9 @@ export interface paths {
                              */
                             object: "chat_started";
                             /** @description The newly created chat's identifier. */
-                            chat_id: string | null;
-                            /** @description The Recruiter member IDs the chat was started with. */
-                            attendee_ids: string[];
+                            chat_id: string;
+                            /** @description The opening message identifier. */
+                            message_id: string;
                         };
                     };
                 };
