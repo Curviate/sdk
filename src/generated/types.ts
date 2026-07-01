@@ -13089,7 +13089,7 @@ export interface paths {
                 query: {
                     /** @description The linked LinkedIn account to search on behalf of. */
                     account_id: string;
-                    /** @description Maximum results per page (1–50, default 10). Note: the platform may return a fixed page size (empirically ~10 items) regardless of smaller limits. */
+                    /** @description Maximum results per page (1–50, default 10). */
                     limit?: number;
                     /** @description Opaque pagination cursor returned from a previous response. */
                     cursor?: string;
@@ -13160,6 +13160,8 @@ export interface paths {
                             object: "people_search_result";
                             /** @description People search result items. */
                             items: {
+                                /** @description Raw LinkedIn provider id for this person (e.g. ACoAA…). */
+                                id: string;
                                 /** @description LinkedIn member URN for this person (normalized to urn:li:member:N). */
                                 linkedin_urn: string;
                                 /** @description LinkedIn public identifier (the slug after linkedin.com/in/). */
@@ -13365,7 +13367,7 @@ export interface paths {
                 query: {
                     /** @description The linked LinkedIn account to search on behalf of. */
                     account_id: string;
-                    /** @description Maximum results per page (1–50, default 10). Note: the platform may return a fixed page size (empirically ~10 items) regardless of smaller limits. */
+                    /** @description Maximum results per page (1–50, default 10). */
                     limit?: number;
                     /** @description Opaque pagination cursor returned from a previous response. */
                     cursor?: string;
@@ -13569,7 +13571,7 @@ export interface paths {
                 query: {
                     /** @description The linked LinkedIn account to search on behalf of. */
                     account_id: string;
-                    /** @description Maximum results per page (1–50, default 10). Note: the platform may return a fixed page size (empirically ~10 items) regardless of smaller limits. */
+                    /** @description Maximum results per page (1–50, default 10). */
                     limit?: number;
                     /** @description Opaque pagination cursor returned from a previous response. */
                     cursor?: string;
@@ -13837,7 +13839,7 @@ export interface paths {
                 query: {
                     /** @description The linked LinkedIn account to search on behalf of. */
                     account_id: string;
-                    /** @description Maximum results per page (1–50, default 10). Note: the platform may return a fixed page size (empirically ~10 items) regardless of smaller limits. */
+                    /** @description Maximum results per page (1–50, default 10). */
                     limit?: number;
                     /** @description Opaque pagination cursor returned from a previous response. */
                     cursor?: string;
