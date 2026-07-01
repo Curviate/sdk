@@ -7,6 +7,19 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.4.2] — 2026-07-01
+
+### Added
+
+- Invitation item `specifics` now includes `provider: "LINKEDIN"` on both `InvitationSent` and `InvitationReceived` — the platform the invitation belongs to, passed through alongside `shared_secret`.
+
+### Changed
+
+- Removed the `422` response from `invites.cancel` (`DELETE /v1/invites/{invitation_id}`) and `invites.respond` (`POST /v1/invites/received/{invitation_id}`): cancel is idempotent (`canceled`/`not_found` only) and a non-pending handle returns `not_found`, so neither surfaces an account-restricted `422`.
+- Regenerated types from the current API surface, consolidating the invitation-item changes on top of the 0.4.1 people-search and 0.4.0 profile/messaging types.
+
+---
+
 ## [0.4.1] — 2026-06-30
 
 ### Added

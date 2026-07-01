@@ -1794,6 +1794,11 @@ export interface paths {
                                 } | null;
                                 /** @description Platform-specific invitation metadata. */
                                 specifics?: {
+                                    /**
+                                     * @description The platform this invitation belongs to.
+                                     * @enum {string}
+                                     */
+                                    provider?: "LINKEDIN";
                                     /** @description Per-invitation token from the platform. Content pass-through — never stored. */
                                     shared_secret?: string | null;
                                 };
@@ -1974,6 +1979,11 @@ export interface paths {
                                 } | null;
                                 /** @description Platform-specific invitation metadata. */
                                 specifics?: {
+                                    /**
+                                     * @description The platform this invitation belongs to.
+                                     * @enum {string}
+                                     */
+                                    provider?: "LINKEDIN";
                                     /** @description Per-invitation token required to accept or decline this invitation via POST /v1/invites/received/{invitation_id}. Content pass-through — never stored. */
                                     shared_secret?: string | null;
                                 };
@@ -2172,15 +2182,6 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Account restricted from performing this operation. */
-                422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
                 /** @description Quota exceeded — slow down and retry after the hinted delay. */
                 429: {
                     headers: {
@@ -2310,15 +2311,6 @@ export interface paths {
                 };
                 /** @description Account not found or not owned by this tenant. */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Account restricted from performing this operation. */
-                422: {
                     headers: {
                         [name: string]: unknown;
                     };
