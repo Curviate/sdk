@@ -12968,6 +12968,14 @@ export interface paths {
                                 title: string;
                                 /** @description Optional image URL for this filter value (e.g. company logo). Present when available. */
                                 picture_url?: string;
+                                /** @description Industry the company operates in. Present (nullable) only for type=COMPANY, to disambiguate same-named companies. */
+                                industry?: string | null;
+                                /** @description Company follower count. Present (nullable) only for type=COMPANY. */
+                                followers_count?: number | null;
+                                /** @description Human-readable company size range (e.g. '51-200'). Present (nullable) only for type=COMPANY. */
+                                headcount?: string | null;
+                                /** @description Company headquarters location. Present (nullable) only for type=COMPANY. */
+                                location?: string | null;
                             }[];
                             /** @description Paging metadata. */
                             paging: {
@@ -13081,7 +13089,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Search LinkedIn people
+         * Search people
          * @description Searches LinkedIn profiles using structured filters or a pasted LinkedIn search URL. The two modes are mutually exclusive: supply either url or structured filters, not both. account_id and pagination live in query params; filters in the request body.
          */
         post: {
@@ -13130,10 +13138,10 @@ export interface paths {
                         school?: string[];
                         /** @description Opaque service IDs from GET /v1/search/parameters?type=SERVICE. */
                         service?: string[];
-                        /** @description Filter to connections of a specific member URN. */
-                        connections_of?: string;
-                        /** @description Filter to followers of a specific member URN. */
-                        followers_of?: string;
+                        /** @description Filter to connections of the given members. Array of opaque member IDs from GET /v1/search/parameters?type=CONNECTIONS. */
+                        connections_of?: string[];
+                        /** @description Filter to followers of the given members. Array of opaque member IDs from GET /v1/search/parameters?type=PEOPLE. */
+                        followers_of?: string[];
                         /** @description Filter by network distance: 1 = 1st degree, 2 = 2nd degree, 3 = 3rd degree. */
                         network_distance?: (1 | 2 | 3)[];
                         /** @description Filter by profile language codes. */
@@ -13359,7 +13367,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Search LinkedIn companies
+         * Search companies
          * @description Searches LinkedIn companies using structured filters or a pasted LinkedIn search URL. The two modes are mutually exclusive. No company description or tagline is returned.
          */
         post: {
@@ -13391,9 +13399,9 @@ export interface paths {
                         has_job_offers?: boolean;
                         /** @description Filter by company size buckets. Each entry is a { min, max } object (e.g. { min: 51, max: 200 }). */
                         headcount?: {
-                            /** @description Minimum headcount for this bucket. */
+                            /** @description Lower bound of a company-size bucket. Valid values: 1, 11, 51, 201, 501, 1001, 5001, 10001. */
                             min: number;
-                            /** @description Maximum headcount for this bucket. */
+                            /** @description Upper bound of a company-size bucket. Valid values: 1, 10, 50, 200, 500, 1000, 5000, 10000. */
                             max: number;
                         }[];
                         /** @description Filter by network distance: 1 = 1st degree, 2 = 2nd degree, 3 = 3rd degree. */
@@ -13563,7 +13571,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Search LinkedIn posts
+         * Search posts
          * @description Searches LinkedIn posts using structured filters or a pasted LinkedIn search URL. The two modes are mutually exclusive. Post body text is never returned — results carry the post URN and engagement metadata only.
          */
         post: {
@@ -13602,22 +13610,34 @@ export interface paths {
                          * @enum {string}
                          */
                         content_type?: "videos" | "images" | "live_videos" | "collaborative_articles" | "documents";
-                        /** @description Filter to posts by a specific member. */
+                        /** @description Filter to posts by specific authors (members, companies, yourself, connections, or people you follow). */
                         posted_by?: {
-                            /** @description LinkedIn member URN (e.g. urn:li:member:123). */
-                            member_urn?: string;
+                            /** @description Opaque member IDs from GET /v1/search/parameters?type=PEOPLE. */
+                            member?: string[];
+                            /** @description Opaque company IDs from GET /v1/search/parameters?type=COMPANY. */
+                            company?: string[];
+                            /** @description Restrict to your own posts. */
+                            me?: boolean;
+                            /** @description Restrict to posts by your 1st-degree connections. */
+                            first_connections?: boolean;
+                            /** @description Restrict to posts by people you follow. */
+                            people_you_follow?: boolean;
                         };
-                        /** @description Filter to posts mentioning a specific member. */
+                        /** @description Filter to posts mentioning specific members or companies. */
                         mentioning?: {
-                            /** @description LinkedIn member URN (e.g. urn:li:member:123). */
-                            member_urn?: string;
+                            /** @description Opaque member IDs from GET /v1/search/parameters?type=PEOPLE. */
+                            member?: string[];
+                            /** @description Opaque company IDs from GET /v1/search/parameters?type=COMPANY. */
+                            company?: string[];
                         };
-                        /** @description Filter to posts from a specific author (company or member). */
+                        /** @description Filter to posts by author attributes (industry, company, or keywords). */
                         author?: {
-                            /** @description LinkedIn organization URN (e.g. urn:li:organization:456). */
-                            company_urn?: string;
-                            /** @description LinkedIn member URN (e.g. urn:li:member:123). */
-                            member_urn?: string;
+                            /** @description Opaque industry IDs from GET /v1/search/parameters?type=INDUSTRY. */
+                            industry?: string[];
+                            /** @description Opaque company IDs from GET /v1/search/parameters?type=COMPANY. */
+                            company?: string[];
+                            /** @description Free-text keyword match on the author. */
+                            keywords?: string;
                         };
                     };
                 };
@@ -13831,7 +13851,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Search LinkedIn jobs
+         * Search jobs
          * @description Searches LinkedIn job postings using structured filters or a pasted LinkedIn jobs URL. The two modes are mutually exclusive. Job description text is never returned.
          */
         post: {
@@ -13866,8 +13886,8 @@ export interface paths {
                         region?: string;
                         /** @description Opaque location IDs from GET /v1/search/parameters?type=LOCATION. */
                         location?: string[];
-                        /** @description Location area string filter. */
-                        location_within_area?: string;
+                        /** @description Search radius around the location, in miles (positive number). */
+                        location_within_area?: number;
                         /** @description Opaque industry IDs from GET /v1/search/parameters?type=INDUSTRY. */
                         industry?: string[];
                         /** @description Filter by seniority levels. */

@@ -55,7 +55,7 @@ export class SearchResource {
   }
 
   /**
-   * Search LinkedIn people with structured filters or a pasted URL.
+   * Search people with structured filters or a pasted URL.
    * `POST /v1/search/people`
    * Cursor passed via query param (not body) — matches the OpenAPI spec.
    */
@@ -72,7 +72,7 @@ export class SearchResource {
   }
 
   /**
-   * Search LinkedIn companies.
+   * Search companies.
    * `POST /v1/search/companies`
    */
   companies(body: SearchCompaniesBody & { cursor?: string; limit?: number }): Promise<SearchCompaniesResult> {
@@ -88,7 +88,7 @@ export class SearchResource {
   }
 
   /**
-   * Search LinkedIn posts.
+   * Search posts.
    * `POST /v1/search/posts`
    */
   posts(body: SearchPostsBody & { cursor?: string; limit?: number }): Promise<SearchPostsResult> {
@@ -104,7 +104,7 @@ export class SearchResource {
   }
 
   /**
-   * Search LinkedIn jobs.
+   * Search jobs.
    * `POST /v1/search/jobs`
    */
   jobs(body: SearchJobsBody & { cursor?: string; limit?: number }): Promise<SearchJobsResult> {

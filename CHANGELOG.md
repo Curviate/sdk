@@ -7,6 +7,24 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.5.0] — 2026-07-01
+
+### Added
+
+- Posts search gains nested `posted_by`, `mentioning`, and `author` filter objects. `posted_by` and `mentioning` take `member` / `company` arrays of opaque IDs (from `GET /v1/search/parameters`); `posted_by` also accepts `me`, `first_connections`, and `people_you_follow` booleans; `author` filters by `industry`, `company`, or `keywords`.
+- Search-parameters items (`GET /v1/search/parameters`) now carry nullable company-disambiguation fields — `industry`, `location`, `headcount` (human-readable size range), and `followers_count` — populated only for `type=COMPANY` results.
+
+### Changed
+
+- **Breaking (typed consumers):** people-search `connections_of` and `followers_of` are now arrays of opaque member IDs (`string[]`) instead of a single `string`. Pass one or more IDs resolved from `GET /v1/search/parameters`.
+- **Breaking (typed consumers):** posts-search replaces the flat `member_urn` / `company_urn` filters with the nested `posted_by` / `mentioning` / `author` objects described above.
+- **Breaking (typed consumers):** jobs-search `location_within_area` is now a `number` (search radius in miles) instead of a `string`.
+- Company-size (`headcount`) bucket bounds are documented with their explicit valid values.
+- De-branded the four search method summaries in the SDK JSDoc (`Search people/companies/posts/jobs`).
+- Regenerated types from the current API surface.
+
+---
+
 ## [0.4.2] — 2026-07-01
 
 ### Added
