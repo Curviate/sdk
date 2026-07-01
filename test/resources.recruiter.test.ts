@@ -16,11 +16,11 @@ describe("recruiter.syncMessages", () => {
   it("GET /v1/recruiter/messages/sync returns sync status", async () => {
     server.use(
       http.get(`${BASE}/v1/recruiter/messages/sync`, () =>
-        HttpResponse.json({ object: "account_sync", sync_status: "sync_started" }),
+        HttpResponse.json({ object: "account_sync", status: "sync_started" }),
       ),
     );
     const res = await rec().syncMessages({ account_id: ACC });
-    expect(res.sync_status).toBe("sync_started");
+    expect(res.status).toBe("sync_started");
   });
 
   it("throws CurviateError with required_tier when TIER_NOT_ACTIVE", async () => {
@@ -51,16 +51,17 @@ describe("recruiter.startChat", () => {
     server.use(
       http.post(`${BASE}/v1/recruiter/chats`, () =>
         HttpResponse.json(
-          { chat_id: "recchat_1", attendee_ids: ["AEa_abc"] },
+          { object: "chat_started", chat_id: "recchat_1", attendee_ids: ["AEa_abc"] },
           { status: 201 },
         ),
       ),
     );
     const res = await rec().startChat({
       account_id: ACC,
-      attendee_ids: ["AEa_abc"],
+      attendees_ids: ["AEa_abc"],
       text: "Hi from Recruiter",
     });
+    expect(res.object).toBe("chat_started");
     expect(res.chat_id).toBe("recchat_1");
   });
 
@@ -70,7 +71,7 @@ describe("recruiter.startChat", () => {
       http.post(`${BASE}/v1/recruiter/chats`, ({ request }) => {
         ct = request.headers.get("content-type");
         return HttpResponse.json(
-          { chat_id: "recchat_2", attendee_ids: ["AEa_abc"] },
+          { object: "chat_started", chat_id: "recchat_2", attendee_ids: ["AEa_abc"] },
           { status: 201 },
         );
       }),
@@ -78,7 +79,7 @@ describe("recruiter.startChat", () => {
     const buf = Buffer.from("resume-attachment");
     await rec().startChat({
       account_id: ACC,
-      attendee_ids: ["AEa_abc"],
+      attendees_ids: ["AEa_abc"],
       text: "With attachment",
       attachments: [buf],
     });

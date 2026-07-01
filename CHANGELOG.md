@@ -7,6 +7,21 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.6.0] — 2026-07-01
+
+### Added
+
+- **Recruiter start-chat response gains `object: "chat_started"` discriminator.** The 201 response from `recruiter.startChat` now includes `object: "chat_started"` as a required field. Type: `RecruiterStartChatResult`.
+
+### Changed
+
+- **Breaking (typed consumers):** `salesNavigator.syncMessages` and `recruiter.syncMessages` — the 200 response field `sync_status` is renamed to `status`. Enum values (`sync_started | running | done | error`) are unchanged. Types: `SNSyncMessagesResult`, `RecruiterSyncMessagesResult`.
+- **Breaking (typed consumers):** `recruiter.startChat` request body field `attendee_ids` → `attendees_ids`. The **response** `attendee_ids` field is unchanged. Type: `RecruiterStartChatBody`.
+- Recruiter start-chat 201 response no longer surfaces a separate `quota` field — remaining InMail capacity is read from `GET /v1/accounts/{account_id}`.
+- Regenerated types from the updated API surface (SN/Recruiter messaging parity).
+
+---
+
 ## [0.5.0] — 2026-07-01
 
 ### Added

@@ -9393,7 +9393,7 @@ export interface paths {
         };
         /**
          * Re-sync messages (Recruiter)
-         * @description Trigger (or, on a repeat call, monitor) a full or windowed re-sync of the account's Recruiter message history. Returns a sync_status (200). No message content is returned or persisted. Requires a Recruiter seat.
+         * @description Trigger (or, on a repeat call, monitor) a full or windowed re-sync of the account's Recruiter message history. Returns a status (200). No message content is returned or persisted. Requires a Recruiter seat.
          */
         get: {
             parameters: {
@@ -9431,7 +9431,7 @@ export interface paths {
                             object?: "account_sync";
                             account_id?: string;
                             /** @enum {string} */
-                            sync_status?: "sync_started" | "running" | "done" | "error";
+                            status?: "sync_started" | "running" | "done" | "error";
                         };
                     };
                 };
@@ -9564,7 +9564,7 @@ export interface paths {
                         /** @description The operator account ID whose Recruiter session starts the chat. */
                         account_id: string;
                         /** @description One or more Recruiter member IDs (AE… format). Repeatable form field or a single value. */
-                        attendee_ids: string[];
+                        attendees_ids: string[];
                         /** @description Opening message text. Passed to the platform and discarded — never stored or logged. */
                         text: string;
                         /** @description Optional InMail subject line. */
@@ -9627,23 +9627,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Recruiter chat created successfully. */
-                200: {
-                    headers: {
-                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                        RateLimit: components["headers"]["RateLimit"];
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /** @description The chat identifier. */
-                            chat_id: string | null;
-                            /** @description The Recruiter member IDs. */
-                            attendee_ids: string[];
-                        };
-                    };
-                };
-                /** @description Recruiter chat started. Returns the chat_id and the attendee_ids. Message content is never echoed back. The InMail daily quota is consumed; remaining capacity is read from GET /v1/accounts/{account_id}. Requires a Recruiter seat. */
+                /** @description Recruiter chat started. Returns the object discriminator, the chat_id, and the attendee_ids. Message content is never echoed back. The InMail daily quota is consumed; remaining capacity is read from GET /v1/accounts/{account_id}, never echoed here. Requires a Recruiter seat. */
                 201: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -9652,6 +9636,11 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "chat_started";
                             /** @description The newly created chat's identifier. */
                             chat_id: string | null;
                             /** @description The Recruiter member IDs the chat was started with. */
@@ -11378,7 +11367,7 @@ export interface paths {
         };
         /**
          * Re-sync messages (Sales Navigator)
-         * @description Trigger (or monitor) a full or windowed re-sync of the account's Sales Navigator message history. Returns a sync_status (200). No message content is returned or persisted. Requires a Sales Navigator seat.
+         * @description Trigger (or monitor) a full or windowed re-sync of the account's Sales Navigator message history. Returns a status (200). No message content is returned or persisted. Requires a Sales Navigator seat.
          */
         get: {
             parameters: {
@@ -11416,7 +11405,7 @@ export interface paths {
                             object?: "account_sync";
                             account_id?: string;
                             /** @enum {string} */
-                            sync_status?: "sync_started" | "running" | "done" | "error";
+                            status?: "sync_started" | "running" | "done" | "error";
                         };
                     };
                 };

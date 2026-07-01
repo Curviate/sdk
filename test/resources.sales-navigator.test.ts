@@ -157,10 +157,10 @@ describe("salesNavigator.syncMessages", () => {
   it("GET /v1/sales-navigator/messages/sync returns sync status", async () => {
     server.use(
       http.get(`${BASE}/v1/sales-navigator/messages/sync`, () =>
-        HttpResponse.json({ object: "account_sync", sync_status: "done" }),
+        HttpResponse.json({ object: "account_sync", status: "done" }),
       ),
     );
     const res = await sn().syncMessages({ account_id: ACC });
-    expect(res.sync_status).toBe("done");
+    expect(res.status).toBe("done");
   });
 });
