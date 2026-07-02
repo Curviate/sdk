@@ -7,6 +7,48 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.8.0] — 2026-07-02
+
+### Added
+
+- **Recruiter job-lifecycle endpoints are now fully implemented server-side.** The following operations no longer return `501` and are safe to call in production: getting/rejecting an applicant, downloading an applicant's resume, listing a job's applicants, solving a job's publish checkpoint, publishing a job, and fetching a Recruiter profile. Their generated response types no longer include a `501` variant — if your code branched on it, that branch is now dead and can be removed.
+- Richer parameter documentation across the Recruiter and search surfaces: job/applicant/hiring-project IDs now describe where to obtain them (e.g. `job_id` from `GET /v1/recruiter/jobs`, `user_id` from a people-search result), and several previously-terse descriptions were corrected (e.g. the saved-search `industry` filter's cross-reference).
+- Server-side parameter defaults are now surfaced in the generated JSDoc (`@default`) wherever the API applies one when a param is omitted — link-expiry seconds, chat visibility, hiring-project list `limit`, webhook delivery `format`/`enabled`/`headers`/`data`, and more.
+- **Breaking (typed consumers):** the Sales Navigator company-search `annual_revenue.min`/`max` filter is now a bucketed numeric enum (`0 | 0.2 | 1 | 2.5 | 5 | 10 | 20 | 50 | 100 | 500 | 1000 | 1001`) instead of a free-form `number`, matching what the API actually accepts. Code passing arbitrary numbers no longer typechecks — pick the nearest bucket value. Runtime behavior is unchanged (the API already only accepted these buckets).
+
+### Changed
+
+- **Search filter guard-rails are now documented.** `search.companies` `limit` requires a minimum of 2 (was 1) — the API rejects single-result company searches. `search.jobs` `benefits` and `commitments` filters now document their accepted values. `search.people` `open_to` now documents its accepted values (`proBono`, `boardMember`). The `search.posts` request examples were corrected to use the actual `member`/`company` array filter shape instead of a `member_urn` string.
+- Regenerated types from the current API surface. No resource method signatures changed.
+
+---
+
+## [0.7.0] — 2026-07-01
+
+### Changed
+
+- **Breaking (typed consumers):** `recruiter.startChat` 201 response — the `attendee_ids` field is removed and replaced by `message_id` (the opening message identifier). Final shape: `{ object: "chat_started", chat_id, message_id }`, matching `messaging.startChat` and `salesNavigator.startChat`. `chat_id` is now non-nullable on a 201. Type: `RecruiterStartChatResult`. Migration: read `res.message_id`.
+  - *Why:* product-API + core / Sales Navigator parity — the underlying LinkedIn start-chat operation returns an identical `{ object, chat_id, message_id }` for every product; the prior `attendee_ids` echo had no product-API basis.
+- The `recruiter.startChat` request body is unchanged (`attendees_ids` plus all recruiter-specific params).
+- Regenerated types from the updated API surface.
+
+---
+
+## [0.6.0] — 2026-07-01
+
+### Added
+
+- **Recruiter start-chat response gains `object: "chat_started"` discriminator.** The 201 response from `recruiter.startChat` now includes `object: "chat_started"` as a required field. Type: `RecruiterStartChatResult`.
+
+### Changed
+
+- **Breaking (typed consumers):** `salesNavigator.syncMessages` and `recruiter.syncMessages` — the 200 response field `sync_status` is renamed to `status`. Enum values (`sync_started | running | done | error`) are unchanged. Types: `SNSyncMessagesResult`, `RecruiterSyncMessagesResult`.
+- **Breaking (typed consumers):** `recruiter.startChat` request body field `attendee_ids` → `attendees_ids`. The **response** `attendee_ids` field is unchanged. Type: `RecruiterStartChatBody`.
+- Recruiter start-chat 201 response no longer surfaces a separate `quota` field — remaining InMail capacity is read from `GET /v1/accounts/{account_id}`.
+- Regenerated types from the updated API surface (SN/Recruiter messaging parity).
+
+---
+
 ## [0.5.0] — 2026-07-01
 
 ### Added
