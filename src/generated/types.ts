@@ -745,10 +745,14 @@ export interface paths {
                         account_id?: string;
                         /**
                          * @description 'create' = new account onboarding; 'reconnect' = re-auth of existing account
+                         * @default create
                          * @enum {string}
                          */
                         purpose?: "create" | "reconnect";
-                        /** @description Seconds until the link expires (60–3600, default 900) */
+                        /**
+                         * @description Seconds until the link expires (60–3600, default 900)
+                         * @default 900
+                         */
                         expires_in_seconds?: number;
                         /** @description Optional browser return URL after the hosted flow. No credential material. */
                         redirect_url?: string;
@@ -7513,6 +7517,7 @@ export interface paths {
                 };
                 header?: never;
                 path: {
+                    /** @description The target profile's public identifier (vanity slug), member ID, or URN. */
                     identifier: string;
                 };
                 cookie?: never;
@@ -7673,15 +7678,6 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Not implemented — the Recruiter profile endpoint is not available on this account configuration. */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
                 /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
@@ -7763,12 +7759,12 @@ export interface paths {
                         saved_search?: {
                             /** @description Saved search ID. Resolve via search/parameters?type=SAVED_SEARCHES. */
                             id: string;
-                            /** @description Project ID the saved search belongs to. Resolve via search/parameters?type=HIRING_PROJECTS. */
+                            /** @description Project ID the saved search belongs to. Resolve via search/parameters?type=SAVED_SEARCHES. */
                             project_id: string;
                             /** @description When true, returns only results new since the search was last run. */
                             newest_results_only?: boolean;
                         };
-                        /** @description INDUSTRY IDs to include or exclude. Resolve via search/parameters?type=DEPARTMENT. */
+                        /** @description INDUSTRY IDs to include or exclude. Resolve via search/parameters?type=INDUSTRY. */
                         industry?: {
                             /** @description Filter IDs to include. */
                             include?: string[];
@@ -8407,10 +8403,15 @@ export interface paths {
         get: {
             parameters: {
                 query: {
+                    /** @description The Curviate account ID whose Recruiter session lists hiring projects. */
                     account_id: string;
+                    /** @description Maximum number of hiring projects to return (1–100). Defaults to 10. */
                     limit?: number;
+                    /** @description Opaque pagination cursor from a previous response. Omit for the first page. */
                     cursor?: string;
+                    /** @description Field to sort hiring projects by. Defaults to ACCESSED_TIME. */
                     sort_by?: "NAME" | "FAVORITE" | "CREATED_TIME" | "ACCESSED_TIME" | "ENGAGED_TIME" | "ENGAGEMENT_COUNT";
+                    /** @description Sort direction. Defaults to DESCENDING. */
                     sort_order?: "ASCENDING" | "DESCENDING";
                 };
                 header?: never;
@@ -8641,10 +8642,12 @@ export interface paths {
         get: {
             parameters: {
                 query: {
+                    /** @description The Curviate account ID whose Recruiter session performs this call. */
                     account_id: string;
                 };
                 header?: never;
                 path: {
+                    /** @description The hiring project ID. Obtain it from the items[].id of GET /v1/recruiter/projects. */
                     project_id: string;
                 };
                 cookie?: never;
@@ -8861,6 +8864,7 @@ export interface paths {
         get: {
             parameters: {
                 query: {
+                    /** @description The Curviate account ID whose Recruiter session performs this call. */
                     account_id: string;
                     /** @description Filter by job posting status. One of: active, draft, closed. Defaults to active. */
                     category?: "active" | "draft" | "closed";
@@ -9584,6 +9588,7 @@ export interface paths {
                         email_address?: string;
                         /**
                          * @description Visibility of the recruiter chat. Defaults to PRIVATE.
+                         * @default PRIVATE
                          * @enum {string}
                          */
                         visibility?: "PUBLIC" | "PRIVATE" | "PROJECT";
@@ -10121,6 +10126,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
+                    /** @description The member id in AEM… format. Obtain it from the `id` field of a POST /v1/recruiter/search/people result item. */
                     user_id: string;
                 };
                 cookie?: never;
@@ -10295,6 +10301,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
+                    /** @description The job posting draft ID, returned as job_id in the POST /v1/recruiter/jobs response. */
                     job_id: string;
                 };
                 cookie?: never;
@@ -10480,15 +10487,6 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description PLATFORM_NOT_IMPLEMENTED — this operation is not available on the current platform tier. */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
                 /** @description PLATFORM_ERROR — A temporary error occurred. Please try again. */
                 502: {
                     headers: {
@@ -10542,6 +10540,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
+                    /** @description The job posting ID whose pending publish checkpoint is being solved. */
                     job_id: string;
                 };
                 cookie?: never;
@@ -10653,15 +10652,6 @@ export interface paths {
                 };
                 /** @description Internal server error. */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description PLATFORM_NOT_IMPLEMENTED — this operation is not available on the current platform tier. */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -10800,15 +10790,6 @@ export interface paths {
                 };
                 /** @description Internal error. */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description The real adapter for this endpoint is not yet wired. */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -11051,15 +11032,6 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The real adapter for this endpoint is not yet wired. */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
                 /** @description The platform returned an error. */
                 502: {
                     headers: {
@@ -11142,6 +11114,7 @@ export interface paths {
                 };
                 header?: never;
                 path: {
+                    /** @description The job posting ID whose applicants to list. Obtain it from GET /v1/recruiter/jobs. */
                     job_id: string;
                 };
                 cookie?: never;
@@ -11305,15 +11278,6 @@ export interface paths {
                 };
                 /** @description Internal error. */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description The real adapter for this endpoint is not yet wired. */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -12012,10 +11976,16 @@ export interface paths {
                         annual_revenue?: {
                             /** @description ISO 4217 three-character currency code (e.g. 'USD'). */
                             currency: string;
-                            /** @description Minimum revenue in the given currency. */
-                            min: number;
-                            /** @description Maximum revenue. Use 1001 for '1000+' (open-ended upper bound). */
-                            max: number;
+                            /**
+                             * @description Minimum revenue bucket. One of the enumerated values; 1001 means '1000+'.
+                             * @enum {number}
+                             */
+                            min: 0 | 0.2 | 1 | 2.5 | 5 | 10 | 20 | 50 | 100 | 500 | 1000 | 1001;
+                            /**
+                             * @description Maximum revenue bucket. Use 1001 for '1000+' (open-ended upper bound).
+                             * @enum {number}
+                             */
+                            max: 0 | 0.2 | 1 | 2.5 | 5 | 10 | 20 | 50 | 100 | 500 | 1000 | 1001;
                         };
                         /** @description Connection distance: 1 (1st), 2 (2nd), 3 (3rd+). No GROUP value for companies. */
                         network_distance?: (1 | 2 | 3)[];
@@ -13135,7 +13105,7 @@ export interface paths {
                         network_distance?: (1 | 2 | 3)[];
                         /** @description Filter by profile language codes. */
                         profile_language?: string[];
-                        /** @description Filter by open-to opportunity types. */
+                        /** @description Filter by open-to opportunity types. Valid values: proBono, boardMember. */
                         open_to?: string[];
                     };
                 };
@@ -13364,7 +13334,7 @@ export interface paths {
                 query: {
                     /** @description The linked LinkedIn account to search on behalf of. */
                     account_id: string;
-                    /** @description Maximum results per page (1–50, default 10). */
+                    /** @description Maximum results per page (2–50, default 10). Company search requires a minimum of 2. */
                     limit?: number;
                     /** @description Opaque pagination cursor returned from a previous response. */
                     cursor?: string;
@@ -13921,9 +13891,9 @@ export interface paths {
                              */
                             value: 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100;
                         };
-                        /** @description Filter by offered benefits. */
+                        /** @description Filter by offered benefits. Valid values: medical_insurance, vision_insurance, dental_insurance, 401(k), pension_plan, commuter_benefits. */
                         benefits?: string[];
-                        /** @description Filter by company commitments. */
+                        /** @description Filter by company commitments. Valid values: career_growth_and_learning, diversity_equity_and_inclusion, environmental_sustainability, social_impact, work_life_balance. */
                         commitments?: string[];
                         /** @description Filter to jobs with LinkedIn verification badges. */
                         has_verifications?: boolean;
@@ -14225,21 +14195,31 @@ export interface paths {
                         name?: string;
                         /**
                          * @description Delivery body encoding (default: json)
+                         * @default json
                          * @enum {string}
                          */
                         format?: "json" | "form";
                         /** @description Per-account targeting. Required and non-empty — each id must be an acc_-prefixed id owned by the tenant. */
                         account_ids: string[];
-                        /** @description A disabled webhook is created but delivers nothing */
+                        /**
+                         * @description A disabled webhook is created but delivers nothing
+                         * @default true
+                         */
                         enabled?: boolean;
-                        /** @description Custom headers added to each delivery POST */
+                        /**
+                         * @description Custom headers added to each delivery POST
+                         * @default []
+                         */
                         headers?: {
                             key: string;
                             value: string;
                         }[];
                         /** @description Messaging events to subscribe to (default: [message.received]) */
                         events?: ("message.received" | "message.delivered" | "message.read" | "message.reaction" | "message.edited" | "message.deleted")[];
-                        /** @description Field-remapping keys for the messaging delivery payload */
+                        /**
+                         * @description Field-remapping keys for the messaging delivery payload
+                         * @default []
+                         */
                         data?: string[];
                     } | {
                         /** @constant */
@@ -14250,21 +14230,31 @@ export interface paths {
                         name?: string;
                         /**
                          * @description Delivery body encoding (default: json)
+                         * @default json
                          * @enum {string}
                          */
                         format?: "json" | "form";
                         /** @description Per-account targeting. Required and non-empty — each id must be an acc_-prefixed id owned by the tenant. */
                         account_ids: string[];
-                        /** @description A disabled webhook is created but delivers nothing */
+                        /**
+                         * @description A disabled webhook is created but delivers nothing
+                         * @default true
+                         */
                         enabled?: boolean;
-                        /** @description Custom headers added to each delivery POST */
+                        /**
+                         * @description Custom headers added to each delivery POST
+                         * @default []
+                         */
                         headers?: {
                             key: string;
                             value: string;
                         }[];
                         /** @description User/relation events to subscribe to (default: [connection.accepted]) */
                         events?: "connection.accepted"[];
-                        /** @description Field-remapping keys for the user/relation delivery payload */
+                        /**
+                         * @description Field-remapping keys for the user/relation delivery payload
+                         * @default []
+                         */
                         data?: ("user_provider_id" | "user_full_name" | "user_public_identifier" | "user_profile_url" | "user_picture_url")[];
                     } | {
                         /** @constant */
@@ -14275,14 +14265,21 @@ export interface paths {
                         name?: string;
                         /**
                          * @description Delivery body encoding (default: json)
+                         * @default json
                          * @enum {string}
                          */
                         format?: "json" | "form";
                         /** @description Per-account targeting. Required and non-empty — each id must be an acc_-prefixed id owned by the tenant. */
                         account_ids: string[];
-                        /** @description A disabled webhook is created but delivers nothing */
+                        /**
+                         * @description A disabled webhook is created but delivers nothing
+                         * @default true
+                         */
                         enabled?: boolean;
-                        /** @description Custom headers added to each delivery POST */
+                        /**
+                         * @description Custom headers added to each delivery POST
+                         * @default []
+                         */
                         headers?: {
                             key: string;
                             value: string;

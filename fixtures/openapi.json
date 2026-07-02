@@ -2124,13 +2124,15 @@
                       "create",
                       "reconnect"
                     ],
-                    "description": "'create' = new account onboarding; 'reconnect' = re-auth of existing account"
+                    "description": "'create' = new account onboarding; 'reconnect' = re-auth of existing account",
+                    "default": "create"
                   },
                   "expires_in_seconds": {
                     "type": "integer",
                     "minimum": 60,
                     "maximum": 3600,
-                    "description": "Seconds until the link expires (60\u20133600, default 900)"
+                    "description": "Seconds until the link expires (60\u20133600, default 900)",
+                    "default": 900
                   },
                   "redirect_url": {
                     "type": "string",
@@ -4034,7 +4036,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 250
+              "maximum": 250,
+              "default": 20
             },
             "description": "Number of invitations to return per page (1\u2013250, default 20)."
           }
@@ -4481,7 +4484,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 10
             },
             "description": "Number of invitations to return per page (1\u2013100, default 10). The platform caps received invitations at 100 per page."
           }
@@ -5570,7 +5574,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 250
+              "maximum": 250,
+              "default": 20
             },
             "description": "Number of items to return per page (1\u2013250, default 20)."
           },
@@ -7008,7 +7013,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 250
+              "maximum": 250,
+              "default": 20
             },
             "description": "Number of items to return per page (1\u2013250, default 20)."
           },
@@ -11391,7 +11397,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 20
             },
             "description": "Maximum posts to return (1\u201350, default 20)."
           },
@@ -11912,7 +11919,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 20
             },
             "description": "Maximum comments to return (1\u201350, default 20)."
           },
@@ -12703,7 +12711,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 20
             },
             "description": "Maximum reactions to return (1\u201350, default 20). A cursor: null in the response does not confirm all reactions were returned \u2014 the list may be truncated at the requested limit. Use the --all flag or the paginate() helper for exhaustive reads."
           },
@@ -13961,7 +13970,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             },
             "description": "When true, the retrieval surfaces the authenticated account in the viewee's \"who viewed your profile\" notifications. Default false (no notification)."
           }
@@ -14503,7 +14513,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 1000
+              "maximum": 1000,
+              "default": 100
             },
             "description": "Number of connections to return per page (1\u20131000, default 100)."
           },
@@ -14899,7 +14910,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 50
             },
             "description": "Number of followers to return per page (1\u201350, default 50)."
           }
@@ -15274,7 +15286,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 100
             },
             "description": "Number of posts to return per page (1\u2013100, default 100)."
           },
@@ -15283,7 +15296,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": false
             },
             "description": "When true, profile_id is interpreted as a company identifier and the endpoint returns that organization's posts. Default false (member posts)."
           }
@@ -15735,7 +15749,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 100
             },
             "description": "Number of comments to return per page (1\u2013100, default 100)."
           }
@@ -16123,7 +16138,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 100
             },
             "description": "Number of reactions to return per page (1\u2013100, default 100)."
           }
@@ -17564,7 +17580,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The target profile's public identifier (vanity slug), member ID, or URN."
           },
           {
             "name": "account_id",
@@ -18074,27 +18091,6 @@
               }
             }
           },
-          "501": {
-            "description": "Not implemented \u2014 the Recruiter profile endpoint is not available on this account configuration.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "Not implemented",
-                    "value": {
-                      "code": "PLATFORM_NOT_IMPLEMENTED",
-                      "message": "This operation is not yet available.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
           "502": {
             "description": "PLATFORM_ERROR \u2014 A temporary error occurred. Please try again.",
             "content": {
@@ -18199,7 +18195,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 10
             },
             "description": "Number of results to return (1\u2013100). The Recruiter ceiling is 100."
           },
@@ -18853,7 +18850,7 @@
                       },
                       "project_id": {
                         "type": "string",
-                        "description": "Project ID the saved search belongs to. Resolve via search/parameters?type=HIRING_PROJECTS."
+                        "description": "Project ID the saved search belongs to. Resolve via search/parameters?type=SAVED_SEARCHES."
                       },
                       "newest_results_only": {
                         "type": "boolean",
@@ -18884,7 +18881,7 @@
                         "description": "Filter IDs to exclude."
                       }
                     },
-                    "description": "INDUSTRY IDs to include or exclude. Resolve via search/parameters?type=DEPARTMENT."
+                    "description": "INDUSTRY IDs to include or exclude. Resolve via search/parameters?type=INDUSTRY."
                   },
                   "degree": {
                     "type": "object",
@@ -19676,7 +19673,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 10
             },
             "description": "Maximum number of parameter items to return (1\u2013100)."
           }
@@ -20026,7 +20024,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The Curviate account ID whose Recruiter session lists hiring projects."
           },
           {
             "name": "limit",
@@ -20036,7 +20035,8 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 100
-            }
+            },
+            "description": "Maximum number of hiring projects to return (1\u2013100). Defaults to 10."
           },
           {
             "name": "cursor",
@@ -20044,7 +20044,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Opaque pagination cursor from a previous response. Omit for the first page."
           },
           {
             "name": "sort_by",
@@ -20060,7 +20061,8 @@
                 "ENGAGED_TIME",
                 "ENGAGEMENT_COUNT"
               ]
-            }
+            },
+            "description": "Field to sort hiring projects by. Defaults to ACCESSED_TIME."
           },
           {
             "name": "sort_order",
@@ -20072,7 +20074,8 @@
                 "ASCENDING",
                 "DESCENDING"
               ]
-            }
+            },
+            "description": "Sort direction. Defaults to DESCENDING."
           }
         ],
         "responses": {
@@ -20665,7 +20668,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The hiring project ID. Obtain it from the items[].id of GET /v1/recruiter/projects."
           },
           {
             "name": "account_id",
@@ -20673,7 +20677,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The Curviate account ID whose Recruiter session performs this call."
           }
         ],
         "responses": {
@@ -21247,7 +21252,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The Curviate account ID whose Recruiter session performs this call."
           },
           {
             "name": "category",
@@ -21270,7 +21276,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 250
+              "maximum": 250,
+              "default": 10
             },
             "description": "Number of job postings to return (1\u2013250). Defaults to 10."
           },
@@ -23505,7 +23512,8 @@
                       "PRIVATE",
                       "PROJECT"
                     ],
-                    "description": "Visibility of the recruiter chat. Defaults to PRIVATE."
+                    "description": "Visibility of the recruiter chat. Defaults to PRIVATE.",
+                    "default": "PRIVATE"
                   },
                   "follow_up": {
                     "type": "object",
@@ -24016,6 +24024,16 @@
                   "account_id",
                   "hiring_project_id"
                 ]
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Add a candidate to a hiring project",
+                  "value": {
+                    "account_id": "acc_01KV2GYE4VZ1PNCV4TJHTDYWWV",
+                    "hiring_project_id": "proj_1",
+                    "stage": "UNCONTACTED"
+                  }
+                }
               }
             }
           }
@@ -24393,6 +24411,16 @@
                   "account_id",
                   "hiring_project_id"
                 ]
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Add an applicant to a hiring project",
+                  "value": {
+                    "account_id": "acc_01KV2GYE4VZ1PNCV4TJHTDYWWV",
+                    "hiring_project_id": "proj_1",
+                    "stage": "UNCONTACTED"
+                  }
+                }
               }
             }
           }
@@ -24417,7 +24445,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The member id in AEM\u2026 format. Obtain it from the `id` field of a POST /v1/recruiter/search/people result item."
           }
         ],
         "responses": {
@@ -24790,6 +24819,28 @@
                   "hiring_project_id",
                   "reason"
                 ]
+              },
+              "examples": {
+                "silent": {
+                  "summary": "Reject an applicant with no notification",
+                  "value": {
+                    "account_id": "acc_01KV2GYE4VZ1PNCV4TJHTDYWWV",
+                    "hiring_project_id": "proj_1",
+                    "reason": "NOT_MEET_BASIC_QUALIFICATIONS"
+                  }
+                },
+                "withNotification": {
+                  "summary": "Reject an applicant and schedule a notification",
+                  "value": {
+                    "account_id": "acc_01KV2GYE4VZ1PNCV4TJHTDYWWV",
+                    "hiring_project_id": "proj_1",
+                    "reason": "MORE_QUALIFIED_CANDIDATES",
+                    "rejection_notification": {
+                      "message": "Thank you for your interest \u2014 we've moved forward with other candidates.",
+                      "send_notification_at": 1748390400000
+                    }
+                  }
+                }
               }
             }
           }
@@ -24814,7 +24865,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The job posting draft ID, returned as job_id in the POST /v1/recruiter/jobs response."
           }
         ],
         "responses": {
@@ -25094,27 +25146,6 @@
                       "message": "An unexpected error occurred.",
                       "user_fixable": false,
                       "retry_likely_to_succeed": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "PLATFORM_NOT_IMPLEMENTED \u2014 this operation is not available on the current platform tier.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "Not implemented",
-                    "value": {
-                      "code": "PLATFORM_NOT_IMPLEMENTED",
-                      "message": "This operation is not available on the current platform.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": false
                     }
                   }
                 }
@@ -25450,7 +25481,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The job posting ID whose pending publish checkpoint is being solved."
           }
         ],
         "responses": {
@@ -25712,27 +25744,6 @@
                       "message": "An unexpected error occurred.",
                       "user_fixable": false,
                       "retry_likely_to_succeed": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "PLATFORM_NOT_IMPLEMENTED \u2014 this operation is not available on the current platform tier.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "Not implemented",
-                    "value": {
-                      "code": "PLATFORM_NOT_IMPLEMENTED",
-                      "message": "This operation is not available on the current platform.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": false
                     }
                   }
                 }
@@ -26057,27 +26068,6 @@
                       "message": "An unexpected internal error occurred.",
                       "user_fixable": false,
                       "retry_likely_to_succeed": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "501": {
-            "description": "The real adapter for this endpoint is not yet wired.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "501 error",
-                    "value": {
-                      "code": "PLATFORM_NOT_IMPLEMENTED",
-                      "message": "This operation is not yet supported.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": false
                     }
                   }
                 }
@@ -26646,27 +26636,6 @@
               }
             }
           },
-          "501": {
-            "description": "The real adapter for this endpoint is not yet wired.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "501 error",
-                    "value": {
-                      "code": "PLATFORM_NOT_IMPLEMENTED",
-                      "message": "This operation is not yet supported.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
           "502": {
             "description": "The platform returned an error.",
             "content": {
@@ -26760,7 +26729,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The job posting ID whose applicants to list. Obtain it from GET /v1/recruiter/jobs."
           },
           {
             "name": "account_id",
@@ -26778,7 +26748,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 250
+              "maximum": 250,
+              "default": 20
             },
             "description": "Number of applicants to return (1\u2013250). Defaults to 20."
           },
@@ -27390,27 +27361,6 @@
               }
             }
           },
-          "501": {
-            "description": "The real adapter for this endpoint is not yet wired.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "501 error",
-                    "value": {
-                      "code": "PLATFORM_NOT_IMPLEMENTED",
-                      "message": "This operation is not yet supported.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
           "502": {
             "description": "The platform returned an error.",
             "content": {
@@ -27859,7 +27809,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 10
             },
             "description": "Number of results to return (1\u2013100). The Sales Navigator ceiling is 100."
           },
@@ -29089,7 +29040,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 10
             },
             "description": "Number of results to return (1\u2013100)."
           },
@@ -29843,11 +29795,39 @@
                       },
                       "min": {
                         "type": "number",
-                        "description": "Minimum revenue in the given currency."
+                        "enum": [
+                          0,
+                          0.2,
+                          1,
+                          2.5,
+                          5,
+                          10,
+                          20,
+                          50,
+                          100,
+                          500,
+                          1000,
+                          1001
+                        ],
+                        "description": "Minimum revenue bucket. One of the enumerated values; 1001 means '1000+'."
                       },
                       "max": {
                         "type": "number",
-                        "description": "Maximum revenue. Use 1001 for '1000+' (open-ended upper bound)."
+                        "enum": [
+                          0,
+                          0.2,
+                          1,
+                          2.5,
+                          5,
+                          10,
+                          20,
+                          50,
+                          100,
+                          500,
+                          1000,
+                          1001
+                        ],
+                        "description": "Maximum revenue bucket. Use 1001 for '1000+' (open-ended upper bound)."
                       }
                     },
                     "required": [
@@ -30004,7 +29984,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 10
             },
             "description": "Maximum number of parameter items to return (1\u2013100)."
           }
@@ -31653,7 +31634,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100
+              "maximum": 100,
+              "default": 10
             },
             "description": "Number of parameters to return (1\u2013100, default 10)."
           }
@@ -32085,7 +32067,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 10
             },
             "description": "Maximum results per page (1\u201350, default 10)."
           },
@@ -32775,7 +32758,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Filter by open-to opportunity types."
+                    "description": "Filter by open-to opportunity types. Valid values: proBono, boardMember."
                   }
                 }
               },
@@ -32845,10 +32828,11 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "minimum": 1,
-              "maximum": 50
+              "minimum": 2,
+              "maximum": 50,
+              "default": 10
             },
-            "description": "Maximum results per page (1\u201350, default 10)."
+            "description": "Maximum results per page (2\u201350, default 10). Company search requires a minimum of 2."
           },
           {
             "name": "cursor",
@@ -33398,7 +33382,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 10
             },
             "description": "Maximum results per page (1\u201350, default 10)."
           },
@@ -34033,13 +34018,15 @@
               },
               "examples": {
                 "structured": {
-                  "summary": "Search posts mentioning a topic, filtered by content type",
+                  "summary": "Search posts mentioning a topic, filtered by content type and author's company",
                   "value": {
                     "keywords": "hiring engineers",
                     "content_type": "videos",
                     "sort_by": "date",
                     "author": {
-                      "member_urn": "urn:li:member:99999"
+                      "company": [
+                        "1234567"
+                      ]
                     }
                   }
                 },
@@ -34047,7 +34034,9 @@
                   "summary": "Find posts by a specific member",
                   "value": {
                     "posted_by": {
-                      "member_urn": "urn:li:member:99999"
+                      "member": [
+                        "99999"
+                      ]
                     }
                   }
                 },
@@ -34092,7 +34081,8 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 10
             },
             "description": "Maximum results per page (1\u201350, default 10)."
           },
@@ -34737,14 +34727,14 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "Filter by offered benefits."
+                    "description": "Filter by offered benefits. Valid values: medical_insurance, vision_insurance, dental_insurance, 401(k), pension_plan, commuter_benefits."
                   },
                   "commitments": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     },
-                    "description": "Filter by company commitments."
+                    "description": "Filter by company commitments. Valid values: career_growth_and_learning, diversity_equity_and_inclusion, environmental_sustainability, social_impact, work_life_balance."
                   },
                   "has_verifications": {
                     "type": "boolean",
@@ -35374,7 +35364,8 @@
                           "json",
                           "form"
                         ],
-                        "description": "Delivery body encoding (default: json)"
+                        "description": "Delivery body encoding (default: json)",
+                        "default": "json"
                       },
                       "account_ids": {
                         "type": "array",
@@ -35385,7 +35376,8 @@
                       },
                       "enabled": {
                         "type": "boolean",
-                        "description": "A disabled webhook is created but delivers nothing"
+                        "description": "A disabled webhook is created but delivers nothing",
+                        "default": true
                       },
                       "headers": {
                         "type": "array",
@@ -35404,7 +35396,8 @@
                             "value"
                           ]
                         },
-                        "description": "Custom headers added to each delivery POST"
+                        "description": "Custom headers added to each delivery POST",
+                        "default": []
                       },
                       "events": {
                         "type": "array",
@@ -35426,7 +35419,8 @@
                         "items": {
                           "type": "string"
                         },
-                        "description": "Field-remapping keys for the messaging delivery payload"
+                        "description": "Field-remapping keys for the messaging delivery payload",
+                        "default": []
                       }
                     },
                     "required": [
@@ -35457,7 +35451,8 @@
                           "json",
                           "form"
                         ],
-                        "description": "Delivery body encoding (default: json)"
+                        "description": "Delivery body encoding (default: json)",
+                        "default": "json"
                       },
                       "account_ids": {
                         "type": "array",
@@ -35468,7 +35463,8 @@
                       },
                       "enabled": {
                         "type": "boolean",
-                        "description": "A disabled webhook is created but delivers nothing"
+                        "description": "A disabled webhook is created but delivers nothing",
+                        "default": true
                       },
                       "headers": {
                         "type": "array",
@@ -35487,7 +35483,8 @@
                             "value"
                           ]
                         },
-                        "description": "Custom headers added to each delivery POST"
+                        "description": "Custom headers added to each delivery POST",
+                        "default": []
                       },
                       "events": {
                         "type": "array",
@@ -35511,7 +35508,8 @@
                             "user_picture_url"
                           ]
                         },
-                        "description": "Field-remapping keys for the user/relation delivery payload"
+                        "description": "Field-remapping keys for the user/relation delivery payload",
+                        "default": []
                       }
                     },
                     "required": [
@@ -35542,7 +35540,8 @@
                           "json",
                           "form"
                         ],
-                        "description": "Delivery body encoding (default: json)"
+                        "description": "Delivery body encoding (default: json)",
+                        "default": "json"
                       },
                       "account_ids": {
                         "type": "array",
@@ -35553,7 +35552,8 @@
                       },
                       "enabled": {
                         "type": "boolean",
-                        "description": "A disabled webhook is created but delivers nothing"
+                        "description": "A disabled webhook is created but delivers nothing",
+                        "default": true
                       },
                       "headers": {
                         "type": "array",
@@ -35572,7 +35572,8 @@
                             "value"
                           ]
                         },
-                        "description": "Custom headers added to each delivery POST"
+                        "description": "Custom headers added to each delivery POST",
+                        "default": []
                       },
                       "events": {
                         "type": "array",
