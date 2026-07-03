@@ -7,6 +7,20 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.9.0] — 2026-07-03
+
+### Added
+
+- **Account enrichment fields.** `accounts.list()` items and `accounts.get()` now carry six cached account-detail fields, populated by an async background enrichment on every successful account activation: `username`, `premium_id`, `public_identifier`, `substrate_created_at` (ISO-8601 UTC), `signatures` (`{title, content}[]`), and `groups` (`string[]`). All six are `null`/`[]` until the account's first enrichment pass completes — never `undefined`, never a missing key. Types: `AccountListPage`, `AccountDetail`.
+- `accounts.get()` gains `seat_id` (`string | null`) — the seat the account occupies, `null` for an admin seatless account. Previously only `accounts.list()` items carried this field.
+
+### Changed
+
+- `connected_at` (on both `accounts.list()` items and `accounts.get()`) and `last_checked_at` (`accounts.get()`) now consistently emit ISO-8601 UTC (`…Z`) timestamps — a prior docs-vs-runtime drift meant these could reach callers in raw Postgres wire format. No type change (already typed as `string`/`string | null`); this is a runtime-correctness fix reflected in the regenerated example values.
+- Regenerated types from the current API surface. No resource method signatures changed — purely additive response fields.
+
+---
+
 ## [0.8.0] — 2026-07-02
 
 ### Added

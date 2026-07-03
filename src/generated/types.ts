@@ -55,8 +55,23 @@ export interface paths {
                                 headline?: string | null;
                                 /** @description The seat this account occupies. */
                                 seat_id?: string | null;
-                                /** @description ISO-8601 connection timestamp. */
-                                connected_at?: string;
+                                /** @description ISO-8601 UTC connection timestamp. */
+                                connected_at?: string | null;
+                                /** @description Cached account username. Null until enriched. */
+                                username?: string | null;
+                                /** @description Cached premium-membership id. Null until enriched, or for non-premium accounts. */
+                                premium_id?: string | null;
+                                /** @description Cached public profile identifier. Null until enriched. */
+                                public_identifier?: string | null;
+                                /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until enriched. */
+                                substrate_created_at?: string | null;
+                                /** @description Cached signature blocks (title + content) for the account. Empty until enriched. */
+                                signatures?: {
+                                    title?: string;
+                                    content?: string;
+                                }[];
+                                /** @description Cached group names the account belongs to. Empty until enriched. */
+                                groups?: string[];
                             }[];
                             /** @description Next-page cursor; null on the last page. */
                             cursor?: string | null;
@@ -399,8 +414,27 @@ export interface paths {
                             auth_method?: string;
                             full_name?: string | null;
                             headline?: string | null;
+                            /** @description ISO-8601 UTC connection timestamp. */
                             connected_at?: string | null;
+                            /** @description ISO-8601 UTC time the account state was last checked. */
                             last_checked_at?: string;
+                            /** @description The seat this account occupies (null for an admin seatless account). */
+                            seat_id?: string | null;
+                            /** @description Cached account username. Null until enriched. */
+                            username?: string | null;
+                            /** @description Cached premium-membership id. Null until enriched, or for non-premium accounts. */
+                            premium_id?: string | null;
+                            /** @description Cached public profile identifier. Null until enriched. */
+                            public_identifier?: string | null;
+                            /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until enriched. */
+                            substrate_created_at?: string | null;
+                            /** @description Cached signature blocks (title + content) for the account. Empty until enriched. */
+                            signatures?: {
+                                title?: string;
+                                content?: string;
+                            }[];
+                            /** @description Cached group names the account belongs to. Empty until enriched. */
+                            groups?: string[];
                             /** @description Per-account quota view — one entry per tracked family (messages.daily, connection_requests.daily, profile_views.daily, inmail.daily, account.per_minute). */
                             quotas?: {
                                 /** @description Quota family (e.g. messages.daily, account.per_minute). */

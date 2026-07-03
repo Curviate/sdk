@@ -257,8 +257,61 @@
                             "description": "The seat this account occupies."
                           },
                           "connected_at": {
-                            "type": "string",
-                            "description": "ISO-8601 connection timestamp."
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "ISO-8601 UTC connection timestamp."
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Cached account username. Null until enriched."
+                          },
+                          "premium_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Cached premium-membership id. Null until enriched, or for non-premium accounts."
+                          },
+                          "public_identifier": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Cached public profile identifier. Null until enriched."
+                          },
+                          "substrate_created_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "ISO-8601 UTC creation timestamp of the underlying LinkedIn account \u2014 distinct from connected_at. Null until enriched."
+                          },
+                          "signatures": {
+                            "type": "array",
+                            "description": "Cached signature blocks (title + content) for the account. Empty until enriched.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "title": {
+                                  "type": "string"
+                                },
+                                "content": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "groups": {
+                            "type": "array",
+                            "description": "Cached group names the account belongs to. Empty until enriched.",
+                            "items": {
+                              "type": "string"
+                            }
                           }
                         }
                       }
@@ -285,7 +338,20 @@
                           "full_name": "Ada Lovelace",
                           "headline": "Engineer",
                           "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
-                          "connected_at": "2026-06-01T09:00:00Z"
+                          "connected_at": "2026-06-01T09:00:00.000Z",
+                          "username": "ada-lovelace",
+                          "premium_id": "prem_42",
+                          "public_identifier": "ada-lovelace",
+                          "substrate_created_at": "2025-01-15T09:30:00.000Z",
+                          "signatures": [
+                            {
+                              "title": "Work",
+                              "content": "Best, Ada"
+                            }
+                          ],
+                          "groups": [
+                            "Analytical Engines"
+                          ]
                         }
                       ],
                       "cursor": null
@@ -1060,10 +1126,69 @@
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "description": "ISO-8601 UTC connection timestamp."
                     },
                     "last_checked_at": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "ISO-8601 UTC time the account state was last checked."
+                    },
+                    "seat_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "The seat this account occupies (null for an admin seatless account)."
+                    },
+                    "username": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Cached account username. Null until enriched."
+                    },
+                    "premium_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Cached premium-membership id. Null until enriched, or for non-premium accounts."
+                    },
+                    "public_identifier": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Cached public profile identifier. Null until enriched."
+                    },
+                    "substrate_created_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "ISO-8601 UTC creation timestamp of the underlying LinkedIn account \u2014 distinct from connected_at. Null until enriched."
+                    },
+                    "signatures": {
+                      "type": "array",
+                      "description": "Cached signature blocks (title + content) for the account. Empty until enriched.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string"
+                          },
+                          "content": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "groups": {
+                      "type": "array",
+                      "description": "Cached group names the account belongs to. Empty until enriched.",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "quotas": {
                       "type": "array",
@@ -1112,8 +1237,22 @@
                       "auth_method": "cookie",
                       "full_name": "Ada Lovelace",
                       "headline": "Engineer",
-                      "connected_at": "2026-06-01T09:00:00Z",
-                      "last_checked_at": "2026-06-08T09:00:00Z",
+                      "connected_at": "2026-06-01T09:00:00.000Z",
+                      "last_checked_at": "2026-06-08T09:00:00.000Z",
+                      "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
+                      "username": "ada-lovelace",
+                      "premium_id": "prem_42",
+                      "public_identifier": "ada-lovelace",
+                      "substrate_created_at": "2025-01-15T09:30:00.000Z",
+                      "signatures": [
+                        {
+                          "title": "Work",
+                          "content": "Best, Ada"
+                        }
+                      ],
+                      "groups": [
+                        "Analytical Engines"
+                      ],
                       "quotas": [
                         {
                           "quota_name": "messages.daily",

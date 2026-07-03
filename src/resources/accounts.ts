@@ -93,6 +93,11 @@ export class AccountsResource {
   /**
    * List the tenant's connected LinkedIn accounts, cursor-paginated.
    *
+   * Each item also carries a small set of cached account-detail fields
+   * (`username`, `premium_id`, `public_identifier`, `substrate_created_at`,
+   * `signatures`, `groups`) populated by an async background enrichment —
+   * `null`/`[]` until the account's first enrichment pass completes.
+   *
    * @param params - optional `limit` (1–250) and `cursor` (from a prior page).
    * @returns a page of accounts and the next-page `cursor` (null when exhausted).
    *
@@ -158,7 +163,14 @@ export class AccountsResource {
 
   /**
    * Return metadata and current state for one connected account, including the
-   * central `quotas[]` view for all tracked quota families.
+   * central `quotas[]` view for all tracked quota families and `seat_id` (the
+   * seat this account occupies, `null` for an admin seatless account).
+   *
+   * This is a stale-while-revalidate read — it always returns immediately
+   * from the cached row (never blocks on a live substrate call), and the
+   * six cached enrichment fields (`username`, `premium_id`,
+   * `public_identifier`, `substrate_created_at`, `signatures`, `groups`) are
+   * `null`/`[]` until the account's first enrichment pass completes.
    */
   get(accountId: string): Promise<AccountDetail> {
     return this.ctx.request<AccountDetail>({
