@@ -18,6 +18,7 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 - `connected_at` (on both `accounts.list()` items and `accounts.get()`) and `last_checked_at` (`accounts.get()`) now consistently emit ISO-8601 UTC (`…Z`) timestamps — a prior docs-vs-runtime drift meant these could reach callers in raw Postgres wire format. No type change (already typed as `string`/`string | null`); this is a runtime-correctness fix reflected in the regenerated example values.
 - Regenerated types from the current API surface. No resource method signatures changed — purely additive response fields.
+- `quotas[]` (on `accounts.get()`) is now documented as advisory usage-safety recommendations: daily families never cause a rejected request; only `account.per_minute` is a binding limit enforced with HTTP 429. `recommended_throttle_hint` semantics documented per level (`none` / `slow_down` / `backoff` are advisory; `stop` is reserved for the binding per-minute limit). JSDoc-only — no type shape change.
 
 ---
 

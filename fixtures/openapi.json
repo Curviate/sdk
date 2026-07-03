@@ -1192,7 +1192,7 @@
                     },
                     "quotas": {
                       "type": "array",
-                      "description": "Per-account quota view \u2014 one entry per tracked family (messages.daily, connection_requests.daily, profile_views.daily, inmail.daily, account.per_minute).",
+                      "description": "Usage-safety recommendations for this account \u2014 one entry per tracked family (messages.daily, connection_requests.daily, profile_views.daily, inmail.daily, profile.endorse, account.per_minute). These are advisory only: Curviate never rejects a request because a daily recommendation is exceeded; only account.per_minute is a binding limit enforced with HTTP 429.",
                       "items": {
                         "type": "object",
                         "properties": {
@@ -1220,7 +1220,7 @@
                               "backoff",
                               "stop"
                             ],
-                            "description": "Pacing hint."
+                            "description": "Pacing recommendation for this family, advisory only. `none` (under 80% consumed), `slow_down` (80-99% consumed), and `backoff` (100%+ consumed) never block a request. `stop` is reserved exclusively for `account.per_minute` \u2014 the sole binding limit, whose breach is enforced with HTTP 429."
                           }
                         }
                       }
@@ -1256,36 +1256,43 @@
                       "quotas": [
                         {
                           "quota_name": "messages.daily",
-                          "remaining": 149,
-                          "total": 150,
+                          "remaining": 99,
+                          "total": 100,
                           "reset_time": "2026-06-11T00:00:00Z",
                           "recommended_throttle_hint": "none"
                         },
                         {
                           "quota_name": "connection_requests.daily",
-                          "remaining": 80,
-                          "total": 80,
+                          "remaining": 120,
+                          "total": 120,
                           "reset_time": "2026-06-11T00:00:00Z",
                           "recommended_throttle_hint": "none"
                         },
                         {
                           "quota_name": "profile_views.daily",
-                          "remaining": 80,
-                          "total": 80,
+                          "remaining": 100,
+                          "total": 100,
                           "reset_time": "2026-06-11T00:00:00Z",
                           "recommended_throttle_hint": "none"
                         },
                         {
                           "quota_name": "inmail.daily",
-                          "remaining": 25,
-                          "total": 25,
+                          "remaining": 60,
+                          "total": 60,
+                          "reset_time": "2026-06-11T00:00:00Z",
+                          "recommended_throttle_hint": "none"
+                        },
+                        {
+                          "quota_name": "profile.endorse",
+                          "remaining": 40,
+                          "total": 40,
                           "reset_time": "2026-06-11T00:00:00Z",
                           "recommended_throttle_hint": "none"
                         },
                         {
                           "quota_name": "account.per_minute",
-                          "remaining": 1000,
-                          "total": 1000,
+                          "remaining": 3000,
+                          "total": 3000,
                           "reset_time": "2026-06-10T10:01:00Z",
                           "recommended_throttle_hint": "none"
                         }

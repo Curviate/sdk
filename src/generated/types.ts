@@ -435,7 +435,7 @@ export interface paths {
                             }[];
                             /** @description Cached group names the account belongs to. Empty until enriched. */
                             groups?: string[];
-                            /** @description Per-account quota view — one entry per tracked family (messages.daily, connection_requests.daily, profile_views.daily, inmail.daily, account.per_minute). */
+                            /** @description Usage-safety recommendations for this account — one entry per tracked family (messages.daily, connection_requests.daily, profile_views.daily, inmail.daily, profile.endorse, account.per_minute). These are advisory only: Curviate never rejects a request because a daily recommendation is exceeded; only account.per_minute is a binding limit enforced with HTTP 429. */
                             quotas?: {
                                 /** @description Quota family (e.g. messages.daily, account.per_minute). */
                                 quota_name?: string;
@@ -446,7 +446,7 @@ export interface paths {
                                 /** @description ISO-8601 UTC time the current window resets. */
                                 reset_time?: string;
                                 /**
-                                 * @description Pacing hint.
+                                 * @description Pacing recommendation for this family, advisory only. `none` (under 80% consumed), `slow_down` (80-99% consumed), and `backoff` (100%+ consumed) never block a request. `stop` is reserved exclusively for `account.per_minute` — the sole binding limit, whose breach is enforced with HTTP 429.
                                  * @enum {string}
                                  */
                                 recommended_throttle_hint?: "none" | "slow_down" | "backoff" | "stop";
