@@ -145,6 +145,7 @@ describe("account-scoped accessor", () => {
       "posts",
       "salesNavigator",
       "recruiter",
+      "jobs",
       "webhooks",
     ]) {
       expect(scoped, `namespace ${ns} should exist`).toHaveProperty(ns);

@@ -1,13 +1,17 @@
 /**
- * Recruiter resource — 17 methods (tier: recruiter).
+ * Recruiter resource — 18 methods (tier: recruiter).
  *
  * Account-scoped: the bound context injects `account_id` into every request.
  * `startChat` accepts optional `attachments[]`, `voice_message`, and
  * `video_message`; the SDK builds the `FormData` body automatically.
  * `downloadResume` returns `Promise<ArrayBuffer>` (binary response).
+ * `getJob` returns the same `JobPosting` shape as `jobs.get()` — reused, not
+ * redefined, since both endpoints share the underlying job-posting retrieve.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
+import { resolveJobId } from "../internal/job-id.js";
+import type { JobPosting } from "./jobs.js";
 
 // ─── Type aliases from generated OpenAPI snapshot ──────────────────────────
 
@@ -346,6 +350,25 @@ export class RecruiterResource {
       path: `/v1/recruiter/jobs/${jobId}/checkpoint`,
       body,
       accountIdIn: "body",
+    });
+  }
+
+  /**
+   * Get a job posting via the Recruiter lens (any public posting, not only
+   * the operator's own). `GET /v1/recruiter/jobs/{job_id}`
+   *
+   * Accepts a bare numeric job id or a full job URL
+   * (`https://www.linkedin.com/jobs/view/{id}`) — the id is extracted
+   * client-side, mirroring `jobs.get()`. Throws
+   * `CurviateError({ code: 'INVALID_REQUEST' })` synchronously if neither
+   * form can be recognized. Returns the same `JobPosting` shape as
+   * `jobs.get()`.
+   */
+  getJob(jobIdOrUrl: string): Promise<JobPosting> {
+    const jobId = resolveJobId(jobIdOrUrl);
+    return this.ctx.request<JobPosting>({
+      method: "GET",
+      path: `/v1/recruiter/jobs/${jobId}`,
     });
   }
 

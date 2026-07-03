@@ -33,6 +33,10 @@
       "description": "Send, cancel, accept, and decline connection invitations on the professional network."
     },
     {
+      "name": "Jobs",
+      "description": "Retrieve a public job posting's full detail by id."
+    },
+    {
       "name": "Messaging",
       "description": "Send messages, manage conversations, and track message threads with connections."
     },
@@ -5663,6 +5667,392 @@
         ],
         "description": "Cancels a previously sent connection invitation by id. An already-absent or unrecognized invitation_id returns status:not_found rather than an error.",
         "x-order": 5
+      }
+    },
+    "/v1/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "Jobs"
+        ],
+        "summary": "Get job posting",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/search/jobs result. Pass the number only \u2014 a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you)."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connected LinkedIn account to retrieve the job posting on behalf of."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The job posting's full detail. Content fields (title, description) are returned verbatim and are never stored.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "object",
+                    "id",
+                    "title",
+                    "company",
+                    "company_id",
+                    "state",
+                    "location",
+                    "cost",
+                    "applicants_counter",
+                    "description",
+                    "created_at",
+                    "published_at",
+                    "hiring_team"
+                  ],
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "job_posting"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "The job posting's numeric identifier."
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Job title (content pass-through \u2014 never stored)."
+                    },
+                    "company": {
+                      "type": "string",
+                      "description": "Hiring company's display name."
+                    },
+                    "company_id": {
+                      "type": "string",
+                      "description": "The hiring company's id \u2014 pass it to GET /v1/profiles/companies/{company_id}."
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "Posting lifecycle state (e.g. active)."
+                    },
+                    "location": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Job location, or null when not set."
+                    },
+                    "cost": {
+                      "type": "number",
+                      "description": "Posting cost, in the currency the account bills in."
+                    },
+                    "applicants_counter": {
+                      "type": "number",
+                      "description": "Number of applicants so far."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Full job description text (content pass-through \u2014 never stored)."
+                    },
+                    "created_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "ISO-8601 UTC timestamp the posting was created, or null when not set."
+                    },
+                    "published_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "ISO-8601 UTC timestamp the posting was published, or null when not set."
+                    },
+                    "hiring_team": {
+                      "type": "array",
+                      "items": {},
+                      "description": "Hiring team members associated with this posting, when the posting exposes any."
+                    }
+                  }
+                },
+                "examples": {
+                  "jobPosting": {
+                    "summary": "A public job posting",
+                    "value": {
+                      "object": "job_posting",
+                      "id": "4428113858",
+                      "title": "Founders Associate",
+                      "company": "LEAGUES",
+                      "company_id": "67756343",
+                      "state": "active",
+                      "location": "Stuttgart, Baden-W\u00fcrttemberg, Germany",
+                      "cost": 0,
+                      "applicants_counter": 75,
+                      "description": "Als Founders Associate arbeitest du eng mit dem Gr\u00fcnderteam zusammen und treibst zentrale Wachstumsinitiativen voran.",
+                      "created_at": "2026-06-12T17:27:09.000Z",
+                      "published_at": "2026-06-12T17:28:03.000Z",
+                      "hiring_team": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or empty account_id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account does not have the required Core seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "TIER_NOT_ACTIVE",
+                      "message": "The seat plan does not permit this operation; a higher plan is required.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The account_id does not belong to this tenant, or the job posting was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The account is restricted and cannot be queried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          }
+        ],
+        "description": "Returns one public LinkedIn job posting's full detail \u2014 title, company, location, description, and applicant count.",
+        "x-order": 1
       }
     },
     "/v1/chats": {
@@ -26855,6 +27245,391 @@
           }
         ],
         "description": "Retrieve details for a single job applicant, including contact information. The applicant_id comes from the list applicants endpoint's items[].id. Unknown applicant \u2192 404 RESOURCE_NOT_FOUND. Requires a Recruiter seat."
+      }
+    },
+    "/v1/recruiter/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "Recruiter"
+        ],
+        "summary": "Get job posting",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/search/jobs result. Pass the number only \u2014 a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you)."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connected LinkedIn account to retrieve the job posting on behalf of."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The job posting's full detail (RECRUITER lens \u2014 the same job_posting shape as the Core retrieve; content fields are returned verbatim and never stored). Requires a Recruiter seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "object",
+                    "id",
+                    "title",
+                    "company",
+                    "company_id",
+                    "state",
+                    "location",
+                    "cost",
+                    "applicants_counter",
+                    "description",
+                    "created_at",
+                    "published_at",
+                    "hiring_team"
+                  ],
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "job_posting"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "The job posting's numeric identifier."
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Job title (content pass-through \u2014 never stored)."
+                    },
+                    "company": {
+                      "type": "string",
+                      "description": "Hiring company's display name."
+                    },
+                    "company_id": {
+                      "type": "string",
+                      "description": "The hiring company's id \u2014 pass it to GET /v1/profiles/companies/{company_id}."
+                    },
+                    "state": {
+                      "type": "string",
+                      "description": "Posting lifecycle state (e.g. active)."
+                    },
+                    "location": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Job location, or null when not set."
+                    },
+                    "cost": {
+                      "type": "number",
+                      "description": "Posting cost, in the currency the account bills in."
+                    },
+                    "applicants_counter": {
+                      "type": "number",
+                      "description": "Number of applicants so far."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Full job description text (content pass-through \u2014 never stored)."
+                    },
+                    "created_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "ISO-8601 UTC timestamp the posting was created, or null when not set."
+                    },
+                    "published_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "ISO-8601 UTC timestamp the posting was published, or null when not set."
+                    },
+                    "hiring_team": {
+                      "type": "array",
+                      "items": {},
+                      "description": "Hiring team members associated with this posting, when the posting exposes any."
+                    }
+                  }
+                },
+                "examples": {
+                  "jobPosting": {
+                    "summary": "A public job posting (Recruiter lens)",
+                    "value": {
+                      "object": "job_posting",
+                      "id": "4428113858",
+                      "title": "Founders Associate",
+                      "company": "LEAGUES",
+                      "company_id": "67756343",
+                      "state": "active",
+                      "location": "Stuttgart, Baden-W\u00fcrttemberg, Germany",
+                      "cost": 0,
+                      "applicants_counter": 75,
+                      "description": "Als Founders Associate arbeitest du eng mit dem Gr\u00fcnderteam zusammen und treibst zentrale Wachstumsinitiativen voran.",
+                      "created_at": "2026-06-12T17:27:09.000Z",
+                      "published_at": "2026-06-12T17:28:03.000Z",
+                      "hiring_team": []
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or empty account_id.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key, or LinkedIn authentication failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account does not have the required Recruiter seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "TIER_NOT_ACTIVE",
+                      "message": "The seat plan does not permit this operation; a higher plan is required.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The account_id does not belong to this tenant, or the job posting was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The account is restricted and cannot be queried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "recruiter",
+        "x-badges": [
+          {
+            "name": "+R",
+            "position": "after",
+            "color": "#F59E0B"
+          }
+        ],
+        "description": "Returns one public LinkedIn job posting's full detail (RECRUITER lens) \u2014 title, company, location, description, and applicant count. Requires a Recruiter seat."
       }
     },
     "/v1/recruiter/jobs/{job_id}/applicants": {

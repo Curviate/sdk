@@ -7,6 +7,13 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.10.0] — 2026-07-03
+
+### Added
+
+- **New `jobs` namespace.** `jobs.get(jobIdOrUrl)` retrieves one public LinkedIn job posting's full detail — title, company, location, description, applicant count, and more. Accepts either a bare numeric job id (e.g. `"4428113858"`) or a full job URL (`"https://www.linkedin.com/jobs/view/4428113858"`) — the SDK extracts the numeric id client-side, so both forms issue the identical request. Passing a value with no extractable numeric id throws `CurviateError({ code: "INVALID_REQUEST" })` synchronously, before any network call. Type: `JobPosting`.
+- `recruiter.getJob(jobIdOrUrl)` — the Recruiter-lens sibling, retrieving any public job posting (not only the operator's own postings). Accepts the same bare-id-or-URL forms as `jobs.get()` and returns the identical `JobPosting` type (no separate response shape to learn). Extends the Recruiter surface to 18 methods.
+
 ## [0.9.0] — 2026-07-03
 
 ### Added

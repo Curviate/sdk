@@ -283,6 +283,60 @@ describe("recruiter.solveJobCheckpoint", () => {
   });
 });
 
+// ─── recruiter.getJob (GET /v1/recruiter/jobs/:job_id) ────────────────────────
+const RECRUITER_JOB_FIXTURE = {
+  object: "job_posting",
+  id: "4428113858",
+  title: "Founders Associate",
+  company: "LEAGUES",
+  company_id: "67756343",
+  state: "active",
+  location: "Stuttgart, Baden-Württemberg, Germany",
+  cost: 0,
+  applicants_counter: 75,
+  description: "Über deine Rolle: …",
+  created_at: "2026-06-12T10:07:09.000Z",
+  published_at: "2026-06-12T10:08:03.000Z",
+  hiring_team: [] as unknown[],
+};
+
+describe("recruiter.getJob", () => {
+  it("GET /v1/recruiter/jobs/:job_id — a bare numeric id issues the request as-is", async () => {
+    server.use(
+      http.get(`${BASE}/v1/recruiter/jobs/4428113858`, () => HttpResponse.json(RECRUITER_JOB_FIXTURE)),
+    );
+    const res = await rec().getJob("4428113858");
+    expect(res.object).toBe("job_posting");
+    expect(res.id).toBe("4428113858");
+    expect(res.title).toBe("Founders Associate");
+  });
+
+  it("a full LinkedIn job URL resolves client-side to the identical GET /v1/recruiter/jobs/4428113858 request", async () => {
+    let hitCount = 0;
+    server.use(
+      http.get(`${BASE}/v1/recruiter/jobs/4428113858`, () => {
+        hitCount++;
+        return HttpResponse.json(RECRUITER_JOB_FIXTURE);
+      }),
+    );
+    const byId = await rec().getJob("4428113858");
+    const byUrl = await rec().getJob("https://www.linkedin.com/jobs/view/4428113858");
+    expect(hitCount).toBe(2);
+    expect(byUrl).toEqual(byId);
+  });
+
+  it("throws INVALID_REQUEST synchronously for a value with no extractable numeric id", () => {
+    let caught: unknown;
+    try {
+      rec().getJob("not-a-job-identifier");
+    } catch (e) {
+      caught = e;
+    }
+    expect(isCurviateError(caught)).toBe(true);
+    expect((caught as CurviateError).code).toBe("INVALID_REQUEST");
+  });
+});
+
 // ─── recruiter.listApplicants (GET /v1/recruiter/jobs/:job_id/applicants) ─────
 describe("recruiter.listApplicants", () => {
   it("GET /v1/recruiter/jobs/:job_id/applicants returns applicant list", async () => {

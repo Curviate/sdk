@@ -2411,6 +2411,176 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get job posting
+         * @description Returns one public LinkedIn job posting's full detail — title, company, location, description, and applicant count.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The connected LinkedIn account to retrieve the job posting on behalf of. */
+                    account_id: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                    job_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The job posting's full detail. Content fields (title, description) are returned verbatim and are never stored. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "job_posting";
+                            /** @description The job posting's numeric identifier. */
+                            id: string;
+                            /** @description Job title (content pass-through — never stored). */
+                            title: string;
+                            /** @description Hiring company's display name. */
+                            company: string;
+                            /** @description The hiring company's id — pass it to GET /v1/profiles/companies/{company_id}. */
+                            company_id: string;
+                            /** @description Posting lifecycle state (e.g. active). */
+                            state: string;
+                            /** @description Job location, or null when not set. */
+                            location: string | null;
+                            /** @description Posting cost, in the currency the account bills in. */
+                            cost: number;
+                            /** @description Number of applicants so far. */
+                            applicants_counter: number;
+                            /** @description Full job description text (content pass-through — never stored). */
+                            description: string;
+                            /** @description ISO-8601 UTC timestamp the posting was created, or null when not set. */
+                            created_at: string | null;
+                            /** @description ISO-8601 UTC timestamp the posting was published, or null when not set. */
+                            published_at: string | null;
+                            /** @description Hiring team members associated with this posting, when the posting exposes any. */
+                            hiring_team: unknown[];
+                        };
+                    };
+                };
+                /** @description Missing or empty account_id. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account does not have the required Core seat. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account_id does not belong to this tenant, or the job posting was not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account is restricted and cannot be queried. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/chats": {
         parameters: {
             query?: never;
@@ -11067,6 +11237,176 @@ export interface paths {
                     };
                 };
                 /** @description The platform returned an error. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/recruiter/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get job posting
+         * @description Returns one public LinkedIn job posting's full detail (RECRUITER lens) — title, company, location, description, and applicant count. Requires a Recruiter seat.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The connected LinkedIn account to retrieve the job posting on behalf of. */
+                    account_id: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                    job_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The job posting's full detail (RECRUITER lens — the same job_posting shape as the Core retrieve; content fields are returned verbatim and never stored). Requires a Recruiter seat. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "job_posting";
+                            /** @description The job posting's numeric identifier. */
+                            id: string;
+                            /** @description Job title (content pass-through — never stored). */
+                            title: string;
+                            /** @description Hiring company's display name. */
+                            company: string;
+                            /** @description The hiring company's id — pass it to GET /v1/profiles/companies/{company_id}. */
+                            company_id: string;
+                            /** @description Posting lifecycle state (e.g. active). */
+                            state: string;
+                            /** @description Job location, or null when not set. */
+                            location: string | null;
+                            /** @description Posting cost, in the currency the account bills in. */
+                            cost: number;
+                            /** @description Number of applicants so far. */
+                            applicants_counter: number;
+                            /** @description Full job description text (content pass-through — never stored). */
+                            description: string;
+                            /** @description ISO-8601 UTC timestamp the posting was created, or null when not set. */
+                            created_at: string | null;
+                            /** @description ISO-8601 UTC timestamp the posting was published, or null when not set. */
+                            published_at: string | null;
+                            /** @description Hiring team members associated with this posting, when the posting exposes any. */
+                            hiring_team: unknown[];
+                        };
+                    };
+                };
+                /** @description Missing or empty account_id. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid API key, or LinkedIn authentication failed. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account does not have the required Recruiter seat. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account_id does not belong to this tenant, or the job posting was not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account is restricted and cannot be queried. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
                         [name: string]: unknown;

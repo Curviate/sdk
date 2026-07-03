@@ -33,6 +33,7 @@ import {
   type PostsResource,
   type SalesNavigatorResource,
   type RecruiterResource,
+  type JobsResource,
   type WebhooksResource,
 } from "./resources/index.js";
 
@@ -48,6 +49,7 @@ export class Curviate {
   readonly posts: PostsResource;
   readonly salesNavigator: SalesNavigatorResource;
   readonly recruiter: RecruiterResource;
+  readonly jobs: JobsResource;
   readonly webhooks: WebhooksResource;
 
   constructor(config: CurviateConfig) {
@@ -62,6 +64,7 @@ export class Curviate {
     this.posts = ns.posts;
     this.salesNavigator = ns.salesNavigator;
     this.recruiter = ns.recruiter;
+    this.jobs = ns.jobs;
     this.webhooks = ns.webhooks;
   }
 
