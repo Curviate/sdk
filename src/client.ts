@@ -34,6 +34,7 @@ import {
   type SalesNavigatorResource,
   type RecruiterResource,
   type JobsResource,
+  type CompaniesResource,
   type WebhooksResource,
 } from "./resources/index.js";
 
@@ -50,6 +51,7 @@ export class Curviate {
   readonly salesNavigator: SalesNavigatorResource;
   readonly recruiter: RecruiterResource;
   readonly jobs: JobsResource;
+  readonly companies: CompaniesResource;
   readonly webhooks: WebhooksResource;
 
   constructor(config: CurviateConfig) {
@@ -65,6 +67,7 @@ export class Curviate {
     this.salesNavigator = ns.salesNavigator;
     this.recruiter = ns.recruiter;
     this.jobs = ns.jobs;
+    this.companies = ns.companies;
     this.webhooks = ns.webhooks;
   }
 

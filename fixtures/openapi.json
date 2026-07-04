@@ -29,6 +29,10 @@
       "description": "Retrieve seat and billing summary information for your subscription."
     },
     {
+      "name": "Companies",
+      "description": "Look up company profiles, browse employee lists, and retrieve company posts, jobs, and followers."
+    },
+    {
       "name": "Invites",
       "description": "Send, cancel, accept, and decline connection invitations on the professional network."
     },
@@ -4348,6 +4352,2716 @@
           }
         },
         "description": "Returns the current seat allocation, billing status, and subscription details for the authenticated tenant."
+      }
+    },
+    "/v1/companies/{identifier}": {
+      "get": {
+        "tags": [
+          "Companies"
+        ],
+        "summary": "Retrieve a company profile",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The company to retrieve. Accepts the company's public handle \u2014 the slug in linkedin.com/company/<handle> (e.g. t-systems) \u2014 or its numeric id (e.g. 1234567). The numeric id field returned on each POST /v1/search/companies result, or the id field of this endpoint's own response, can be passed here directly."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connected LinkedIn account to read with (acc_\u2026). Required."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The company's full LinkedIn profile. Content fields (description, tagline, localized_*) are returned verbatim and are never stored.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "object",
+                    "id",
+                    "name",
+                    "description",
+                    "entity_urn",
+                    "public_identifier",
+                    "profile_url",
+                    "hashtags",
+                    "messaging",
+                    "claimed",
+                    "viewer_permissions",
+                    "organization_type",
+                    "locations"
+                  ],
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "company_profile"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "LinkedIn company numeric identifier."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Company display name."
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Company description (content pass-through \u2014 never stored)."
+                    },
+                    "entity_urn": {
+                      "type": "string",
+                      "description": "LinkedIn entity URN for the organization."
+                    },
+                    "public_identifier": {
+                      "type": "string",
+                      "description": "LinkedIn public slug (the segment after linkedin.com/company/)."
+                    },
+                    "profile_url": {
+                      "type": "string",
+                      "description": "Full LinkedIn company profile URL."
+                    },
+                    "tagline": {
+                      "type": "string",
+                      "description": "Short company tagline (when set)."
+                    },
+                    "followers_count": {
+                      "type": "number",
+                      "description": "Total follower count (when available)."
+                    },
+                    "is_following": {
+                      "type": "boolean",
+                      "description": "Whether the authenticated account is following this company."
+                    },
+                    "is_employee": {
+                      "type": "boolean",
+                      "description": "Whether the authenticated account is an employee of this company."
+                    },
+                    "hashtags": {
+                      "type": "array",
+                      "description": "Hashtags associated with the company page.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "string",
+                            "description": "Hashtag without the # prefix."
+                          }
+                        }
+                      }
+                    },
+                    "messaging": {
+                      "type": "object",
+                      "description": "Messaging availability for this company.",
+                      "required": [
+                        "is_enabled",
+                        "id",
+                        "entity_urn"
+                      ],
+                      "properties": {
+                        "is_enabled": {
+                          "type": "boolean",
+                          "description": "Whether messaging is enabled for this company page."
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "Messaging identifier."
+                        },
+                        "entity_urn": {
+                          "type": "string",
+                          "description": "LinkedIn entity URN for messaging."
+                        }
+                      }
+                    },
+                    "claimed": {
+                      "type": "boolean",
+                      "description": "Whether the company page has been claimed by an admin."
+                    },
+                    "viewer_permissions": {
+                      "type": "object",
+                      "description": "Viewer permissions for this company page. An open object of camelCase boolean flags \u2014 the exact set is company-dependent and variable (~69 observed on one company). Common flags include canReadMessages, canUpdateOrganizationProfile, canCreateOrganicShare, canReadAdminDashboard, canSeeProducts, canAssignRoles, canViewBillingInformation \u2014 none individually required.",
+                      "additionalProperties": {
+                        "type": "boolean"
+                      }
+                    },
+                    "organization_type": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Organization type (e.g. PUBLIC_COMPANY, PRIVATELY_HELD, NON_PROFIT)."
+                    },
+                    "locations": {
+                      "type": "array",
+                      "description": "Company office locations.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "is_headquarter": {
+                            "type": "boolean",
+                            "description": "Whether this is the headquarters location."
+                          },
+                          "country": {
+                            "type": "string",
+                            "description": "Country code."
+                          },
+                          "city": {
+                            "type": "string",
+                            "description": "City name."
+                          },
+                          "postalCode": {
+                            "type": "string",
+                            "description": "Postal code (when available)."
+                          },
+                          "street": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Street address lines."
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "Location description (when available)."
+                          },
+                          "area": {
+                            "type": "string",
+                            "description": "Area or region name (when available)."
+                          }
+                        }
+                      }
+                    },
+                    "logo": {
+                      "type": "string",
+                      "description": "Company logo URL (when available)."
+                    },
+                    "localized_description": {
+                      "type": "object",
+                      "description": "Locale-keyed description variants (e.g. en_US)."
+                    },
+                    "localized_name": {
+                      "type": "object",
+                      "description": "Locale-keyed name variants."
+                    },
+                    "localized_tagline": {
+                      "type": "object",
+                      "description": "Locale-keyed tagline variants."
+                    },
+                    "industry": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Industry categories (when available)."
+                    },
+                    "activities": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Company specialty areas (when available)."
+                    },
+                    "employee_count": {
+                      "type": "number",
+                      "description": "Exact employee count (when available)."
+                    },
+                    "employee_count_range": {
+                      "type": "object",
+                      "description": "Employee count range (when available).",
+                      "properties": {
+                        "from": {
+                          "type": "number",
+                          "description": "Lower bound of the range."
+                        },
+                        "to": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "description": "Upper bound of the range, or null for the open-ended top band (e.g. 10001+)."
+                        }
+                      }
+                    },
+                    "website": {
+                      "type": "string",
+                      "description": "Company website URL (when available)."
+                    },
+                    "foundation_date": {
+                      "type": "string",
+                      "description": "Year or date the company was founded (when available)."
+                    },
+                    "phone": {
+                      "type": "string",
+                      "description": "Company phone number (when available)."
+                    },
+                    "insights": {
+                      "type": "object",
+                      "description": "Aggregated insights about the company (when available).",
+                      "properties": {
+                        "employeesCount": {
+                          "type": "object",
+                          "description": "Employee count insight data."
+                        }
+                      }
+                    },
+                    "acquired_by": {
+                      "type": "object",
+                      "description": "Parent or acquiring company (when the company has been acquired).",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "Parent company identifier."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Parent company name."
+                        },
+                        "public_identifier": {
+                          "type": "string",
+                          "description": "Parent company LinkedIn slug."
+                        },
+                        "profile_url": {
+                          "type": "string",
+                          "description": "Parent company LinkedIn URL."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                        "public_identifier",
+                        "profile_url"
+                      ]
+                    },
+                    "crunchbase_funding": {
+                      "type": "object",
+                      "description": "Crunchbase funding summary (when available).",
+                      "required": [
+                        "last_updated_at",
+                        "company_url",
+                        "rounds",
+                        "url",
+                        "total_count",
+                        "last_round"
+                      ],
+                      "properties": {
+                        "last_updated_at": {
+                          "type": "string",
+                          "description": "ISO-8601 timestamp of the last funding update."
+                        },
+                        "company_url": {
+                          "type": "string",
+                          "description": "Crunchbase company URL."
+                        },
+                        "rounds": {
+                          "type": "object",
+                          "description": "All funding rounds summary."
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "Crunchbase funding rounds URL."
+                        },
+                        "total_count": {
+                          "type": "number",
+                          "description": "Total number of funding rounds."
+                        },
+                        "last_round": {
+                          "type": "object",
+                          "description": "Details of the most recent funding round.",
+                          "properties": {
+                            "announced_on": {
+                              "type": "string",
+                              "description": "Date the round was announced."
+                            },
+                            "url": {
+                              "type": "string",
+                              "description": "Crunchbase URL for this round."
+                            },
+                            "funding_type": {
+                              "type": "string",
+                              "description": "Type of funding (e.g. SERIES_A, VENTURE)."
+                            },
+                            "investors_count": {
+                              "type": "number",
+                              "description": "Number of investors in this round."
+                            },
+                            "lead_investors": {
+                              "type": "array",
+                              "description": "Lead investors in this round.",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Investor name."
+                                  },
+                                  "url": {
+                                    "type": "string",
+                                    "description": "Crunchbase URL for the investor."
+                                  },
+                                  "logo": {
+                                    "type": "string",
+                                    "description": "Investor logo URL (when available)."
+                                  }
+                                }
+                              }
+                            },
+                            "money_raised": {
+                              "type": "object",
+                              "description": "Amount raised in this round (when available).",
+                              "properties": {
+                                "amount": {
+                                  "type": "number",
+                                  "description": "Numeric amount."
+                                },
+                                "currency": {
+                                  "type": "string",
+                                  "description": "Currency code (e.g. USD, EUR)."
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "companyProfile": {
+                    "summary": "Company profile",
+                    "value": {
+                      "object": "company_profile",
+                      "id": "1234567",
+                      "name": "Acme Corporation",
+                      "description": "A global leader in innovative solutions.",
+                      "entity_urn": "urn:li:organization:1234567",
+                      "public_identifier": "acme-corporation",
+                      "profile_url": "https://www.linkedin.com/company/acme-corporation",
+                      "tagline": "Innovation at scale.",
+                      "followers_count": 50000,
+                      "is_following": false,
+                      "is_employee": false,
+                      "hashtags": [
+                        {
+                          "title": "innovation"
+                        },
+                        {
+                          "title": "technology"
+                        }
+                      ],
+                      "messaging": {
+                        "is_enabled": true,
+                        "id": "msg_acme_001",
+                        "entity_urn": "urn:li:organization:1234567"
+                      },
+                      "claimed": true,
+                      "viewer_permissions": {
+                        "canReadMessages": true,
+                        "canUpdateOrganizationProfile": false,
+                        "canCreateOrganicShare": false,
+                        "canReadAdminDashboard": false,
+                        "canSeeProducts": true,
+                        "canAssignRoles": false,
+                        "canViewBillingInformation": false
+                      },
+                      "organization_type": "PRIVATELY_HELD",
+                      "locations": [
+                        {
+                          "is_headquarter": true,
+                          "country": "US",
+                          "city": "San Francisco",
+                          "postalCode": "94102",
+                          "street": [
+                            "123 Market Street"
+                          ],
+                          "description": "Headquarters"
+                        }
+                      ],
+                      "logo": "https://media.licdn.com/dms/image/acme-logo.jpg",
+                      "industry": [
+                        "Software Development"
+                      ],
+                      "employee_count_range": {
+                        "from": 10001,
+                        "to": null
+                      },
+                      "website": "https://www.acme.com",
+                      "insights": {
+                        "employeesCount": {
+                          "start": 1001,
+                          "end": 5000,
+                          "type": "STANDARD"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or empty account_id or identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account does not have the required Core seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "TIER_NOT_ACTIVE",
+                      "message": "The seat plan does not permit this operation; a higher plan is required.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The account_id does not belong to this tenant, or the company was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The account is restricted and cannot be queried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          }
+        ],
+        "description": "Returns a company's full LinkedIn profile including page details, viewer permissions, locations, and funding information.",
+        "x-order": 1
+      }
+    },
+    "/v1/companies/{identifier}/employees": {
+      "get": {
+        "tags": [
+          "Companies"
+        ],
+        "summary": "List a company's employees",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The company's numeric id (e.g. 112013061) \u2014 the id field of GET /v1/companies/{identifier} or a POST /v1/search/companies result. A public handle or URN is not accepted here \u2014 pass the numeric id."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connected LinkedIn account to read with (acc_\u2026). Required."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of employees to return per page (1\u201350, default 10)."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor from a previous response. Omit for the first page."
+          },
+          {
+            "name": "keywords",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Free-text keyword filter across employee profile fields."
+          },
+          {
+            "name": "location",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque location id from GET /v1/search/parameters?type=LOCATION."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of people who currently work at the company.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "object",
+                    "items",
+                    "paging",
+                    "cursor"
+                  ],
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "company_employee_list"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "People who currently work at the company.",
+                      "items": {
+                        "type": "object",
+                        "description": "A single person search result.",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "Raw LinkedIn provider id for this person (e.g. ACoAA\u2026)."
+                          },
+                          "linkedin_urn": {
+                            "type": "string",
+                            "description": "LinkedIn member URN for this person (normalized to urn:li:member:N)."
+                          },
+                          "public_identifier": {
+                            "type": "string",
+                            "description": "LinkedIn public identifier (the slug after linkedin.com/in/)."
+                          },
+                          "full_name": {
+                            "type": "string",
+                            "description": "Full display name."
+                          },
+                          "headline": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "LinkedIn headline, or null if not set."
+                          },
+                          "location": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Location as set on the profile, or null if not set."
+                          },
+                          "avatar_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Profile picture URL, or null if not available."
+                          },
+                          "network_distance": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "enum": [
+                              "SELF",
+                              "DISTANCE_1",
+                              "DISTANCE_2",
+                              "DISTANCE_3",
+                              "OUT_OF_NETWORK",
+                              null
+                            ],
+                            "description": "Connection distance to the authenticated account as a string enum, or null if unknown."
+                          },
+                          "is_premium": {
+                            "type": "boolean",
+                            "description": "true if this is a LinkedIn Premium account. Present when available."
+                          },
+                          "is_open_profile": {
+                            "type": "boolean",
+                            "description": "true if the account has open profile enabled. Present when available."
+                          },
+                          "connections_count": {
+                            "type": "number",
+                            "description": "Number of connections. Present when available."
+                          },
+                          "followers_count": {
+                            "type": "number",
+                            "description": "Follower count. Present when available."
+                          },
+                          "skills": {
+                            "type": "array",
+                            "description": "Skills and endorsements. Typically null/absent on classic search.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "endorsement_count": {
+                                  "type": "number"
+                                }
+                              }
+                            }
+                          },
+                          "current_positions": {
+                            "type": "array",
+                            "description": "Current positions. Typically null/absent on classic search.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          },
+                          "education": {
+                            "type": "array",
+                            "description": "Education history. Typically null/absent on classic search.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          },
+                          "work_experience": {
+                            "type": "array",
+                            "description": "Work experience history. Typically null/absent on classic search.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          },
+                          "certifications": {
+                            "type": "array",
+                            "description": "Certifications. Typically null/absent on classic search.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          },
+                          "projects": {
+                            "type": "array",
+                            "description": "Projects. Typically null/absent on classic search.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          },
+                          "hidden_candidate": {
+                            "type": "boolean",
+                            "description": "Whether the candidate is hidden. Typically null/absent on classic search."
+                          },
+                          "interest_likelihood": {
+                            "type": "number",
+                            "description": "Recruiter interest likelihood score. Typically null/absent on classic search."
+                          },
+                          "tags": {
+                            "type": "array",
+                            "description": "Recruiter tags. Typically null/absent on classic search.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "notes": {
+                            "type": "array",
+                            "description": "Recruiter notes. Typically null/absent on classic search.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          },
+                          "last_outreach_activity": {
+                            "type": "object",
+                            "description": "Last outreach activity. Typically null/absent on classic search.",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "SEND_MESSAGE",
+                                  "ACCEPT_INVITATION"
+                                ]
+                              },
+                              "performed_at": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "recruiter_candidate_id": {
+                            "type": "string",
+                            "description": "Recruiter candidate ID. Typically null/absent on classic search."
+                          },
+                          "recruiter_pipeline_category": {
+                            "type": "string",
+                            "description": "Recruiter pipeline category. Typically null/absent on classic search."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "linkedin_urn",
+                          "public_identifier",
+                          "full_name",
+                          "headline",
+                          "location",
+                          "avatar_url",
+                          "network_distance"
+                        ]
+                      }
+                    },
+                    "paging": {
+                      "type": "object",
+                      "required": [
+                        "total_count"
+                      ],
+                      "properties": {
+                        "total_count": {
+                          "type": "number",
+                          "description": "Total number of matching employees across all pages."
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page, or null when there are no more results."
+                    }
+                  }
+                },
+                "examples": {
+                  "companyEmployeeList": {
+                    "summary": "A page of company employees",
+                    "value": {
+                      "object": "company_employee_list",
+                      "items": [
+                        {
+                          "id": "ACoAABcDeFgHiJkLmNoPqRsTuVwXyZ1234567890",
+                          "linkedin_urn": "urn:li:member:99999",
+                          "public_identifier": "frank-employee",
+                          "full_name": "Frank Employee",
+                          "headline": "Software Engineer",
+                          "location": "Berlin, Germany",
+                          "avatar_url": null,
+                          "network_distance": null
+                        }
+                      ],
+                      "paging": {
+                        "total_count": 2
+                      },
+                      "cursor": "cursor_company_employees_001"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or empty account_id; a non-numeric identifier; or a malformed location filter value.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account does not have the required Core seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "TIER_NOT_ACTIVE",
+                      "message": "The seat plan does not permit this operation; a higher plan is required.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The account_id does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The account is restricted and cannot be queried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          }
+        ],
+        "description": "Returns a paginated list of people who currently work at the company. A facade over people search with the company filter applied \u2014 filter further with keywords or location.",
+        "x-order": 2
+      }
+    },
+    "/v1/companies/{identifier}/posts": {
+      "get": {
+        "tags": [
+          "Companies"
+        ],
+        "summary": "List a company's posts",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The company's numeric id (e.g. 112013061) \u2014 the id field of GET /v1/companies/{identifier} or a POST /v1/search/companies result. A public handle or URN is not accepted here \u2014 pass the numeric id."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connected LinkedIn account to read with (acc_\u2026). Required."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of posts to return per page (1\u201350, default 10)."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor from a previous response. Omit for the first page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the company's posts. Post text is returned verbatim and is never stored.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "object",
+                    "items",
+                    "paging",
+                    "cursor"
+                  ],
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "company_post_list"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "The company's posts.",
+                      "items": {
+                        "type": "object",
+                        "description": "A single post search result. Engagement counters, post text, author, and attachments are included.",
+                        "properties": {
+                          "post_urn": {
+                            "type": "string",
+                            "description": "LinkedIn URN identifying the post (from social_id field)."
+                          },
+                          "posted_at": {
+                            "type": "string",
+                            "description": "Approximate posting date in ISO-8601 format."
+                          },
+                          "reaction_count": {
+                            "type": "number",
+                            "description": "Total reaction count on the post."
+                          },
+                          "comment_count": {
+                            "type": "number",
+                            "description": "Total comment count on the post."
+                          },
+                          "repost_count": {
+                            "type": "number",
+                            "description": "Total repost count on the post."
+                          },
+                          "text": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Post text content. Present when available."
+                          },
+                          "share_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Shareable post URL. Present when available."
+                          },
+                          "author": {
+                            "type": "object",
+                            "description": "Post author object. Present when available.",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "is_company": {
+                                "type": "boolean"
+                              },
+                              "public_identifier": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "additionalProperties": true
+                          },
+                          "attachments": {
+                            "type": "array",
+                            "description": "Post attachments array. Present when the post carries attachments.",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": true
+                            }
+                          },
+                          "impressions_count": {
+                            "type": "number",
+                            "description": "Total impressions. Present when available."
+                          },
+                          "is_repost": {
+                            "type": "boolean",
+                            "description": "true if this post is a repost. Present when available."
+                          },
+                          "mentions": {
+                            "type": "array",
+                            "description": "Member/company mentions in the post.",
+                            "items": {}
+                          },
+                          "user_reacted": {
+                            "type": "string",
+                            "description": "The authenticated user's reaction type. Present when available."
+                          },
+                          "written_by": {
+                            "type": "object",
+                            "description": "Ghost author details. Present when available.",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "public_identifier": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "repost_id": {
+                            "type": "string",
+                            "description": "ID of the original post if this is a repost. Present when available."
+                          },
+                          "reposted_by": {
+                            "type": "object",
+                            "description": "Author who reposted. Present when available.",
+                            "additionalProperties": true
+                          },
+                          "repost_content": {
+                            "type": "object",
+                            "description": "Content of the original post when this is a repost. Present when available.",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "parsed_datetime": {
+                                "type": "string"
+                              },
+                              "author": {
+                                "type": "object",
+                                "additionalProperties": true
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "poll": {
+                            "type": "object",
+                            "description": "Poll data. Typically null/absent on classic search.",
+                            "additionalProperties": true
+                          },
+                          "group": {
+                            "type": "object",
+                            "description": "LinkedIn Group context. Typically null/absent on classic search.",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "private": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "analytics": {
+                            "type": "object",
+                            "description": "Post analytics data. Typically null/absent on classic search.",
+                            "additionalProperties": true
+                          }
+                        },
+                        "required": [
+                          "post_urn",
+                          "posted_at",
+                          "reaction_count",
+                          "comment_count",
+                          "repost_count"
+                        ]
+                      }
+                    },
+                    "paging": {
+                      "type": "object",
+                      "required": [
+                        "total_count"
+                      ],
+                      "properties": {
+                        "total_count": {
+                          "type": "number",
+                          "description": "Total number of matching posts across all pages."
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page, or null when there are no more results."
+                    }
+                  }
+                },
+                "examples": {
+                  "companyPostList": {
+                    "summary": "A page of company posts",
+                    "value": {
+                      "object": "company_post_list",
+                      "items": [
+                        {
+                          "post_urn": "urn:li:activity:coppost_1",
+                          "posted_at": "2026-06-01T10:00:00.000Z",
+                          "reaction_count": 10,
+                          "comment_count": 1,
+                          "repost_count": 0,
+                          "text": "We are hiring senior engineers. Check us out!",
+                          "share_url": "https://www.linkedin.com/feed/update/urn:li:activity:coppost_1",
+                          "author": {
+                            "id": "12345678",
+                            "name": "Acme Corp",
+                            "is_company": true
+                          },
+                          "attachments": []
+                        }
+                      ],
+                      "paging": {
+                        "total_count": 3
+                      },
+                      "cursor": "cursor_company_posts_001"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or empty account_id, or a non-numeric identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account does not have the required Core seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "TIER_NOT_ACTIVE",
+                      "message": "The seat plan does not permit this operation; a higher plan is required.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The account_id does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The account is restricted and cannot be queried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          }
+        ],
+        "description": "Returns a paginated list of the company's posts. A facade over post search with the company filter applied.",
+        "x-order": 3
+      }
+    },
+    "/v1/companies/{identifier}/jobs": {
+      "get": {
+        "tags": [
+          "Companies"
+        ],
+        "summary": "List a company's open jobs",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The company's numeric id (e.g. 112013061) \u2014 the id field of GET /v1/companies/{identifier} or a POST /v1/search/companies result. A public handle or URN is not accepted here \u2014 pass the numeric id."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connected LinkedIn account to read with (acc_\u2026). Required."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of jobs to return per page (1\u201350, default 10)."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor from a previous response. Omit for the first page."
+          },
+          {
+            "name": "keywords",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Free-text keyword filter across job postings."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the company's open job postings. An empty items[] is a valid result (the company currently has no open postings) \u2014 not an error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "object",
+                    "items",
+                    "paging",
+                    "cursor"
+                  ],
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "company_job_list"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "The company's open job postings.",
+                      "items": {
+                        "type": "object",
+                        "description": "A single job search result. Job description text is never returned.",
+                        "properties": {
+                          "job_urn": {
+                            "type": "string",
+                            "description": "LinkedIn URN identifying the job posting."
+                          },
+                          "reference_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Platform reference ID for the job posting. Present when available."
+                          },
+                          "title": {
+                            "type": "string",
+                            "description": "Job title."
+                          },
+                          "location": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Job location, or null if not specified."
+                          },
+                          "posted_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Approximate posting date in ISO-8601 format, or null if not available."
+                          },
+                          "reposted": {
+                            "type": "boolean",
+                            "description": "true if this is a reposted job. Present when available."
+                          },
+                          "url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Direct URL to the job posting. Present when available."
+                          },
+                          "promoted": {
+                            "type": "boolean",
+                            "description": "true if this is a promoted job. Present when available."
+                          },
+                          "benefits": {
+                            "type": "array",
+                            "description": "Job benefit tags. Present when available.",
+                            "items": {}
+                          },
+                          "easy_apply": {
+                            "type": "boolean",
+                            "description": "true if the posting supports LinkedIn Easy Apply. Present when available."
+                          },
+                          "company": {
+                            "type": "object",
+                            "description": "Hiring company details.",
+                            "properties": {
+                              "id": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "profile_url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "public_identifier": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "profile_picture_url": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            },
+                            "additionalProperties": true
+                          }
+                        },
+                        "required": [
+                          "job_urn",
+                          "title",
+                          "location",
+                          "posted_at"
+                        ]
+                      }
+                    },
+                    "paging": {
+                      "type": "object",
+                      "required": [
+                        "total_count"
+                      ],
+                      "properties": {
+                        "total_count": {
+                          "type": "number",
+                          "description": "Total number of matching job postings across all pages."
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page, or null when there are no more results."
+                    }
+                  }
+                },
+                "examples": {
+                  "companyJobList": {
+                    "summary": "A page of the company's open jobs",
+                    "value": {
+                      "object": "company_job_list",
+                      "items": [
+                        {
+                          "job_urn": "urn:li:job:coop_job_1",
+                          "reference_id": "coop_ref_1",
+                          "title": "Senior Platform Engineer",
+                          "location": "Berlin, Germany",
+                          "posted_at": "2026-06-01T08:00:00.000Z",
+                          "reposted": false,
+                          "url": "https://www.linkedin.com/jobs/view/coop_job_1",
+                          "promoted": false,
+                          "benefits": [],
+                          "easy_apply": true,
+                          "company": {
+                            "id": "12345678",
+                            "name": "Acme Corp",
+                            "profile_url": "https://www.linkedin.com/company/acme-corp",
+                            "public_identifier": "acme-corp",
+                            "profile_picture_url": null
+                          }
+                        }
+                      ],
+                      "paging": {
+                        "total_count": 2
+                      },
+                      "cursor": "cursor_company_jobs_001"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or empty account_id; or a non-numeric identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account does not have the required Core seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "TIER_NOT_ACTIVE",
+                      "message": "The seat plan does not permit this operation; a higher plan is required.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The account_id does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The account is restricted and cannot be queried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          }
+        ],
+        "description": "Returns a paginated list of the company's open job postings. A facade over job search with the company filter applied \u2014 filter further with keywords. An empty list is a valid result when the company currently has no open postings.",
+        "x-order": 4
+      }
+    },
+    "/v1/companies/{identifier}/followers": {
+      "get": {
+        "tags": [
+          "Companies"
+        ],
+        "summary": "List a company's followers",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The company's numeric id (e.g. 112013061) \u2014 the id field of GET /v1/companies/{identifier} or a POST /v1/search/companies result. A public handle or URN is not accepted here \u2014 pass the numeric id."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connected LinkedIn account to read with (acc_\u2026). Required."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "description": "Number of followers to return per page (1\u201350, default 10)."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor from a previous response. Omit for the first page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the company's followers. No paging.total_count \u2014 the native seam has none to re-map.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "object",
+                    "items",
+                    "cursor"
+                  ],
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "company_follower_list"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "The company's followers.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "object": {
+                            "type": "string",
+                            "enum": [
+                              "follower"
+                            ],
+                            "description": "Response type discriminator."
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "LinkedIn follower identifier."
+                          },
+                          "urn": {
+                            "type": "string",
+                            "description": "LinkedIn URN for the follower."
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "Display name."
+                          },
+                          "headline": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "LinkedIn headline."
+                          },
+                          "profile_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Full LinkedIn profile URL."
+                          },
+                          "profile_picture_url": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Profile picture URL, or null if not set."
+                          },
+                          "profile_picture_url_large": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Large profile picture URL, or null if not set."
+                          }
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page, or null when there are no more results."
+                    }
+                  }
+                },
+                "examples": {
+                  "companyFollowerList": {
+                    "summary": "A page of company followers",
+                    "value": {
+                      "object": "company_follower_list",
+                      "items": [
+                        {
+                          "object": "follower",
+                          "id": "ACoAAAFOL11111",
+                          "urn": "urn:li:member:fol_11111",
+                          "name": "Diana Follower",
+                          "headline": "Engineer",
+                          "profile_url": "https://www.linkedin.com/in/diana-follower",
+                          "profile_picture_url": null,
+                          "profile_picture_url_large": null
+                        }
+                      ],
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or empty account_id; or a non-numeric identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You must be a page administrator of this company to read its followers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "TIER_NOT_ACTIVE",
+                      "message": "The seat plan does not permit this operation; a higher plan is required.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The account_id does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The account is restricted and cannot be queried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          }
+        ],
+        "description": "Returns a paginated list of the company's followers. You must be an administrator of the target company page to read its followers.",
+        "x-order": 5
       }
     },
     "/v1/invites": {
@@ -17615,710 +20329,6 @@
         ],
         "description": "Returns a paginated list of reactions made by a LinkedIn member.",
         "x-order": 7
-      }
-    },
-    "/v1/profiles/companies/{company_id}": {
-      "get": {
-        "tags": [
-          "Profiles"
-        ],
-        "summary": "Retrieve a company profile",
-        "security": [
-          {
-            "apiKeyAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "company_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The company to retrieve. Accepts the company's public handle \u2014 the slug in linkedin.com/company/<handle> (e.g. t-systems) \u2014 or its numeric id (e.g. 1234567). The numeric id field returned on each POST /v1/search/companies result can be passed here directly."
-          },
-          {
-            "name": "account_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The connected LinkedIn account to read with (acc_\u2026). Required."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The company's full LinkedIn profile. Content fields (description, tagline, localized_*) are returned verbatim and are never stored.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "object",
-                    "id",
-                    "name",
-                    "description",
-                    "entity_urn",
-                    "public_identifier",
-                    "profile_url",
-                    "hashtags",
-                    "messaging",
-                    "claimed",
-                    "viewer_permissions",
-                    "organization_type",
-                    "locations"
-                  ],
-                  "properties": {
-                    "object": {
-                      "type": "string",
-                      "enum": [
-                        "company_profile"
-                      ],
-                      "description": "Response type discriminator."
-                    },
-                    "id": {
-                      "type": "string",
-                      "description": "LinkedIn company numeric identifier."
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "Company display name."
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "Company description (content pass-through \u2014 never stored)."
-                    },
-                    "entity_urn": {
-                      "type": "string",
-                      "description": "LinkedIn entity URN for the organization."
-                    },
-                    "public_identifier": {
-                      "type": "string",
-                      "description": "LinkedIn public slug (the segment after linkedin.com/company/)."
-                    },
-                    "profile_url": {
-                      "type": "string",
-                      "description": "Full LinkedIn company profile URL."
-                    },
-                    "tagline": {
-                      "type": "string",
-                      "description": "Short company tagline (when set)."
-                    },
-                    "followers_count": {
-                      "type": "number",
-                      "description": "Total follower count (when available)."
-                    },
-                    "is_following": {
-                      "type": "boolean",
-                      "description": "Whether the authenticated account is following this company."
-                    },
-                    "is_employee": {
-                      "type": "boolean",
-                      "description": "Whether the authenticated account is an employee of this company."
-                    },
-                    "hashtags": {
-                      "type": "array",
-                      "description": "Hashtags associated with the company page.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "title": {
-                            "type": "string",
-                            "description": "Hashtag without the # prefix."
-                          }
-                        }
-                      }
-                    },
-                    "messaging": {
-                      "type": "object",
-                      "description": "Messaging availability for this company.",
-                      "required": [
-                        "is_enabled",
-                        "id",
-                        "entity_urn"
-                      ],
-                      "properties": {
-                        "is_enabled": {
-                          "type": "boolean",
-                          "description": "Whether messaging is enabled for this company page."
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "Messaging identifier."
-                        },
-                        "entity_urn": {
-                          "type": "string",
-                          "description": "LinkedIn entity URN for messaging."
-                        }
-                      }
-                    },
-                    "claimed": {
-                      "type": "boolean",
-                      "description": "Whether the company page has been claimed by an admin."
-                    },
-                    "viewer_permissions": {
-                      "type": "object",
-                      "description": "Viewer permissions for this company page. An open object of camelCase boolean flags \u2014 the exact set is company-dependent and variable (~69 observed on one company). Common flags include canReadMessages, canUpdateOrganizationProfile, canCreateOrganicShare, canReadAdminDashboard, canSeeProducts, canAssignRoles, canViewBillingInformation \u2014 none individually required.",
-                      "additionalProperties": {
-                        "type": "boolean"
-                      }
-                    },
-                    "organization_type": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "description": "Organization type (e.g. PUBLIC_COMPANY, PRIVATELY_HELD, NON_PROFIT)."
-                    },
-                    "locations": {
-                      "type": "array",
-                      "description": "Company office locations.",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "is_headquarter": {
-                            "type": "boolean",
-                            "description": "Whether this is the headquarters location."
-                          },
-                          "country": {
-                            "type": "string",
-                            "description": "Country code."
-                          },
-                          "city": {
-                            "type": "string",
-                            "description": "City name."
-                          },
-                          "postalCode": {
-                            "type": "string",
-                            "description": "Postal code (when available)."
-                          },
-                          "street": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            },
-                            "description": "Street address lines."
-                          },
-                          "description": {
-                            "type": "string",
-                            "description": "Location description (when available)."
-                          },
-                          "area": {
-                            "type": "string",
-                            "description": "Area or region name (when available)."
-                          }
-                        }
-                      }
-                    },
-                    "logo": {
-                      "type": "string",
-                      "description": "Company logo URL (when available)."
-                    },
-                    "localized_description": {
-                      "type": "object",
-                      "description": "Locale-keyed description variants (e.g. en_US)."
-                    },
-                    "localized_name": {
-                      "type": "object",
-                      "description": "Locale-keyed name variants."
-                    },
-                    "localized_tagline": {
-                      "type": "object",
-                      "description": "Locale-keyed tagline variants."
-                    },
-                    "industry": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Industry categories (when available)."
-                    },
-                    "activities": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      },
-                      "description": "Company specialty areas (when available)."
-                    },
-                    "employee_count": {
-                      "type": "number",
-                      "description": "Exact employee count (when available)."
-                    },
-                    "employee_count_range": {
-                      "type": "object",
-                      "description": "Employee count range (when available).",
-                      "properties": {
-                        "from": {
-                          "type": "number",
-                          "description": "Lower bound of the range."
-                        },
-                        "to": {
-                          "type": [
-                            "number",
-                            "null"
-                          ],
-                          "description": "Upper bound of the range, or null for the open-ended top band (e.g. 10001+)."
-                        }
-                      }
-                    },
-                    "website": {
-                      "type": "string",
-                      "description": "Company website URL (when available)."
-                    },
-                    "foundation_date": {
-                      "type": "string",
-                      "description": "Year or date the company was founded (when available)."
-                    },
-                    "phone": {
-                      "type": "string",
-                      "description": "Company phone number (when available)."
-                    },
-                    "insights": {
-                      "type": "object",
-                      "description": "Aggregated insights about the company (when available).",
-                      "properties": {
-                        "employeesCount": {
-                          "type": "object",
-                          "description": "Employee count insight data."
-                        }
-                      }
-                    },
-                    "acquired_by": {
-                      "type": "object",
-                      "description": "Parent or acquiring company (when the company has been acquired).",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "description": "Parent company identifier."
-                        },
-                        "name": {
-                          "type": "string",
-                          "description": "Parent company name."
-                        },
-                        "public_identifier": {
-                          "type": "string",
-                          "description": "Parent company LinkedIn slug."
-                        },
-                        "profile_url": {
-                          "type": "string",
-                          "description": "Parent company LinkedIn URL."
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "public_identifier",
-                        "profile_url"
-                      ]
-                    },
-                    "crunchbase_funding": {
-                      "type": "object",
-                      "description": "Crunchbase funding summary (when available).",
-                      "required": [
-                        "last_updated_at",
-                        "company_url",
-                        "rounds",
-                        "url",
-                        "total_count",
-                        "last_round"
-                      ],
-                      "properties": {
-                        "last_updated_at": {
-                          "type": "string",
-                          "description": "ISO-8601 timestamp of the last funding update."
-                        },
-                        "company_url": {
-                          "type": "string",
-                          "description": "Crunchbase company URL."
-                        },
-                        "rounds": {
-                          "type": "object",
-                          "description": "All funding rounds summary."
-                        },
-                        "url": {
-                          "type": "string",
-                          "description": "Crunchbase funding rounds URL."
-                        },
-                        "total_count": {
-                          "type": "number",
-                          "description": "Total number of funding rounds."
-                        },
-                        "last_round": {
-                          "type": "object",
-                          "description": "Details of the most recent funding round.",
-                          "properties": {
-                            "announced_on": {
-                              "type": "string",
-                              "description": "Date the round was announced."
-                            },
-                            "url": {
-                              "type": "string",
-                              "description": "Crunchbase URL for this round."
-                            },
-                            "funding_type": {
-                              "type": "string",
-                              "description": "Type of funding (e.g. SERIES_A, VENTURE)."
-                            },
-                            "investors_count": {
-                              "type": "number",
-                              "description": "Number of investors in this round."
-                            },
-                            "lead_investors": {
-                              "type": "array",
-                              "description": "Lead investors in this round.",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "name": {
-                                    "type": "string",
-                                    "description": "Investor name."
-                                  },
-                                  "url": {
-                                    "type": "string",
-                                    "description": "Crunchbase URL for the investor."
-                                  },
-                                  "logo": {
-                                    "type": "string",
-                                    "description": "Investor logo URL (when available)."
-                                  }
-                                }
-                              }
-                            },
-                            "money_raised": {
-                              "type": "object",
-                              "description": "Amount raised in this round (when available).",
-                              "properties": {
-                                "amount": {
-                                  "type": "number",
-                                  "description": "Numeric amount."
-                                },
-                                "currency": {
-                                  "type": "string",
-                                  "description": "Currency code (e.g. USD, EUR)."
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "examples": {
-                  "companyProfile": {
-                    "summary": "Company profile",
-                    "value": {
-                      "object": "company_profile",
-                      "id": "1234567",
-                      "name": "Acme Corporation",
-                      "description": "A global leader in innovative solutions.",
-                      "entity_urn": "urn:li:organization:1234567",
-                      "public_identifier": "acme-corporation",
-                      "profile_url": "https://www.linkedin.com/company/acme-corporation",
-                      "tagline": "Innovation at scale.",
-                      "followers_count": 50000,
-                      "is_following": false,
-                      "is_employee": false,
-                      "hashtags": [
-                        {
-                          "title": "innovation"
-                        },
-                        {
-                          "title": "technology"
-                        }
-                      ],
-                      "messaging": {
-                        "is_enabled": true,
-                        "id": "msg_acme_001",
-                        "entity_urn": "urn:li:organization:1234567"
-                      },
-                      "claimed": true,
-                      "viewer_permissions": {
-                        "canReadMessages": true,
-                        "canUpdateOrganizationProfile": false,
-                        "canCreateOrganicShare": false,
-                        "canReadAdminDashboard": false,
-                        "canSeeProducts": true,
-                        "canAssignRoles": false,
-                        "canViewBillingInformation": false
-                      },
-                      "organization_type": "PRIVATELY_HELD",
-                      "locations": [
-                        {
-                          "is_headquarter": true,
-                          "country": "US",
-                          "city": "San Francisco",
-                          "postalCode": "94102",
-                          "street": [
-                            "123 Market Street"
-                          ],
-                          "description": "Headquarters"
-                        }
-                      ],
-                      "logo": "https://media.licdn.com/dms/image/acme-logo.jpg",
-                      "industry": [
-                        "Software Development"
-                      ],
-                      "employee_count_range": {
-                        "from": 10001,
-                        "to": null
-                      },
-                      "website": "https://www.acme.com",
-                      "insights": {
-                        "employeesCount": {
-                          "start": 1001,
-                          "end": 5000,
-                          "type": "STANDARD"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "headers": {
-              "RateLimit-Policy": {
-                "$ref": "#/components/headers/RateLimit-Policy"
-              },
-              "RateLimit": {
-                "$ref": "#/components/headers/RateLimit"
-              }
-            }
-          },
-          "400": {
-            "description": "Missing or empty account_id or company_id.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "400 error",
-                    "value": {
-                      "code": "INVALID_REQUEST",
-                      "message": "A parameter failed validation.",
-                      "user_fixable": true,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid API key.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "401 error",
-                    "value": {
-                      "code": "UNAUTHORIZED",
-                      "message": "Missing or invalid API key.",
-                      "user_fixable": true,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The account does not have the required Core seat.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "403 error",
-                    "value": {
-                      "code": "TIER_NOT_ACTIVE",
-                      "message": "The seat plan does not permit this operation; a higher plan is required.",
-                      "user_fixable": true,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The account_id does not belong to this tenant, or the company was not found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "404 error",
-                    "value": {
-                      "code": "RESOURCE_NOT_FOUND",
-                      "message": "The referenced resource does not exist for this tenant.",
-                      "user_fixable": true,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "The account is restricted and cannot be queried.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "422 error",
-                    "value": {
-                      "code": "UNPROCESSABLE",
-                      "message": "The request was well-formed but cannot be completed as asked.",
-                      "user_fixable": true,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "429 error",
-                    "value": {
-                      "code": "RATE_LIMITED",
-                      "message": "Too many requests; retry after the hinted delay.",
-                      "user_fixable": true,
-                      "retry_likely_to_succeed": true
-                    }
-                  }
-                }
-              }
-            },
-            "headers": {
-              "RateLimit-Policy": {
-                "$ref": "#/components/headers/RateLimit-Policy"
-              },
-              "RateLimit": {
-                "$ref": "#/components/headers/RateLimit"
-              },
-              "Retry-After": {
-                "$ref": "#/components/headers/Retry-After"
-              }
-            }
-          },
-          "500": {
-            "description": "Internal error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "500 error",
-                    "value": {
-                      "code": "INTERNAL_ERROR",
-                      "message": "An unexpected internal error occurred.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "502": {
-            "description": "A temporary error occurred. Please try again.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "502 error",
-                    "value": {
-                      "code": "PLATFORM_ERROR",
-                      "message": "A temporary error occurred. Please try again.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Service unavailable.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "503 error",
-                    "value": {
-                      "code": "SERVICE_UNAVAILABLE",
-                      "message": "The service is temporarily unavailable. Please try again.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": true
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "504": {
-            "description": "Gateway timeout.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "504 error",
-                    "value": {
-                      "code": "GATEWAY_TIMEOUT",
-                      "message": "The request timed out. Please try again.",
-                      "user_fixable": false,
-                      "retry_likely_to_succeed": true
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "x-curviate-tier": "core",
-        "x-badges": [
-          {
-            "name": "CORE",
-            "position": "after",
-            "color": "#A1A1AA"
-          }
-        ],
-        "description": "Returns a company's full LinkedIn profile including page details, viewer permissions, locations, and funding information.",
-        "x-order": 8
       }
     },
     "/v1/profiles/{profile_id}/endorse": {

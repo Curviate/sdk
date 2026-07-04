@@ -1,5 +1,5 @@
 // webhooks namespace (6 methods; root-scoped)
-// MSW happy-path for every method + coverage test asserting 84 total methods.
+// MSW happy-path for every method + coverage test asserting 88 total methods.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";
@@ -142,9 +142,10 @@ describe("webhooks.getStateDiff", () => {
   });
 });
 
-// ─── coverage: total public method count == 84 ───────────────────────────────
-describe("coverage: total public method count == 84", () => {
-  it("counts all public function properties across all resource namespaces (target: 84)", () => {
+// ─── coverage: total public method count == 88 ───────────────────────────────
+// (was 84: profiles lost getCompany (9→8, hard-moved), companies added (+5))
+describe("coverage: total public method count == 88", () => {
+  it("counts all public function properties across all resource namespaces (target: 88)", () => {
     const c = new Curviate({ apiKey: "k", baseUrl: BASE });
 
     function countMethods(obj: object): number {
@@ -162,15 +163,16 @@ describe("coverage: total public method count == 84", () => {
     const scoped = c.account("acc_test");
     const scopedCount =
       countMethods(scoped.messaging) +       // 14
-      countMethods(scoped.profiles) +        //  9
+      countMethods(scoped.profiles) +        //  8 (getCompany removed, hard-moved to companies.get)
       countMethods(scoped.invites) +         //  5
       countMethods(scoped.search) +          //  5
       countMethods(scoped.posts) +           //  7
       countMethods(scoped.salesNavigator) +  //  7
       countMethods(scoped.recruiter) +       // 18
-      countMethods(scoped.jobs);             //  1
+      countMethods(scoped.jobs) +            //  1
+      countMethods(scoped.companies);        //  5
 
     const total = rootCount + scopedCount;
-    expect(total).toBe(84);
+    expect(total).toBe(88);
   });
 });

@@ -2,9 +2,9 @@
  * Resource namespace assembly.
  *
  * The root client and every `account(id)` accessor expose the same set of
- * resource namespaces. All 10 namespaces are fully implemented:
+ * resource namespaces. All 11 namespaces are fully implemented:
  * accounts, messaging, profiles, invites, search, posts,
- * salesNavigator, recruiter, jobs, and webhooks.
+ * salesNavigator, recruiter, jobs, companies, and webhooks.
  */
 import type { RequestContext } from "../internal/context.js";
 import { AccountsResource } from "./accounts.js";
@@ -16,6 +16,7 @@ import { PostsResource } from "./posts.js";
 import { SalesNavigatorResource } from "./sales-navigator.js";
 import { RecruiterResource } from "./recruiter.js";
 import { JobsResource } from "./jobs.js";
+import { CompaniesResource } from "./companies.js";
 import { WebhooksResource } from "./webhooks.js";
 
 export { AccountsResource } from "./accounts.js";
@@ -27,6 +28,7 @@ export { PostsResource } from "./posts.js";
 export { SalesNavigatorResource } from "./sales-navigator.js";
 export { RecruiterResource } from "./recruiter.js";
 export { JobsResource } from "./jobs.js";
+export { CompaniesResource } from "./companies.js";
 export { WebhooksResource } from "./webhooks.js";
 
 /** The full namespace surface, shared by the root client and account scopes. */
@@ -40,6 +42,7 @@ export interface ResourceNamespaces {
   salesNavigator: SalesNavigatorResource;
   recruiter: RecruiterResource;
   jobs: JobsResource;
+  companies: CompaniesResource;
   webhooks: WebhooksResource;
 }
 
@@ -55,6 +58,7 @@ export function buildNamespaces(ctx: RequestContext): ResourceNamespaces {
     salesNavigator: new SalesNavigatorResource(ctx),
     recruiter: new RecruiterResource(ctx),
     jobs: new JobsResource(ctx),
+    companies: new CompaniesResource(ctx),
     webhooks: new WebhooksResource(ctx),
   };
 }

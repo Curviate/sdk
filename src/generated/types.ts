@@ -1861,6 +1861,1127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/companies/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve a company profile
+         * @description Returns a company's full LinkedIn profile including page details, viewer permissions, locations, and funding information.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The connected LinkedIn account to read with (acc_…). Required. */
+                    account_id: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The company to retrieve. Accepts the company's public handle — the slug in linkedin.com/company/<handle> (e.g. t-systems) — or its numeric id (e.g. 1234567). The numeric id field returned on each POST /v1/search/companies result, or the id field of this endpoint's own response, can be passed here directly. */
+                    identifier: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The company's full LinkedIn profile. Content fields (description, tagline, localized_*) are returned verbatim and are never stored. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_profile";
+                            /** @description LinkedIn company numeric identifier. */
+                            id: string;
+                            /** @description Company display name. */
+                            name: string;
+                            /** @description Company description (content pass-through — never stored). */
+                            description: string;
+                            /** @description LinkedIn entity URN for the organization. */
+                            entity_urn: string;
+                            /** @description LinkedIn public slug (the segment after linkedin.com/company/). */
+                            public_identifier: string;
+                            /** @description Full LinkedIn company profile URL. */
+                            profile_url: string;
+                            /** @description Short company tagline (when set). */
+                            tagline?: string;
+                            /** @description Total follower count (when available). */
+                            followers_count?: number;
+                            /** @description Whether the authenticated account is following this company. */
+                            is_following?: boolean;
+                            /** @description Whether the authenticated account is an employee of this company. */
+                            is_employee?: boolean;
+                            /** @description Hashtags associated with the company page. */
+                            hashtags: {
+                                /** @description Hashtag without the # prefix. */
+                                title?: string;
+                            }[];
+                            /** @description Messaging availability for this company. */
+                            messaging: {
+                                /** @description Whether messaging is enabled for this company page. */
+                                is_enabled: boolean;
+                                /** @description Messaging identifier. */
+                                id: string;
+                                /** @description LinkedIn entity URN for messaging. */
+                                entity_urn: string;
+                            };
+                            /** @description Whether the company page has been claimed by an admin. */
+                            claimed: boolean;
+                            /** @description Viewer permissions for this company page. An open object of camelCase boolean flags — the exact set is company-dependent and variable (~69 observed on one company). Common flags include canReadMessages, canUpdateOrganizationProfile, canCreateOrganicShare, canReadAdminDashboard, canSeeProducts, canAssignRoles, canViewBillingInformation — none individually required. */
+                            viewer_permissions: {
+                                [key: string]: boolean;
+                            };
+                            /** @description Organization type (e.g. PUBLIC_COMPANY, PRIVATELY_HELD, NON_PROFIT). */
+                            organization_type: string | null;
+                            /** @description Company office locations. */
+                            locations: {
+                                /** @description Whether this is the headquarters location. */
+                                is_headquarter?: boolean;
+                                /** @description Country code. */
+                                country?: string;
+                                /** @description City name. */
+                                city?: string;
+                                /** @description Postal code (when available). */
+                                postalCode?: string;
+                                /** @description Street address lines. */
+                                street?: string[];
+                                /** @description Location description (when available). */
+                                description?: string;
+                                /** @description Area or region name (when available). */
+                                area?: string;
+                            }[];
+                            /** @description Company logo URL (when available). */
+                            logo?: string;
+                            /** @description Locale-keyed description variants (e.g. en_US). */
+                            localized_description?: Record<string, never>;
+                            /** @description Locale-keyed name variants. */
+                            localized_name?: Record<string, never>;
+                            /** @description Locale-keyed tagline variants. */
+                            localized_tagline?: Record<string, never>;
+                            /** @description Industry categories (when available). */
+                            industry?: string[];
+                            /** @description Company specialty areas (when available). */
+                            activities?: string[];
+                            /** @description Exact employee count (when available). */
+                            employee_count?: number;
+                            /** @description Employee count range (when available). */
+                            employee_count_range?: {
+                                /** @description Lower bound of the range. */
+                                from?: number;
+                                /** @description Upper bound of the range, or null for the open-ended top band (e.g. 10001+). */
+                                to?: number | null;
+                            };
+                            /** @description Company website URL (when available). */
+                            website?: string;
+                            /** @description Year or date the company was founded (when available). */
+                            foundation_date?: string;
+                            /** @description Company phone number (when available). */
+                            phone?: string;
+                            /** @description Aggregated insights about the company (when available). */
+                            insights?: {
+                                /** @description Employee count insight data. */
+                                employeesCount?: Record<string, never>;
+                            };
+                            /** @description Parent or acquiring company (when the company has been acquired). */
+                            acquired_by?: {
+                                /** @description Parent company identifier. */
+                                id: string;
+                                /** @description Parent company name. */
+                                name: string;
+                                /** @description Parent company LinkedIn slug. */
+                                public_identifier: string;
+                                /** @description Parent company LinkedIn URL. */
+                                profile_url: string;
+                            };
+                            /** @description Crunchbase funding summary (when available). */
+                            crunchbase_funding?: {
+                                /** @description ISO-8601 timestamp of the last funding update. */
+                                last_updated_at: string;
+                                /** @description Crunchbase company URL. */
+                                company_url: string;
+                                /** @description All funding rounds summary. */
+                                rounds: Record<string, never>;
+                                /** @description Crunchbase funding rounds URL. */
+                                url: string;
+                                /** @description Total number of funding rounds. */
+                                total_count: number;
+                                /** @description Details of the most recent funding round. */
+                                last_round: {
+                                    /** @description Date the round was announced. */
+                                    announced_on?: string;
+                                    /** @description Crunchbase URL for this round. */
+                                    url?: string;
+                                    /** @description Type of funding (e.g. SERIES_A, VENTURE). */
+                                    funding_type?: string;
+                                    /** @description Number of investors in this round. */
+                                    investors_count?: number;
+                                    /** @description Lead investors in this round. */
+                                    lead_investors?: {
+                                        /** @description Investor name. */
+                                        name?: string;
+                                        /** @description Crunchbase URL for the investor. */
+                                        url?: string;
+                                        /** @description Investor logo URL (when available). */
+                                        logo?: string;
+                                    }[];
+                                    /** @description Amount raised in this round (when available). */
+                                    money_raised?: {
+                                        /** @description Numeric amount. */
+                                        amount?: number;
+                                        /** @description Currency code (e.g. USD, EUR). */
+                                        currency?: string;
+                                    };
+                                };
+                            };
+                        };
+                    };
+                };
+                /** @description Missing or empty account_id or identifier. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account does not have the required Core seat. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account_id does not belong to this tenant, or the company was not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account is restricted and cannot be queried. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/companies/{identifier}/employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a company's employees
+         * @description Returns a paginated list of people who currently work at the company. A facade over people search with the company filter applied — filter further with keywords or location.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The connected LinkedIn account to read with (acc_…). Required. */
+                    account_id: string;
+                    /** @description Number of employees to return per page (1–50, default 10). */
+                    limit?: number;
+                    /** @description Opaque pagination cursor from a previous response. Omit for the first page. */
+                    cursor?: string;
+                    /** @description Free-text keyword filter across employee profile fields. */
+                    keywords?: string;
+                    /** @description Opaque location id from GET /v1/search/parameters?type=LOCATION. */
+                    location?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/companies/{identifier} or a POST /v1/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                    identifier: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of people who currently work at the company. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_employee_list";
+                            /** @description People who currently work at the company. */
+                            items: {
+                                /** @description Raw LinkedIn provider id for this person (e.g. ACoAA…). */
+                                id: string;
+                                /** @description LinkedIn member URN for this person (normalized to urn:li:member:N). */
+                                linkedin_urn: string;
+                                /** @description LinkedIn public identifier (the slug after linkedin.com/in/). */
+                                public_identifier: string;
+                                /** @description Full display name. */
+                                full_name: string;
+                                /** @description LinkedIn headline, or null if not set. */
+                                headline: string | null;
+                                /** @description Location as set on the profile, or null if not set. */
+                                location: string | null;
+                                /** @description Profile picture URL, or null if not available. */
+                                avatar_url: string | null;
+                                /**
+                                 * @description Connection distance to the authenticated account as a string enum, or null if unknown.
+                                 * @enum {string|null}
+                                 */
+                                network_distance: "SELF" | "DISTANCE_1" | "DISTANCE_2" | "DISTANCE_3" | "OUT_OF_NETWORK" | null;
+                                /** @description true if this is a LinkedIn Premium account. Present when available. */
+                                is_premium?: boolean;
+                                /** @description true if the account has open profile enabled. Present when available. */
+                                is_open_profile?: boolean;
+                                /** @description Number of connections. Present when available. */
+                                connections_count?: number;
+                                /** @description Follower count. Present when available. */
+                                followers_count?: number;
+                                /** @description Skills and endorsements. Typically null/absent on classic search. */
+                                skills?: {
+                                    name?: string;
+                                    endorsement_count?: number;
+                                }[];
+                                /** @description Current positions. Typically null/absent on classic search. */
+                                current_positions?: {
+                                    [key: string]: unknown;
+                                }[];
+                                /** @description Education history. Typically null/absent on classic search. */
+                                education?: {
+                                    [key: string]: unknown;
+                                }[];
+                                /** @description Work experience history. Typically null/absent on classic search. */
+                                work_experience?: {
+                                    [key: string]: unknown;
+                                }[];
+                                /** @description Certifications. Typically null/absent on classic search. */
+                                certifications?: {
+                                    [key: string]: unknown;
+                                }[];
+                                /** @description Projects. Typically null/absent on classic search. */
+                                projects?: {
+                                    [key: string]: unknown;
+                                }[];
+                                /** @description Whether the candidate is hidden. Typically null/absent on classic search. */
+                                hidden_candidate?: boolean;
+                                /** @description Recruiter interest likelihood score. Typically null/absent on classic search. */
+                                interest_likelihood?: number;
+                                /** @description Recruiter tags. Typically null/absent on classic search. */
+                                tags?: {
+                                    id?: string;
+                                    name?: string;
+                                }[];
+                                /** @description Recruiter notes. Typically null/absent on classic search. */
+                                notes?: {
+                                    [key: string]: unknown;
+                                }[];
+                                /** @description Last outreach activity. Typically null/absent on classic search. */
+                                last_outreach_activity?: {
+                                    /** @enum {string} */
+                                    type?: "SEND_MESSAGE" | "ACCEPT_INVITATION";
+                                    performed_at?: string;
+                                };
+                                /** @description Recruiter candidate ID. Typically null/absent on classic search. */
+                                recruiter_candidate_id?: string;
+                                /** @description Recruiter pipeline category. Typically null/absent on classic search. */
+                                recruiter_pipeline_category?: string;
+                            }[];
+                            paging: {
+                                /** @description Total number of matching employees across all pages. */
+                                total_count: number;
+                            };
+                            /** @description Opaque cursor for the next page, or null when there are no more results. */
+                            cursor: string | null;
+                        };
+                    };
+                };
+                /** @description Missing or empty account_id; a non-numeric identifier; or a malformed location filter value. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account does not have the required Core seat. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account_id does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account is restricted and cannot be queried. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/companies/{identifier}/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a company's posts
+         * @description Returns a paginated list of the company's posts. A facade over post search with the company filter applied.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The connected LinkedIn account to read with (acc_…). Required. */
+                    account_id: string;
+                    /** @description Number of posts to return per page (1–50, default 10). */
+                    limit?: number;
+                    /** @description Opaque pagination cursor from a previous response. Omit for the first page. */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/companies/{identifier} or a POST /v1/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                    identifier: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of the company's posts. Post text is returned verbatim and is never stored. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_post_list";
+                            /** @description The company's posts. */
+                            items: {
+                                /** @description LinkedIn URN identifying the post (from social_id field). */
+                                post_urn: string;
+                                /** @description Approximate posting date in ISO-8601 format. */
+                                posted_at: string;
+                                /** @description Total reaction count on the post. */
+                                reaction_count: number;
+                                /** @description Total comment count on the post. */
+                                comment_count: number;
+                                /** @description Total repost count on the post. */
+                                repost_count: number;
+                                /** @description Post text content. Present when available. */
+                                text?: string | null;
+                                /** @description Shareable post URL. Present when available. */
+                                share_url?: string | null;
+                                /** @description Post author object. Present when available. */
+                                author?: {
+                                    id?: string;
+                                    name?: string | null;
+                                    is_company?: boolean;
+                                    public_identifier?: string | null;
+                                } & {
+                                    [key: string]: unknown;
+                                };
+                                /** @description Post attachments array. Present when the post carries attachments. */
+                                attachments?: {
+                                    [key: string]: unknown;
+                                }[];
+                                /** @description Total impressions. Present when available. */
+                                impressions_count?: number;
+                                /** @description true if this post is a repost. Present when available. */
+                                is_repost?: boolean;
+                                /** @description Member/company mentions in the post. */
+                                mentions?: unknown[];
+                                /** @description The authenticated user's reaction type. Present when available. */
+                                user_reacted?: string;
+                                /** @description Ghost author details. Present when available. */
+                                written_by?: {
+                                    id?: string;
+                                    public_identifier?: string;
+                                    name?: string;
+                                };
+                                /** @description ID of the original post if this is a repost. Present when available. */
+                                repost_id?: string;
+                                /** @description Author who reposted. Present when available. */
+                                reposted_by?: {
+                                    [key: string]: unknown;
+                                };
+                                /** @description Content of the original post when this is a repost. Present when available. */
+                                repost_content?: {
+                                    id?: string;
+                                    date?: string;
+                                    parsed_datetime?: string;
+                                    author?: {
+                                        [key: string]: unknown;
+                                    };
+                                    text?: string;
+                                };
+                                /** @description Poll data. Typically null/absent on classic search. */
+                                poll?: {
+                                    [key: string]: unknown;
+                                };
+                                /** @description LinkedIn Group context. Typically null/absent on classic search. */
+                                group?: {
+                                    id?: string;
+                                    name?: string;
+                                    private?: boolean;
+                                };
+                                /** @description Post analytics data. Typically null/absent on classic search. */
+                                analytics?: {
+                                    [key: string]: unknown;
+                                };
+                            }[];
+                            paging: {
+                                /** @description Total number of matching posts across all pages. */
+                                total_count: number;
+                            };
+                            /** @description Opaque cursor for the next page, or null when there are no more results. */
+                            cursor: string | null;
+                        };
+                    };
+                };
+                /** @description Missing or empty account_id, or a non-numeric identifier. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account does not have the required Core seat. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account_id does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account is restricted and cannot be queried. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/companies/{identifier}/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a company's open jobs
+         * @description Returns a paginated list of the company's open job postings. A facade over job search with the company filter applied — filter further with keywords. An empty list is a valid result when the company currently has no open postings.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The connected LinkedIn account to read with (acc_…). Required. */
+                    account_id: string;
+                    /** @description Number of jobs to return per page (1–50, default 10). */
+                    limit?: number;
+                    /** @description Opaque pagination cursor from a previous response. Omit for the first page. */
+                    cursor?: string;
+                    /** @description Free-text keyword filter across job postings. */
+                    keywords?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/companies/{identifier} or a POST /v1/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                    identifier: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of the company's open job postings. An empty items[] is a valid result (the company currently has no open postings) — not an error. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_job_list";
+                            /** @description The company's open job postings. */
+                            items: {
+                                /** @description LinkedIn URN identifying the job posting. */
+                                job_urn: string;
+                                /** @description Platform reference ID for the job posting. Present when available. */
+                                reference_id?: string | null;
+                                /** @description Job title. */
+                                title: string;
+                                /** @description Job location, or null if not specified. */
+                                location: string | null;
+                                /** @description Approximate posting date in ISO-8601 format, or null if not available. */
+                                posted_at: string | null;
+                                /** @description true if this is a reposted job. Present when available. */
+                                reposted?: boolean;
+                                /** @description Direct URL to the job posting. Present when available. */
+                                url?: string | null;
+                                /** @description true if this is a promoted job. Present when available. */
+                                promoted?: boolean;
+                                /** @description Job benefit tags. Present when available. */
+                                benefits?: unknown[];
+                                /** @description true if the posting supports LinkedIn Easy Apply. Present when available. */
+                                easy_apply?: boolean;
+                                /** @description Hiring company details. */
+                                company?: {
+                                    id?: string | null;
+                                    name?: string;
+                                    profile_url?: string | null;
+                                    public_identifier?: string | null;
+                                    profile_picture_url?: string | null;
+                                } & {
+                                    [key: string]: unknown;
+                                };
+                            }[];
+                            paging: {
+                                /** @description Total number of matching job postings across all pages. */
+                                total_count: number;
+                            };
+                            /** @description Opaque cursor for the next page, or null when there are no more results. */
+                            cursor: string | null;
+                        };
+                    };
+                };
+                /** @description Missing or empty account_id; or a non-numeric identifier. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account does not have the required Core seat. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account_id does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account is restricted and cannot be queried. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/companies/{identifier}/followers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a company's followers
+         * @description Returns a paginated list of the company's followers. You must be an administrator of the target company page to read its followers.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The connected LinkedIn account to read with (acc_…). Required. */
+                    account_id: string;
+                    /** @description Number of followers to return per page (1–50, default 10). */
+                    limit?: number;
+                    /** @description Opaque pagination cursor from a previous response. Omit for the first page. */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/companies/{identifier} or a POST /v1/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                    identifier: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description A page of the company's followers. No paging.total_count — the native seam has none to re-map. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_follower_list";
+                            /** @description The company's followers. */
+                            items: {
+                                /**
+                                 * @description Response type discriminator.
+                                 * @enum {string}
+                                 */
+                                object?: "follower";
+                                /** @description LinkedIn follower identifier. */
+                                id?: string;
+                                /** @description LinkedIn URN for the follower. */
+                                urn?: string;
+                                /** @description Display name. */
+                                name?: string;
+                                /** @description LinkedIn headline. */
+                                headline?: string | null;
+                                /** @description Full LinkedIn profile URL. */
+                                profile_url?: string | null;
+                                /** @description Profile picture URL, or null if not set. */
+                                profile_picture_url?: string | null;
+                                /** @description Large profile picture URL, or null if not set. */
+                                profile_picture_url_large?: string | null;
+                            }[];
+                            /** @description Opaque cursor for the next page, or null when there are no more results. */
+                            cursor: string | null;
+                        };
+                    };
+                };
+                /** @description Missing or empty account_id; or a non-numeric identifier. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description You must be a page administrator of this company to read its followers. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account_id does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The account is restricted and cannot be queried. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/invites": {
         parameters: {
             query?: never;
@@ -7450,294 +8571,6 @@ export interface paths {
                     };
                 };
                 /** @description The account_id does not belong to this tenant, or the requested profile was not found. */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description The account is restricted and cannot be queried. */
-                422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Rate limited — slow down and retry after the hinted delay. */
-                429: {
-                    headers: {
-                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                        RateLimit: components["headers"]["RateLimit"];
-                        "Retry-After": components["headers"]["Retry-After"];
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Internal error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description A temporary error occurred. Please try again. */
-                502: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Service unavailable. */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Gateway timeout. */
-                504: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/profiles/companies/{company_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Retrieve a company profile
-         * @description Returns a company's full LinkedIn profile including page details, viewer permissions, locations, and funding information.
-         */
-        get: {
-            parameters: {
-                query: {
-                    /** @description The connected LinkedIn account to read with (acc_…). Required. */
-                    account_id: string;
-                };
-                header?: never;
-                path: {
-                    /** @description The company to retrieve. Accepts the company's public handle — the slug in linkedin.com/company/<handle> (e.g. t-systems) — or its numeric id (e.g. 1234567). The numeric id field returned on each POST /v1/search/companies result can be passed here directly. */
-                    company_id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description The company's full LinkedIn profile. Content fields (description, tagline, localized_*) are returned verbatim and are never stored. */
-                200: {
-                    headers: {
-                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                        RateLimit: components["headers"]["RateLimit"];
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * @description Response type discriminator.
-                             * @enum {string}
-                             */
-                            object: "company_profile";
-                            /** @description LinkedIn company numeric identifier. */
-                            id: string;
-                            /** @description Company display name. */
-                            name: string;
-                            /** @description Company description (content pass-through — never stored). */
-                            description: string;
-                            /** @description LinkedIn entity URN for the organization. */
-                            entity_urn: string;
-                            /** @description LinkedIn public slug (the segment after linkedin.com/company/). */
-                            public_identifier: string;
-                            /** @description Full LinkedIn company profile URL. */
-                            profile_url: string;
-                            /** @description Short company tagline (when set). */
-                            tagline?: string;
-                            /** @description Total follower count (when available). */
-                            followers_count?: number;
-                            /** @description Whether the authenticated account is following this company. */
-                            is_following?: boolean;
-                            /** @description Whether the authenticated account is an employee of this company. */
-                            is_employee?: boolean;
-                            /** @description Hashtags associated with the company page. */
-                            hashtags: {
-                                /** @description Hashtag without the # prefix. */
-                                title?: string;
-                            }[];
-                            /** @description Messaging availability for this company. */
-                            messaging: {
-                                /** @description Whether messaging is enabled for this company page. */
-                                is_enabled: boolean;
-                                /** @description Messaging identifier. */
-                                id: string;
-                                /** @description LinkedIn entity URN for messaging. */
-                                entity_urn: string;
-                            };
-                            /** @description Whether the company page has been claimed by an admin. */
-                            claimed: boolean;
-                            /** @description Viewer permissions for this company page. An open object of camelCase boolean flags — the exact set is company-dependent and variable (~69 observed on one company). Common flags include canReadMessages, canUpdateOrganizationProfile, canCreateOrganicShare, canReadAdminDashboard, canSeeProducts, canAssignRoles, canViewBillingInformation — none individually required. */
-                            viewer_permissions: {
-                                [key: string]: boolean;
-                            };
-                            /** @description Organization type (e.g. PUBLIC_COMPANY, PRIVATELY_HELD, NON_PROFIT). */
-                            organization_type: string | null;
-                            /** @description Company office locations. */
-                            locations: {
-                                /** @description Whether this is the headquarters location. */
-                                is_headquarter?: boolean;
-                                /** @description Country code. */
-                                country?: string;
-                                /** @description City name. */
-                                city?: string;
-                                /** @description Postal code (when available). */
-                                postalCode?: string;
-                                /** @description Street address lines. */
-                                street?: string[];
-                                /** @description Location description (when available). */
-                                description?: string;
-                                /** @description Area or region name (when available). */
-                                area?: string;
-                            }[];
-                            /** @description Company logo URL (when available). */
-                            logo?: string;
-                            /** @description Locale-keyed description variants (e.g. en_US). */
-                            localized_description?: Record<string, never>;
-                            /** @description Locale-keyed name variants. */
-                            localized_name?: Record<string, never>;
-                            /** @description Locale-keyed tagline variants. */
-                            localized_tagline?: Record<string, never>;
-                            /** @description Industry categories (when available). */
-                            industry?: string[];
-                            /** @description Company specialty areas (when available). */
-                            activities?: string[];
-                            /** @description Exact employee count (when available). */
-                            employee_count?: number;
-                            /** @description Employee count range (when available). */
-                            employee_count_range?: {
-                                /** @description Lower bound of the range. */
-                                from?: number;
-                                /** @description Upper bound of the range, or null for the open-ended top band (e.g. 10001+). */
-                                to?: number | null;
-                            };
-                            /** @description Company website URL (when available). */
-                            website?: string;
-                            /** @description Year or date the company was founded (when available). */
-                            foundation_date?: string;
-                            /** @description Company phone number (when available). */
-                            phone?: string;
-                            /** @description Aggregated insights about the company (when available). */
-                            insights?: {
-                                /** @description Employee count insight data. */
-                                employeesCount?: Record<string, never>;
-                            };
-                            /** @description Parent or acquiring company (when the company has been acquired). */
-                            acquired_by?: {
-                                /** @description Parent company identifier. */
-                                id: string;
-                                /** @description Parent company name. */
-                                name: string;
-                                /** @description Parent company LinkedIn slug. */
-                                public_identifier: string;
-                                /** @description Parent company LinkedIn URL. */
-                                profile_url: string;
-                            };
-                            /** @description Crunchbase funding summary (when available). */
-                            crunchbase_funding?: {
-                                /** @description ISO-8601 timestamp of the last funding update. */
-                                last_updated_at: string;
-                                /** @description Crunchbase company URL. */
-                                company_url: string;
-                                /** @description All funding rounds summary. */
-                                rounds: Record<string, never>;
-                                /** @description Crunchbase funding rounds URL. */
-                                url: string;
-                                /** @description Total number of funding rounds. */
-                                total_count: number;
-                                /** @description Details of the most recent funding round. */
-                                last_round: {
-                                    /** @description Date the round was announced. */
-                                    announced_on?: string;
-                                    /** @description Crunchbase URL for this round. */
-                                    url?: string;
-                                    /** @description Type of funding (e.g. SERIES_A, VENTURE). */
-                                    funding_type?: string;
-                                    /** @description Number of investors in this round. */
-                                    investors_count?: number;
-                                    /** @description Lead investors in this round. */
-                                    lead_investors?: {
-                                        /** @description Investor name. */
-                                        name?: string;
-                                        /** @description Crunchbase URL for the investor. */
-                                        url?: string;
-                                        /** @description Investor logo URL (when available). */
-                                        logo?: string;
-                                    }[];
-                                    /** @description Amount raised in this round (when available). */
-                                    money_raised?: {
-                                        /** @description Numeric amount. */
-                                        amount?: number;
-                                        /** @description Currency code (e.g. USD, EUR). */
-                                        currency?: string;
-                                    };
-                                };
-                            };
-                        };
-                    };
-                };
-                /** @description Missing or empty account_id or company_id. */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Missing or invalid API key. */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description The account does not have the required Core seat. */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description The account_id does not belong to this tenant, or the company was not found. */
                 404: {
                     headers: {
                         [name: string]: unknown;

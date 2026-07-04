@@ -7,6 +7,16 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **New `companies` namespace (5 methods).** `companies.get(identifier)` retrieves a company's full LinkedIn profile — accepts either a public handle (the slug in `linkedin.com/company/<handle>`, e.g. `"t-systems"`) or a numeric id. `companies.employees(identifier, params?)`, `companies.posts(identifier, params?)`, and `companies.jobs(identifier, params?)` list company sub-resources (filterable with `keywords`/`location` where supported); `companies.followers(identifier, params?)` lists company followers (requires the acting account to administer the target page). The four sub-resource methods require the company's **numeric provider_id** (the same `id` field `companies.get()` returns) — a handle or URN is rejected server-side before any upstream call. Types: `CompanyProfile`, `CompanyEmployeeListPage`, `CompanyPostListPage`, `CompanyJobListPage`, `CompanyFollowerListPage`.
+
+### Removed (BREAKING)
+
+- **`profiles.getCompany(companyId)` removed** — hard-moved to `companies.get(identifier)`. The underlying endpoint (`GET /v1/profiles/companies/{company_id}`) no longer exists; there is no alias. Update call sites to `companies.get()`.
+
 ## [0.11.0] — 2026-07-04
 
 ### Added

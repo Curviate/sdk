@@ -1,4 +1,4 @@
-// profiles namespace (9 methods, account-scoped)
+// profiles namespace (8 methods, account-scoped) — getCompany removed, hard-moved to companies.get()
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";
@@ -168,18 +168,6 @@ describe("profiles.listReactions", () => {
     );
     const res = await acc.profiles.listReactions("prof_1");
     expect(Array.isArray(res.items)).toBe(true);
-  });
-});
-
-describe("profiles.getCompany", () => {
-  it("GET /v1/profiles/companies/:company_id returns company profile", async () => {
-    server.use(
-      http.get(`${BASE}/v1/profiles/companies/co_1`, () =>
-        HttpResponse.json({ object: "company", name: "Acme" }),
-      ),
-    );
-    const res = await acc.profiles.getCompany("co_1");
-    expect(res.name).toBe("Acme");
   });
 });
 

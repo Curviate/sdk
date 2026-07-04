@@ -1,9 +1,11 @@
 /**
- * Profiles resource — 9 methods.
+ * Profiles resource — 8 methods.
  *
  * Account-scoped: the bound context injects `account_id` into every request.
  * Methods that have `account_id` in their query params omit it from the
  * caller-facing type — the context injects it transparently.
+ *
+ * `getCompany` was REMOVED (hard-move to a dedicated Companies group) — use `companies.get()`.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -58,9 +60,6 @@ export type ProfileReactionListPage =
 export type ProfileReactionListParams = WithoutAccountId<
   NonNullable<paths["/v1/profiles/{profile_id}/reactions"]["get"]["parameters"]["query"]>
 >;
-
-export type CompanyProfile =
-  paths["/v1/profiles/companies/{company_id}"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export type EndorseBody =
   paths["/v1/profiles/{profile_id}/endorse"]["post"]["requestBody"]["content"]["application/json"];
@@ -144,14 +143,6 @@ export class ProfilesResource {
       method: "GET",
       path: `/v1/profiles/${profileId}/reactions`,
       ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
-    });
-  }
-
-  /** Get a company profile. `GET /v1/profiles/companies/{company_id}` */
-  getCompany(companyId: string): Promise<CompanyProfile> {
-    return this.ctx.request<CompanyProfile>({
-      method: "GET",
-      path: `/v1/profiles/companies/${companyId}`,
     });
   }
 
