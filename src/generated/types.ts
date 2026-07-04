@@ -48,9 +48,9 @@ export interface paths {
                                  * @description Stable status whitelist.
                                  * @enum {string}
                                  */
-                                status?: "active" | "reconnect_needed" | "restricted" | "connecting";
+                                status?: "active" | "reconnect_needed" | "restricted" | "connecting" | "disconnected";
                                 /** @enum {string} */
-                                auth_method?: "credentials" | "cookie";
+                                auth_method?: "credentials" | "cookie" | "hosted";
                                 full_name?: string | null;
                                 headline?: string | null;
                                 /** @description The seat this account occupies. */
@@ -247,6 +247,12 @@ export interface paths {
                             auth_method?: "credentials" | "cookie";
                             full_name?: string | null;
                             headline?: string | null;
+                            /** @description The seat this account occupies (canonical — supersedes the deprecated attached_seat_id). */
+                            seat_id?: string | null;
+                            /**
+                             * @deprecated
+                             * @description Deprecated — use seat_id (same value). Removed at the GA /v1 cutover.
+                             */
                             attached_seat_id?: string | null;
                         };
                     };
@@ -410,7 +416,7 @@ export interface paths {
                             object?: "account";
                             account_id?: string;
                             /** @enum {string} */
-                            status?: "active" | "reconnect_needed" | "restricted" | "connecting";
+                            status?: "active" | "reconnect_needed" | "restricted" | "connecting" | "disconnected";
                             auth_method?: string;
                             full_name?: string | null;
                             headline?: string | null;
@@ -719,6 +725,15 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
+                /** @description This managed-proxy configuration is not supported for this account (e.g. the requested proxy mode or location is unavailable on the account's current plan). Not retryable as-is — change the request rather than resubmitting. */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
                 /** @description A temporary error occurred. Please try again. */
                 502: {
                     headers: {
@@ -810,6 +825,8 @@ export interface paths {
                             object?: "hosted_auth_url";
                             /** @description The hosted URL the end user opens. */
                             url?: string;
+                            /** @description Poll handle for GET /v1/accounts/connect-sessions/{session_id}. */
+                            session_id?: string;
                             expires_at?: string;
                             seat_id?: string | null;
                             account_id?: string | null;
@@ -893,6 +910,124 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/accounts/connect-sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Poll a hosted connect session
+         * @description Return the current status of a hosted connect session created by connect-link. A pure status read — it makes no external call and does not itself complete the connection (completion is signalled out-of-band once the end user finishes the hosted flow). status is `pending` until the hand-off completes, then `resolved` (with `account_id`), or `expired` / `failed`. Poll until it leaves `pending`.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The connect session id (`cs_…`) returned by connect-link. */
+                    session_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The current status of a hosted connect session created by connect-link. Poll until status leaves pending; account_id is present only once status is resolved. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "connect_session";
+                            /** @description The connect session id (cs_…). */
+                            session_id?: string;
+                            /**
+                             * @description Lifecycle status. pending until the hand-off completes, then resolved / expired / failed.
+                             * @enum {string}
+                             */
+                            status?: "pending" | "resolved" | "expired" | "failed";
+                            /** @description The connected account (acc_…); null until status is resolved. */
+                            account_id?: string | null;
+                            /** @description ISO-8601 UTC session expiry. */
+                            expires_at?: string;
+                        };
+                    };
+                };
+                /** @description Missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description No such connect session for this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1284,6 +1419,13 @@ export interface paths {
                             account_id?: string;
                             /** @enum {string} */
                             status?: "active";
+                            /** @description The seat this account occupies (canonical — supersedes the deprecated attached_seat_id). */
+                            seat_id?: string | null;
+                            /**
+                             * @deprecated
+                             * @description Deprecated — use seat_id (same value). Removed at the GA /v1 cutover.
+                             */
+                            attached_seat_id?: string | null;
                         };
                     };
                 };
@@ -1580,7 +1722,12 @@ export interface paths {
                             full_name?: string | null;
                             /** @description Present on status:"active". */
                             headline?: string | null;
-                            /** @description The seat this account occupies. Present on status:"active". */
+                            /** @description The seat this account occupies (canonical — supersedes the deprecated attached_seat_id). Present on status:"active". */
+                            seat_id?: string | null;
+                            /**
+                             * @deprecated
+                             * @description Deprecated — use seat_id (same value). Removed at the GA /v1 cutover. Present on status:"active".
+                             */
                             attached_seat_id?: string | null;
                             /** @description ISO-8601 expiry. Present on status:"pending". */
                             expires_at?: string;
@@ -15265,8 +15412,10 @@ export interface paths {
                             /** @description Opaque next-call cursor. */
                             version?: string;
                             changes?: {
-                                previous_status?: string | null;
-                                current_status?: string;
+                                /** @enum {string|null} */
+                                previous_status?: "active" | "reconnect_needed" | "restricted" | "connecting" | "disconnected" | null;
+                                /** @enum {string} */
+                                current_status?: "active" | "reconnect_needed" | "restricted" | "connecting" | "disconnected";
                                 detected_at?: string;
                             }[];
                         };

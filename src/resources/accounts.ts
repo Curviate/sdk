@@ -67,6 +67,10 @@ export type AccountConnectLinkBody =
 export type AccountConnectLinkResult =
   paths["/v1/accounts/connect-link"]["post"]["responses"]["201"]["content"]["application/json"];
 
+/** `GET /v1/accounts/connect-sessions/{session_id}` 200 body. */
+export type AccountConnectSessionResult =
+  paths["/v1/accounts/connect-sessions/{session_id}"]["get"]["responses"]["200"]["content"]["application/json"];
+
 /** `GET /v1/accounts/{account_id}` 200 body. */
 export type AccountDetail =
   paths["/v1/accounts/{account_id}"]["get"]["responses"]["200"]["content"]["application/json"];
@@ -184,6 +188,25 @@ export class AccountsResource {
       method: "POST",
       path: "/v1/accounts/connect-link",
       body,
+    });
+  }
+
+  /**
+   * Poll a hosted connect session minted by {@link createConnectLink} (its
+   * `session_id`).
+   *
+   * A pure status read — it makes no external call and does not itself complete
+   * the connection. `status` is `pending` until the end user finishes the
+   * hosted flow, then `resolved` (with `account_id`), or `expired` / `failed`.
+   * Poll until it leaves `pending`.
+   *
+   * @param sessionId - the `session_id` returned on the connect-link 201 body.
+   * @returns the session's current `status` and, once `resolved`, `account_id`.
+   */
+  getConnectSession(sessionId: string): Promise<AccountConnectSessionResult> {
+    return this.ctx.request<AccountConnectSessionResult>({
+      method: "GET",
+      path: `/v1/accounts/connect-sessions/${sessionId}`,
     });
   }
 

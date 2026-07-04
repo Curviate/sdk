@@ -230,7 +230,8 @@
                               "active",
                               "reconnect_needed",
                               "restricted",
-                              "connecting"
+                              "connecting",
+                              "disconnected"
                             ],
                             "description": "Stable status whitelist."
                           },
@@ -238,7 +239,8 @@
                             "type": "string",
                             "enum": [
                               "credentials",
-                              "cookie"
+                              "cookie",
+                              "hosted"
                             ]
                           },
                           "full_name": {
@@ -570,11 +572,20 @@
                         "null"
                       ]
                     },
+                    "seat_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "The seat this account occupies (canonical \u2014 supersedes the deprecated attached_seat_id)."
+                    },
                     "attached_seat_id": {
                       "type": [
                         "string",
                         "null"
-                      ]
+                      ],
+                      "deprecated": true,
+                      "description": "Deprecated \u2014 use seat_id (same value). Removed at the GA /v1 cutover."
                     }
                   }
                 },
@@ -588,6 +599,7 @@
                       "auth_method": "credentials",
                       "full_name": "Ada Lovelace",
                       "headline": "Engineer",
+                      "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
                       "attached_seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8"
                     }
                   }
@@ -1108,7 +1120,8 @@
                         "active",
                         "reconnect_needed",
                         "restricted",
-                        "connecting"
+                        "connecting",
+                        "disconnected"
                       ]
                     },
                     "auth_method": {
@@ -1850,6 +1863,27 @@
               }
             }
           },
+          "501": {
+            "description": "This managed-proxy configuration is not supported for this account (e.g. the requested proxy mode or location is unavailable on the account's current plan). Not retryable as-is \u2014 change the request rather than resubmitting.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "501 error",
+                    "value": {
+                      "code": "PLATFORM_NOT_IMPLEMENTED",
+                      "message": "This operation is not yet supported.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
           "502": {
             "description": "A temporary error occurred. Please try again.",
             "content": {
@@ -2033,6 +2067,10 @@
                       "type": "string",
                       "description": "The hosted URL the end user opens."
                     },
+                    "session_id": {
+                      "type": "string",
+                      "description": "Poll handle for GET /v1/accounts/connect-sessions/{session_id}."
+                    },
                     "expires_at": {
                       "type": "string"
                     },
@@ -2056,6 +2094,7 @@
                     "value": {
                       "object": "hosted_auth_url",
                       "url": "https://app.curviate.com/api/connect/abc123",
+                      "session_id": "cs_01JF00000000000000000001",
                       "expires_at": "2026-06-08T10:15:00Z",
                       "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8"
                     }
@@ -2311,6 +2350,245 @@
           }
         },
         "x-order": 4
+      }
+    },
+    "/v1/accounts/connect-sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Poll a hosted connect session",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connect session id (`cs_\u2026`) returned by connect-link."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The current status of a hosted connect session created by connect-link. Poll until status leaves pending; account_id is present only once status is resolved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "connect_session"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "session_id": {
+                      "type": "string",
+                      "description": "The connect session id (cs_\u2026)."
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "resolved",
+                        "expired",
+                        "failed"
+                      ],
+                      "description": "Lifecycle status. pending until the hand-off completes, then resolved / expired / failed."
+                    },
+                    "account_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "The connected account (acc_\u2026); null until status is resolved."
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "description": "ISO-8601 UTC session expiry."
+                    }
+                  }
+                },
+                "examples": {
+                  "pending": {
+                    "summary": "Still waiting for the browser hand-off",
+                    "value": {
+                      "object": "connect_session",
+                      "session_id": "cs_01JF00000000000000000001",
+                      "status": "pending",
+                      "account_id": null,
+                      "expires_at": "2026-06-08T10:15:00.000Z"
+                    }
+                  },
+                  "resolved": {
+                    "summary": "The account connected",
+                    "value": {
+                      "object": "connect_session",
+                      "session_id": "cs_01JF00000000000000000001",
+                      "status": "resolved",
+                      "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
+                      "expires_at": "2026-06-08T10:15:00.000Z"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such connect session for this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Return the current status of a hosted connect session created by connect-link. A pure status read \u2014 it makes no external call and does not itself complete the connection (completion is signalled out-of-band once the end user finishes the hosted flow). status is `pending` until the hand-off completes, then `resolved` (with `account_id`), or `expired` / `failed`. Poll until it leaves `pending`.",
+        "x-order": 4.5
       }
     },
     "/v1/accounts/{account_id}/reconnect": {
@@ -3096,6 +3374,21 @@
                       "enum": [
                         "active"
                       ]
+                    },
+                    "seat_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "The seat this account occupies (canonical \u2014 supersedes the deprecated attached_seat_id)."
+                    },
+                    "attached_seat_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "deprecated": true,
+                      "description": "Deprecated \u2014 use seat_id (same value). Removed at the GA /v1 cutover."
                     }
                   }
                 },
@@ -3105,7 +3398,9 @@
                     "value": {
                       "object": "account",
                       "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
-                      "status": "active"
+                      "status": "active",
+                      "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
+                      "attached_seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8"
                     }
                   }
                 }
@@ -3737,12 +4032,20 @@
                       ],
                       "description": "Present on status:\"active\"."
                     },
+                    "seat_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "The seat this account occupies (canonical \u2014 supersedes the deprecated attached_seat_id). Present on status:\"active\"."
+                    },
                     "attached_seat_id": {
                       "type": [
                         "string",
                         "null"
                       ],
-                      "description": "The seat this account occupies. Present on status:\"active\"."
+                      "deprecated": true,
+                      "description": "Deprecated \u2014 use seat_id (same value). Removed at the GA /v1 cutover. Present on status:\"active\"."
                     },
                     "expires_at": {
                       "type": "string",
@@ -3767,6 +4070,7 @@
                       "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
                       "full_name": "Ada Lovelace",
                       "headline": "Engineer",
+                      "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
                       "attached_seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8"
                     }
                   },
@@ -37695,10 +37999,25 @@
                             "type": [
                               "string",
                               "null"
+                            ],
+                            "enum": [
+                              "active",
+                              "reconnect_needed",
+                              "restricted",
+                              "connecting",
+                              "disconnected",
+                              null
                             ]
                           },
                           "current_status": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                              "active",
+                              "reconnect_needed",
+                              "restricted",
+                              "connecting",
+                              "disconnected"
+                            ]
                           },
                           "detected_at": {
                             "type": "string"

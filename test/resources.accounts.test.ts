@@ -149,6 +149,45 @@ describe("accounts.createConnectLink", () => {
     expect(res.object).toBe("hosted_auth_url");
     expect(res.url).toContain("curviate.com");
   });
+
+  it("carries the session_id poll handle on the 201", async () => {
+    server.use(
+      http.post(`${BASE}/v1/accounts/connect-link`, () =>
+        HttpResponse.json(
+          { object: "hosted_auth_url", url: "https://connect.curviate.com/abc", session_id: "cs_1", expires_at: "2026-06-21T13:00:00Z", seat_id: "seat_1" },
+          { status: 201 },
+        ),
+      ),
+    );
+    const res = await client.accounts.createConnectLink({ seat_id: "seat_1" });
+    expect(res.session_id).toBe("cs_1");
+  });
+});
+
+// ─── accounts.getConnectSession (GET /v1/accounts/connect-sessions/:id) ──────
+describe("accounts.getConnectSession", () => {
+  it("GET /v1/accounts/connect-sessions/:session_id returns pending status", async () => {
+    server.use(
+      http.get(`${BASE}/v1/accounts/connect-sessions/cs_1`, () =>
+        HttpResponse.json({ object: "connect_session", session_id: "cs_1", status: "pending", account_id: null, expires_at: "2026-06-21T13:00:00Z" }),
+      ),
+    );
+    const res = await client.accounts.getConnectSession("cs_1");
+    expect(res.object).toBe("connect_session");
+    expect(res.status).toBe("pending");
+    expect(res.account_id).toBeNull();
+  });
+
+  it("carries account_id once the session is resolved", async () => {
+    server.use(
+      http.get(`${BASE}/v1/accounts/connect-sessions/cs_1`, () =>
+        HttpResponse.json({ object: "connect_session", session_id: "cs_1", status: "resolved", account_id: "acc_9", expires_at: "2026-06-21T13:00:00Z" }),
+      ),
+    );
+    const res = await client.accounts.getConnectSession("cs_1");
+    expect(res.status).toBe("resolved");
+    expect(res.account_id).toBe("acc_9");
+  });
 });
 
 // ─── accounts.get (GET /v1/accounts/:account_id) ─────────────────────────────

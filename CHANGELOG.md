@@ -11,7 +11,20 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ### Added
 
-- **`accounts.resendCheckpoint({ account_id })`.** Re-sends the pending verification challenge notification for an account (e.g. when the end user says they never received the OTP/2FA code or the mobile-app push). Returns `{ object: "checkpoint", account_id, resent }` — `resent` echoes the outcome honestly (`false` when there was nothing to re-send for that challenge type; this never throws just because a resend wasn't applicable). Does not reset the checkpoint's expiry. Extends the Accounts surface to 11 methods.
+- **`accounts.getConnectSession(session_id)`.** Poll a hosted connect session minted by `accounts.createConnectLink()`. A pure status read — it makes no external call and does not itself complete the connection (the connection is signalled complete out-of-band once the end user finishes the hosted flow). Returns `{ object: "connect_session", session_id, status, account_id, expires_at }`, where `status` is `"pending" | "resolved" | "expired" | "failed"` and `account_id` is populated only once `status` is `"resolved"`. Poll until it leaves `pending`. Type: `AccountConnectSessionResult`. Extends the Accounts surface to 12 methods.
+- **`accounts.resendCheckpoint({ account_id })`.** Re-sends the pending verification challenge notification for an account (e.g. when the end user says they never received the OTP/2FA code or the mobile-app push). Returns `{ object: "checkpoint", account_id, resent }` — `resent` echoes the outcome honestly (`false` when there was nothing to re-send for that challenge type; this never throws just because a resend wasn't applicable). Does not reset the checkpoint's expiry.
+- **`session_id` on the `accounts.createConnectLink()` 201 response** — the durable poll handle to pass to `accounts.getConnectSession()`. Type: `AccountConnectLinkResult`.
+- **`seat_id` on the account-connection responses.** `accounts.link()` (201), `accounts.submitCheckpoint()` (201), and `accounts.pollCheckpoint()` now carry `seat_id` (`string | null`) — the seat the account occupies. `accounts.createConnectLink()` (201) also carries it. This is the canonical replacement for the deprecated `attached_seat_id` (same value).
+- **`auth_method: "hosted"`** is now a possible value on `accounts.list()` items (accounts connected through a hosted link). Response-only — the `link()` / `reconnect()` request `auth_method` remains `"credentials" | "cookie"`.
+- **`"disconnected"` account status.** Now a possible `status` on `accounts.list()` items, `accounts.get()`, and both sides of the account `state-diff` event — whose `previous_status` / `current_status` are now typed enums (`"active" | "reconnect_needed" | "restricted" | "connecting" | "disconnected"`) rather than free-form strings.
+
+### Deprecated
+
+- **`attached_seat_id`** (on `accounts.link()`, `accounts.submitCheckpoint()`, and `accounts.pollCheckpoint()` responses) — use `seat_id` instead (identical value). Retained for backward compatibility; slated for removal at the GA `/v1` cutover.
+
+### Changed
+
+- Regenerated types from the current API surface (full refresh). Beyond the additions above, `accounts.update()` (`PATCH /v1/accounts/{account_id}`) gains a `501` response variant, returned when a managed-proxy configuration isn't supported for the account's current plan (not retryable as-is — change the request rather than resubmitting). No resource method signatures changed.
 
 ## [0.10.0] — 2026-07-03
 

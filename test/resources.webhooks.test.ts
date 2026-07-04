@@ -1,5 +1,5 @@
 // webhooks namespace (6 methods; root-scoped)
-// MSW happy-path for every method + coverage test asserting 82 total methods.
+// MSW happy-path for every method + coverage test asserting 84 total methods.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";
@@ -142,9 +142,9 @@ describe("webhooks.getStateDiff", () => {
   });
 });
 
-// ─── coverage: total public method count == 83 ───────────────────────────────
-describe("coverage: total public method count == 83", () => {
-  it("counts all public function properties across all resource namespaces (target: 83)", () => {
+// ─── coverage: total public method count == 84 ───────────────────────────────
+describe("coverage: total public method count == 84", () => {
+  it("counts all public function properties across all resource namespaces (target: 84)", () => {
     const c = new Curviate({ apiKey: "k", baseUrl: BASE });
 
     function countMethods(obj: object): number {
@@ -155,7 +155,7 @@ describe("coverage: total public method count == 83", () => {
 
     // root-scoped namespaces
     const rootCount =
-      countMethods(c.accounts) +     // 11
+      countMethods(c.accounts) +     // 12
       countMethods(c.webhooks);      //  6
 
     // account-scoped namespaces (get an instance via account())
@@ -171,6 +171,6 @@ describe("coverage: total public method count == 83", () => {
       countMethods(scoped.jobs);             //  1
 
     const total = rootCount + scopedCount;
-    expect(total).toBe(83);
+    expect(total).toBe(84);
   });
 });
