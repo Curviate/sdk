@@ -1398,6 +1398,137 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/accounts/checkpoints/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resend a checkpoint verification notification
+         * @description Re-push / re-issue the pending verification challenge notification for an account. Addressed by account_id in the body (the account_id returned with the 202 checkpoint_required response). Meaningful for otp / two_factor_sms / mobile_app_approval challenges; a two_factor_app challenge has nothing to resend (the code is generated on the device) and returns resent:false rather than an error — the response never claims a resend that did not happen. Does not reset the checkpoint's expiry.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description The account whose pending checkpoint notification should be re-sent (returned with the 202 checkpoint_required response, or from link/poll). */
+                        account_id: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description The resend request was processed. resent:true means the substrate confirmed the notification was re-sent; resent:false means the substrate acknowledged the request but had nothing to re-send (e.g. a two_factor_app challenge, where the code is generated on the device) — the response never claims a resend that did not happen. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "checkpoint";
+                            account_id?: string;
+                            resent?: boolean;
+                        };
+                    };
+                };
+                /** @description No pending checkpoint for this account. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The checkpoint has expired. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description This challenge type does not support resend — there is nothing for the substrate to re-send. Not retryable as-is; resolve the checkpoint via submit, or by completing it directly (e.g. approving on the device), instead of resending. */
+                501: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/accounts/checkpoints/poll": {
         parameters: {
             query?: never;

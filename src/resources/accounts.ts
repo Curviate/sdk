@@ -51,6 +51,14 @@ export type AccountPollCheckpointBody =
 export type AccountPollCheckpointResult =
   paths["/v1/accounts/checkpoints/poll"]["post"]["responses"]["200"]["content"]["application/json"];
 
+/** `POST /v1/accounts/checkpoints/resend` request body. */
+export type AccountResendCheckpointBody =
+  paths["/v1/accounts/checkpoints/resend"]["post"]["requestBody"]["content"]["application/json"];
+
+/** `POST /v1/accounts/checkpoints/resend` 200 body. */
+export type AccountResendCheckpointResult =
+  paths["/v1/accounts/checkpoints/resend"]["post"]["responses"]["200"]["content"]["application/json"];
+
 /** `POST /v1/accounts/connect-link` request body. */
 export type AccountConnectLinkBody =
   paths["/v1/accounts/connect-link"]["post"]["requestBody"]["content"]["application/json"];
@@ -145,6 +153,24 @@ export class AccountsResource {
     return this.ctx.request<AccountPollCheckpointResult>({
       method: "POST",
       path: "/v1/accounts/checkpoints/poll",
+      body,
+    });
+  }
+
+  /**
+   * Re-send the pending verification challenge notification for an account.
+   *
+   * Useful when the end user says they never received the code or push
+   * notification for a pending checkpoint. `resent` echoes the result
+   * honestly: `true` once the notification was actually re-sent, `false`
+   * when there was nothing to re-send for that challenge type (this call
+   * never throws just because a resend wasn't applicable). Does not reset
+   * the checkpoint's expiry.
+   */
+  resendCheckpoint(body: AccountResendCheckpointBody): Promise<AccountResendCheckpointResult> {
+    return this.ctx.request<AccountResendCheckpointResult>({
+      method: "POST",
+      path: "/v1/accounts/checkpoints/resend",
       body,
     });
   }

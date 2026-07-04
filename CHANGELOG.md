@@ -7,6 +7,12 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.11.0] — 2026-07-04
+
+### Added
+
+- **`accounts.resendCheckpoint({ account_id })`.** Re-sends the pending verification challenge notification for an account (e.g. when the end user says they never received the OTP/2FA code or the mobile-app push). Returns `{ object: "checkpoint", account_id, resent }` — `resent` echoes the outcome honestly (`false` when there was nothing to re-send for that challenge type; this never throws just because a resend wasn't applicable). Does not reset the checkpoint's expiry. Extends the Accounts surface to 11 methods.
+
 ## [0.10.0] — 2026-07-03
 
 ### Added

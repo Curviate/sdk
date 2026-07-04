@@ -142,9 +142,9 @@ describe("webhooks.getStateDiff", () => {
   });
 });
 
-// ─── coverage: total public method count == 82 ───────────────────────────────
-describe("coverage: total public method count == 82", () => {
-  it("counts all public function properties across all resource namespaces (target: 82)", () => {
+// ─── coverage: total public method count == 83 ───────────────────────────────
+describe("coverage: total public method count == 83", () => {
+  it("counts all public function properties across all resource namespaces (target: 83)", () => {
     const c = new Curviate({ apiKey: "k", baseUrl: BASE });
 
     function countMethods(obj: object): number {
@@ -155,7 +155,7 @@ describe("coverage: total public method count == 82", () => {
 
     // root-scoped namespaces
     const rootCount =
-      countMethods(c.accounts) +     // 10
+      countMethods(c.accounts) +     // 11
       countMethods(c.webhooks);      //  6
 
     // account-scoped namespaces (get an instance via account())
@@ -171,6 +171,6 @@ describe("coverage: total public method count == 82", () => {
       countMethods(scoped.jobs);             //  1
 
     const total = rootCount + scopedCount;
-    expect(total).toBe(82);
+    expect(total).toBe(83);
   });
 });

@@ -94,6 +94,46 @@ describe("accounts.pollCheckpoint", () => {
   });
 });
 
+// ─── accounts.resendCheckpoint (POST /v1/accounts/checkpoints/resend) ────────
+describe("accounts.resendCheckpoint", () => {
+  it("POST /v1/accounts/checkpoints/resend returns resent:true", async () => {
+    server.use(
+      http.post(`${BASE}/v1/accounts/checkpoints/resend`, () =>
+        HttpResponse.json({ object: "checkpoint", account_id: "acc_prov", resent: true }),
+      ),
+    );
+    const res = await client.accounts.resendCheckpoint({ account_id: "acc_prov" });
+    expect(res.object).toBe("checkpoint");
+    expect(res.account_id).toBe("acc_prov");
+    expect(res.resent).toBe(true);
+  });
+
+  it("honest no-op: returns resent:false without throwing (e.g. two_factor_app has nothing to resend)", async () => {
+    server.use(
+      http.post(`${BASE}/v1/accounts/checkpoints/resend`, () =>
+        HttpResponse.json({ object: "checkpoint", account_id: "acc_prov", resent: false }),
+      ),
+    );
+    const res = await client.accounts.resendCheckpoint({ account_id: "acc_prov" });
+    expect(res.resent).toBe(false);
+  });
+
+  it("sends Content-Type: application/json and the account_id body", async () => {
+    let ct: string | null = null;
+    let body: unknown;
+    server.use(
+      http.post(`${BASE}/v1/accounts/checkpoints/resend`, async ({ request }) => {
+        ct = request.headers.get("content-type");
+        body = await request.json();
+        return HttpResponse.json({ object: "checkpoint", account_id: "acc_prov", resent: true });
+      }),
+    );
+    await client.accounts.resendCheckpoint({ account_id: "acc_prov" });
+    expect(ct).toContain("application/json");
+    expect(body).toEqual({ account_id: "acc_prov" });
+  });
+});
+
 // ─── accounts.createConnectLink (POST /v1/accounts/connect-link) ─────────────
 describe("accounts.createConnectLink", () => {
   it("POST /v1/accounts/connect-link returns hosted url", async () => {

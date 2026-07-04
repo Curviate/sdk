@@ -3407,6 +3407,281 @@
         "x-order": 8
       }
     },
+    "/v1/accounts/checkpoints/resend": {
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Resend a checkpoint verification notification",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The resend request was processed. resent:true means the substrate confirmed the notification was re-sent; resent:false means the substrate acknowledged the request but had nothing to re-send (e.g. a two_factor_app challenge, where the code is generated on the device) \u2014 the response never claims a resend that did not happen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "checkpoint"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "account_id": {
+                      "type": "string"
+                    },
+                    "resent": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "examples": {
+                  "resent": {
+                    "summary": "Notification re-sent",
+                    "value": {
+                      "object": "checkpoint",
+                      "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
+                      "resent": true
+                    }
+                  },
+                  "notResent": {
+                    "summary": "Acknowledged, nothing to resend for this challenge type",
+                    "value": {
+                      "object": "checkpoint",
+                      "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
+                      "resent": false
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "404": {
+            "description": "No pending checkpoint for this account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The checkpoint has expired.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "409 error",
+                    "value": {
+                      "code": "CONFLICT",
+                      "message": "The request conflicts with the current state of the resource.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited \u2014 slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "This challenge type does not support resend \u2014 there is nothing for the substrate to re-send. Not retryable as-is; resolve the checkpoint via submit, or by completing it directly (e.g. approving on the device), instead of resending.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "501 error",
+                    "value": {
+                      "code": "PLATFORM_NOT_IMPLEMENTED",
+                      "message": "This operation is not yet supported.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Re-push / re-issue the pending verification challenge notification for an account. Addressed by account_id in the body (the account_id returned with the 202 checkpoint_required response). Meaningful for otp / two_factor_sms / mobile_app_approval challenges; a two_factor_app challenge has nothing to resend (the code is generated on the device) and returns resent:false rather than an error \u2014 the response never claims a resend that did not happen. Does not reset the checkpoint's expiry.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "account_id": {
+                    "type": "string",
+                    "description": "The account whose pending checkpoint notification should be re-sent (returned with the 202 checkpoint_required response, or from link/poll)."
+                  }
+                },
+                "required": [
+                  "account_id"
+                ]
+              },
+              "examples": {
+                "default": {
+                  "summary": "Resend the pending checkpoint notification",
+                  "value": {
+                    "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-order": 9
+      }
+    },
     "/v1/accounts/checkpoints/poll": {
       "post": {
         "tags": [
