@@ -36,6 +36,7 @@ export type ErrorCode =
   | "ACCOUNT_NOT_FOUND"
   | "ACCOUNT_RESTRICTED"
   | "RESOURCE_NOT_FOUND"
+  | "RESOURCE_ACCESS_RESTRICTED"
   // Tier / subscription gating
   | "TIER_NOT_ACTIVE"
   | "LINKEDIN_FEATURE_NOT_SUBSCRIBED"

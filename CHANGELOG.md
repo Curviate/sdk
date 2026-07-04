@@ -12,6 +12,7 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 ### Added
 
 - **New `companies` namespace (5 methods).** `companies.get(identifier)` retrieves a company's full LinkedIn profile — accepts either a public handle (the slug in `linkedin.com/company/<handle>`, e.g. `"t-systems"`) or a numeric id. `companies.employees(identifier, params?)`, `companies.posts(identifier, params?)`, and `companies.jobs(identifier, params?)` list company sub-resources (filterable with `keywords`/`location` where supported); `companies.followers(identifier, params?)` lists company followers (requires the acting account to administer the target page). The four sub-resource methods require the company's **numeric provider_id** (the same `id` field `companies.get()` returns) — a handle or URN is rejected server-side before any upstream call. Types: `CompanyProfile`, `CompanyEmployeeListPage`, `CompanyPostListPage`, `CompanyJobListPage`, `CompanyFollowerListPage`.
+- **New `ErrorCode` value: `RESOURCE_ACCESS_RESTRICTED`.** The non-admin mapping for `companies.followers()` — surfaced when the acting account does not administer the target company page. Added to the `ErrorCode` union and the transport's known-code set (previously unknown codes silently narrowed to `INTERNAL`).
 
 ### Removed (BREAKING)
 
