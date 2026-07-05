@@ -2048,7 +2048,8 @@
                       "host",
                       "port"
                     ],
-                    "description": "Custom-proxy egress config, or null to clear it (revert to automatic proxy protection). Omit to leave it unchanged."
+                    "description": "Custom-proxy egress config, or null to clear it (revert to automatic proxy protection). Omit to leave it unchanged.",
+                    "nullable": true
                   }
                 }
               },
@@ -41985,7 +41986,8 @@
                   },
                   "name": {
                     "type": "string",
-                    "description": "Replace the human-readable name (1–100 chars), or null to clear it."
+                    "description": "Replace the human-readable name (1–100 chars), or null to clear it.",
+                    "nullable": true
                   },
                   "enabled": {
                     "type": "boolean",

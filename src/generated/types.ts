@@ -675,7 +675,7 @@ export interface paths {
                             username?: string;
                             /** @description Proxy auth password (optional). Encrypted at rest, never logged or returned. */
                             password?: string;
-                        };
+                        } | null;
                     };
                 };
             };
@@ -16986,7 +16986,7 @@ export interface paths {
                         /** @description Replace the delivery URL. Must be an HTTPS URL. */
                         request_url?: string;
                         /** @description Replace the human-readable name (1–100 chars), or null to clear it. */
-                        name?: string;
+                        name?: string | null;
                         /** @description Enable or disable the webhook. A disabled webhook delivers nothing. */
                         enabled?: boolean;
                         /** @description Replace the custom headers added to each delivery POST (whole-array). */
