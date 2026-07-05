@@ -142,10 +142,11 @@ describe("webhooks.getStateDiff", () => {
   });
 });
 
-// ─── coverage: total public method count == 88 ───────────────────────────────
-// (was 84: profiles lost getCompany (9→8, hard-moved), companies added (+5))
-describe("coverage: total public method count == 88", () => {
-  it("counts all public function properties across all resource namespaces (target: 88)", () => {
+// ─── coverage: total public method count == 93 ───────────────────────────────
+// (was 88: salesNavigator gained the 5-method v2 list-surface cascade, 7→12;
+// saveLead's breaking re-signature does not change the method count)
+describe("coverage: total public method count == 93", () => {
+  it("counts all public function properties across all resource namespaces (target: 93)", () => {
     const c = new Curviate({ apiKey: "k", baseUrl: BASE });
 
     function countMethods(obj: object): number {
@@ -167,12 +168,12 @@ describe("coverage: total public method count == 88", () => {
       countMethods(scoped.invites) +         //  5
       countMethods(scoped.search) +          //  5
       countMethods(scoped.posts) +           //  7
-      countMethods(scoped.salesNavigator) +  //  7
+      countMethods(scoped.salesNavigator) +  // 12 (7 + 5-method v2 list-surface cascade)
       countMethods(scoped.recruiter) +       // 18
       countMethods(scoped.jobs) +            //  1
       countMethods(scoped.companies);        //  5
 
     const total = rootCount + scopedCount;
-    expect(total).toBe(88);
+    expect(total).toBe(93);
   });
 });

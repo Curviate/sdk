@@ -34717,12 +34717,12 @@
         "x-order": 6
       }
     },
-    "/v1/sales-navigator/leads/{user_id}": {
-      "post": {
+    "/v1/sales-navigator/account-lists": {
+      "get": {
         "tags": [
           "Sales Navigator"
         ],
-        "summary": "Save a lead",
+        "summary": "List account lists (Sales Navigator)",
         "security": [
           {
             "apiKeyAuth": []
@@ -34730,18 +34730,39 @@
         ],
         "parameters": [
           {
-            "name": "user_id",
-            "in": "path",
+            "name": "account_id",
+            "in": "query",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The Sales Navigator member ID (ACw\u2026 format) to save as a lead."
+            "description": "The operator account whose Sales Navigator seat owns the lists. Requires a Sales Navigator seat."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Maximum number of items to return (1\u2013100). Default 10."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor from a prior response. Omit for the first page."
           }
         ],
         "responses": {
           "200": {
-            "description": "Lead saved successfully.",
+            "description": "The account (company) lists on the operator's Sales Navigator seat.",
             "content": {
               "application/json": {
                 "schema": {
@@ -34750,40 +34771,111 @@
                     "object": {
                       "type": "string",
                       "enum": [
-                        "lead_saved"
+                        "sn_account_list_result"
                       ],
                       "description": "Response type discriminator."
                     },
-                    "user_id": {
-                      "type": "string",
-                      "description": "The Sales Navigator member ID that was saved."
+                    "items": {
+                      "type": "array",
+                      "description": "The lists on the operator's Sales Navigator seat.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "object": {
+                            "type": "string",
+                            "enum": [
+                              "sn_account_list"
+                            ],
+                            "description": "Item type discriminator."
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "List id."
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "List display name."
+                          },
+                          "description": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "List description. May be null."
+                          },
+                          "items_count": {
+                            "type": "number",
+                            "description": "Number of items in the list."
+                          },
+                          "last_modified_at": {
+                            "type": "string",
+                            "description": "ISO-8601 last-modified timestamp."
+                          },
+                          "last_viewed_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "ISO-8601 last-viewed timestamp. May be null."
+                          }
+                        },
+                        "required": [
+                          "object",
+                          "id",
+                          "name",
+                          "items_count",
+                          "last_modified_at"
+                        ]
+                      }
                     },
-                    "saved": {
-                      "type": "boolean",
-                      "description": "true if the lead was saved, false if already saved."
+                    "paging": {
+                      "type": "object",
+                      "description": "Pagination metadata.",
+                      "properties": {
+                        "total_count": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "description": "Total number of lists. May be null."
+                        }
+                      }
                     },
-                    "list_id": {
+                    "cursor": {
                       "type": [
                         "string",
                         "null"
                       ],
-                      "description": "The lead list the member was saved to. Null if no list_id was provided."
+                      "description": "Opaque cursor for the next page, or null when exhausted."
                     }
                   },
                   "required": [
                     "object",
-                    "user_id",
-                    "saved"
+                    "items",
+                    "paging",
+                    "cursor"
                   ]
                 },
                 "examples": {
                   "basic": {
-                    "summary": "Lead saved successfully",
+                    "summary": "Account lists",
                     "value": {
-                      "object": "lead_saved",
-                      "user_id": "ACw_sn_lead_001",
-                      "saved": true,
-                      "list_id": null
+                      "object": "sn_account_list_result",
+                      "items": [
+                        {
+                          "object": "sn_account_list",
+                          "id": "sn_acct_list_001",
+                          "name": "Target Accounts Q3",
+                          "description": "Prioritised outbound accounts.",
+                          "items_count": 12,
+                          "last_modified_at": "2026-06-30T10:00:00.000Z",
+                          "last_viewed_at": "2026-07-01T08:30:00.000Z"
+                        }
+                      ],
+                      "paging": {
+                        "total_count": 2
+                      },
+                      "cursor": null
                     }
                   }
                 }
@@ -34799,7 +34891,7 @@
             }
           },
           "400": {
-            "description": "Invalid request \u2014 malformed user_id or invalid account_id.",
+            "description": "Invalid request \u2014 malformed or missing account_id, limit, cursor, or body field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -34862,7 +34954,7 @@
             }
           },
           "404": {
-            "description": "ACCOUNT_NOT_FOUND \u2014 the account_id does not exist or does not belong to this tenant.",
+            "description": "RESOURCE_NOT_FOUND \u2014 the account_id or list does not exist or does not belong to this tenant.",
             "content": {
               "application/json": {
                 "schema": {
@@ -34870,31 +34962,10 @@
                 },
                 "examples": {
                   "error": {
-                    "summary": "Account not found",
+                    "summary": "Account or list not found",
                     "value": {
-                      "code": "ACCOUNT_NOT_FOUND",
-                      "message": "The account_id does not exist or does not belong to this tenant.",
-                      "user_fixable": true,
-                      "retry_likely_to_succeed": false
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict \u2014 a conflicting operation is already in progress.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "error": {
-                    "summary": "409 error",
-                    "value": {
-                      "code": "CONFLICT",
-                      "message": "The request conflicts with the current state of the resource.",
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
                       "user_fixable": true,
                       "retry_likely_to_succeed": false
                     }
@@ -34904,7 +34975,7 @@
             }
           },
           "422": {
-            "description": "ACCOUNT_RESTRICTED or the lead is already saved (action_already_performed).",
+            "description": "ACCOUNT_RESTRICTED \u2014 the account cannot perform this operation.",
             "content": {
               "application/json": {
                 "schema": {
@@ -35049,7 +35120,1605 @@
             "color": "#E8352F"
           }
         ],
-        "description": "Save a Sales Navigator member (ACw\u2026 ID) as a lead in your lead list. Pass list_id to assign to a specific list. Requires a Sales Navigator seat.",
+        "description": "List the saved-account (company) lists on the operator's Sales Navigator seat. account_id, limit, and cursor go in query params. Requires a Sales Navigator seat.",
+        "x-order": 8
+      }
+    },
+    "/v1/sales-navigator/lead-lists": {
+      "get": {
+        "tags": [
+          "Sales Navigator"
+        ],
+        "summary": "List lead lists (Sales Navigator)",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The operator account whose Sales Navigator seat owns the lists. Requires a Sales Navigator seat."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Maximum number of items to return (1\u2013100). Default 10."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor from a prior response. Omit for the first page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The lead (member) lists on the operator's Sales Navigator seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "sn_lead_list_result"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "The lists on the operator's Sales Navigator seat.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "object": {
+                            "type": "string",
+                            "enum": [
+                              "sn_lead_list"
+                            ],
+                            "description": "Item type discriminator."
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "List id."
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "List display name."
+                          },
+                          "description": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "List description. May be null."
+                          },
+                          "items_count": {
+                            "type": "number",
+                            "description": "Number of items in the list."
+                          },
+                          "last_modified_at": {
+                            "type": "string",
+                            "description": "ISO-8601 last-modified timestamp."
+                          },
+                          "last_viewed_at": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "ISO-8601 last-viewed timestamp. May be null."
+                          }
+                        },
+                        "required": [
+                          "object",
+                          "id",
+                          "name",
+                          "items_count",
+                          "last_modified_at"
+                        ]
+                      }
+                    },
+                    "paging": {
+                      "type": "object",
+                      "description": "Pagination metadata.",
+                      "properties": {
+                        "total_count": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "description": "Total number of lists. May be null."
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page, or null when exhausted."
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "items",
+                    "paging",
+                    "cursor"
+                  ]
+                },
+                "examples": {
+                  "basic": {
+                    "summary": "Lead lists",
+                    "value": {
+                      "object": "sn_lead_list_result",
+                      "items": [
+                        {
+                          "object": "sn_lead_list",
+                          "id": "sn_lead_list_001",
+                          "name": "Champions",
+                          "description": "Warm decision-makers.",
+                          "items_count": 27,
+                          "last_modified_at": "2026-07-02T09:00:00.000Z",
+                          "last_viewed_at": "2026-07-03T07:45:00.000Z"
+                        }
+                      ],
+                      "paging": {
+                        "total_count": 2
+                      },
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request \u2014 malformed or missing account_id, limit, cursor, or body field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated \u2014 missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. Either TIER_NOT_ACTIVE \u2014 the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) \u2014 or LINKEDIN_FEATURE_NOT_SUBSCRIBED \u2014 the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "feature_not_subscribed": {
+                    "summary": "LinkedIn account lacks Sales Navigator subscription",
+                    "value": {
+                      "code": "LINKEDIN_FEATURE_NOT_SUBSCRIBED",
+                      "message": "This LinkedIn account does not have the feature or subscription required for this operation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "RESOURCE_NOT_FOUND \u2014 the account_id or list does not exist or does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "Account or list not found",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "ACCOUNT_RESTRICTED \u2014 the account cannot perform this operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED \u2014 request rate exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "sn",
+        "x-badges": [
+          {
+            "name": "+SN",
+            "position": "after",
+            "color": "#E8352F"
+          }
+        ],
+        "description": "List the saved-lead (member) lists on the operator's Sales Navigator seat. account_id, limit, and cursor go in query params. Requires a Sales Navigator seat.",
+        "x-order": 9
+      }
+    },
+    "/v1/sales-navigator/account-lists/{list_id}": {
+      "post": {
+        "tags": [
+          "Sales Navigator"
+        ],
+        "summary": "Browse an account list (Sales Navigator)",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The account-list id (from GET /v1/sales-navigator/account-lists)."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The operator account whose Sales Navigator seat owns the lists. Requires a Sales Navigator seat."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Maximum number of items to return (1\u2013100). Default 10."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor from a prior response. Omit for the first page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The saved accounts (companies) in one account list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "sn_saved_account_result"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "The saved accounts in the list.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "object": {
+                            "type": "string",
+                            "enum": [
+                              "sn_saved_account"
+                            ],
+                            "description": "Item type discriminator."
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "Item id."
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name."
+                          }
+                        },
+                        "required": [
+                          "object",
+                          "id",
+                          "display_name"
+                        ]
+                      }
+                    },
+                    "paging": {
+                      "type": "object",
+                      "properties": {
+                        "total_count": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "description": "Total number of items. May be null."
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page, or null when exhausted."
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "items",
+                    "paging",
+                    "cursor"
+                  ]
+                },
+                "examples": {
+                  "basic": {
+                    "summary": "Saved accounts",
+                    "value": {
+                      "object": "sn_saved_account_result",
+                      "items": [
+                        {
+                          "object": "sn_saved_account",
+                          "id": "sn_saved_acct_001",
+                          "display_name": "Northwind Analytics",
+                          "industry": "Software Development",
+                          "is_starred": true,
+                          "lists_count": 2,
+                          "notes_count": 1
+                        }
+                      ],
+                      "paging": {
+                        "total_count": 2
+                      },
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request \u2014 malformed or missing account_id, limit, cursor, or body field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated \u2014 missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. Either TIER_NOT_ACTIVE \u2014 the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) \u2014 or LINKEDIN_FEATURE_NOT_SUBSCRIBED \u2014 the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "feature_not_subscribed": {
+                    "summary": "LinkedIn account lacks Sales Navigator subscription",
+                    "value": {
+                      "code": "LINKEDIN_FEATURE_NOT_SUBSCRIBED",
+                      "message": "This LinkedIn account does not have the feature or subscription required for this operation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "RESOURCE_NOT_FOUND \u2014 the account_id or list does not exist or does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "Account or list not found",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "ACCOUNT_RESTRICTED \u2014 the account cannot perform this operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED \u2014 request rate exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "sn",
+        "x-badges": [
+          {
+            "name": "+SN",
+            "position": "after",
+            "color": "#E8352F"
+          }
+        ],
+        "description": "Return the saved accounts (companies) in one account list. Pass optional filters (persona, filter, sort_by, sort_order) in the body; account_id, limit, and cursor go in query params. Requires a Sales Navigator seat.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "persona": {
+                    "type": "string",
+                    "description": "Persona filter identifier to scope the saved accounts."
+                  },
+                  "filter": {
+                    "type": "string",
+                    "enum": [
+                      "STARRED",
+                      "GROWTH_ALERTS",
+                      "RISK_ALERTS"
+                    ],
+                    "description": "Restrict to a saved-account subset: STARRED, GROWTH_ALERTS, or RISK_ALERTS."
+                  },
+                  "sort_by": {
+                    "type": "string",
+                    "enum": [
+                      "DATE_ADDED",
+                      "NAME"
+                    ],
+                    "description": "Sort field: DATE_ADDED or NAME. Defaults to NAME."
+                  },
+                  "sort_order": {
+                    "type": "string",
+                    "enum": [
+                      "ASCENDING",
+                      "DESCENDING"
+                    ],
+                    "description": "Sort direction: ASCENDING or DESCENDING. Defaults to ASCENDING."
+                  }
+                }
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Browse starred saved accounts, sorted by name",
+                  "value": {
+                    "filter": "STARRED",
+                    "sort_by": "NAME",
+                    "sort_order": "ASCENDING"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-order": 10
+      }
+    },
+    "/v1/sales-navigator/lead-lists/{list_id}": {
+      "post": {
+        "tags": [
+          "Sales Navigator"
+        ],
+        "summary": "Browse a lead list (Sales Navigator)",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The lead-list id (from GET /v1/sales-navigator/lead-lists)."
+          },
+          {
+            "name": "account_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The operator account whose Sales Navigator seat owns the lists. Requires a Sales Navigator seat."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Maximum number of items to return (1\u2013100). Default 10."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque pagination cursor from a prior response. Omit for the first page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The saved leads (members) in one lead list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "sn_saved_lead_result"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "description": "The saved leads in the list.",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "object": {
+                            "type": "string",
+                            "enum": [
+                              "sn_saved_lead"
+                            ],
+                            "description": "Item type discriminator."
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "Item id."
+                          },
+                          "display_name": {
+                            "type": "string",
+                            "description": "Display name."
+                          }
+                        },
+                        "required": [
+                          "object",
+                          "id",
+                          "display_name"
+                        ]
+                      }
+                    },
+                    "paging": {
+                      "type": "object",
+                      "properties": {
+                        "total_count": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "description": "Total number of items. May be null."
+                        }
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Opaque cursor for the next page, or null when exhausted."
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "items",
+                    "paging",
+                    "cursor"
+                  ]
+                },
+                "examples": {
+                  "basic": {
+                    "summary": "Saved leads",
+                    "value": {
+                      "object": "sn_saved_lead_result",
+                      "items": [
+                        {
+                          "object": "sn_saved_lead",
+                          "id": "sn_saved_lead_001",
+                          "display_name": "Alice Growth",
+                          "network_distance": "SECOND_DEGREE",
+                          "is_premium": true,
+                          "lists_count": 1,
+                          "notes_count": 2,
+                          "saved_at": "2026-07-01T12:00:00.000Z"
+                        }
+                      ],
+                      "paging": {
+                        "total_count": 2
+                      },
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request \u2014 malformed or missing account_id, limit, cursor, or body field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated \u2014 missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. Either TIER_NOT_ACTIVE \u2014 the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) \u2014 or LINKEDIN_FEATURE_NOT_SUBSCRIBED \u2014 the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "feature_not_subscribed": {
+                    "summary": "LinkedIn account lacks Sales Navigator subscription",
+                    "value": {
+                      "code": "LINKEDIN_FEATURE_NOT_SUBSCRIBED",
+                      "message": "This LinkedIn account does not have the feature or subscription required for this operation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "RESOURCE_NOT_FOUND \u2014 the account_id or list does not exist or does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "Account or list not found",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "ACCOUNT_RESTRICTED \u2014 the account cannot perform this operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED \u2014 request rate exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "sn",
+        "x-badges": [
+          {
+            "name": "+SN",
+            "position": "after",
+            "color": "#E8352F"
+          }
+        ],
+        "description": "Return the saved leads (members) in one lead list. Pass optional filters (spotlight, sort_by, sort_order) in the body; account_id, limit, and cursor go in query params. Requires a Sales Navigator seat.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "spotlight": {
+                    "type": "string",
+                    "enum": [
+                      "RECENT_POSITION_CHANGE",
+                      "RECENTLY_POSTED_ON_LINKEDIN",
+                      "FOLLOW_YOUR_COMPANY",
+                      "SHARE_EXPERIENCE"
+                    ],
+                    "description": "Restrict to a spotlighted lead subset: RECENT_POSITION_CHANGE, RECENTLY_POSTED_ON_LINKEDIN, FOLLOW_YOUR_COMPANY, or SHARE_EXPERIENCE."
+                  },
+                  "sort_by": {
+                    "type": "string",
+                    "enum": [
+                      "DATE_ADDED",
+                      "ACCOUNT",
+                      "NAME",
+                      "OUTREACH_ACTIVITY"
+                    ],
+                    "description": "Sort field: DATE_ADDED, ACCOUNT, NAME, or OUTREACH_ACTIVITY. Defaults to DATE_ADDED."
+                  },
+                  "sort_order": {
+                    "type": "string",
+                    "enum": [
+                      "ASCENDING",
+                      "DESCENDING"
+                    ],
+                    "description": "Sort direction: ASCENDING or DESCENDING. Defaults to DESCENDING."
+                  }
+                }
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Browse leads with a recent position change",
+                  "value": {
+                    "spotlight": "RECENT_POSITION_CHANGE",
+                    "sort_by": "DATE_ADDED",
+                    "sort_order": "DESCENDING"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-order": 11
+      }
+    },
+    "/v1/sales-navigator/account-lists/{list_id}/save": {
+      "post": {
+        "tags": [
+          "Sales Navigator"
+        ],
+        "summary": "Save an account to a list (Sales Navigator)",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The target account-list id to save the company into."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account saved into the list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "sn_account_saved"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "list_id": {
+                      "type": "string",
+                      "description": "The account list the company was saved into."
+                    },
+                    "company_id": {
+                      "type": "string",
+                      "description": "The LinkedIn company id that was saved."
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "list_id",
+                    "company_id"
+                  ]
+                },
+                "examples": {
+                  "basic": {
+                    "summary": "Account saved",
+                    "value": {
+                      "object": "sn_account_saved",
+                      "list_id": "sn_acct_list_001",
+                      "company_id": "123456"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request \u2014 malformed or missing account_id, limit, cursor, or body field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated \u2014 missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. Either TIER_NOT_ACTIVE \u2014 the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) \u2014 or LINKEDIN_FEATURE_NOT_SUBSCRIBED \u2014 the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "feature_not_subscribed": {
+                    "summary": "LinkedIn account lacks Sales Navigator subscription",
+                    "value": {
+                      "code": "LINKEDIN_FEATURE_NOT_SUBSCRIBED",
+                      "message": "This LinkedIn account does not have the feature or subscription required for this operation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "RESOURCE_NOT_FOUND \u2014 the account_id or list does not exist or does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "Account or list not found",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "ACCOUNT_RESTRICTED \u2014 the account cannot perform this operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED \u2014 request rate exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "sn",
+        "x-badges": [
+          {
+            "name": "+SN",
+            "position": "after",
+            "color": "#E8352F"
+          }
+        ],
+        "description": "Save a LinkedIn company into an account list. account_id and company_id go in the body. Requires a Sales Navigator seat.",
         "requestBody": {
           "required": true,
           "content": {
@@ -35059,30 +36728,371 @@
                 "properties": {
                   "account_id": {
                     "type": "string",
-                    "description": "The operator account whose Sales Navigator session saves the lead. Requires a Sales Navigator seat."
+                    "description": "The operator account whose Sales Navigator seat saves the account. Requires a Sales Navigator seat."
                   },
-                  "list_id": {
+                  "company_id": {
                     "type": "string",
-                    "description": "Lead list ID to save the lead into. Resolve via type=LEAD_LISTS on search/parameters."
+                    "description": "The LinkedIn company id to save into the account list."
                   }
                 },
                 "required": [
-                  "account_id"
+                  "account_id",
+                  "company_id"
                 ]
               },
               "examples": {
                 "basic": {
-                  "summary": "Save a Sales Navigator member as a lead",
+                  "summary": "Save a company into an account list",
                   "value": {
                     "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
-                    "list_id": "12345"
+                    "company_id": "123456"
                   }
                 }
               }
             }
           }
         },
-        "x-order": 7
+        "x-order": 12
+      }
+    },
+    "/v1/sales-navigator/lead-lists/{list_id}/save": {
+      "post": {
+        "tags": [
+          "Sales Navigator"
+        ],
+        "summary": "Save a lead",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "list_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The target lead-list id to save the member into."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lead saved into the list.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "sn_lead_saved"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "list_id": {
+                      "type": "string",
+                      "description": "The lead list the member was saved into."
+                    },
+                    "user_id": {
+                      "type": "string",
+                      "description": "The LinkedIn member id that was saved."
+                    }
+                  },
+                  "required": [
+                    "object",
+                    "list_id",
+                    "user_id"
+                  ]
+                },
+                "examples": {
+                  "basic": {
+                    "summary": "Lead saved",
+                    "value": {
+                      "object": "sn_lead_saved",
+                      "list_id": "sn_lead_list_001",
+                      "user_id": "ACwAABxyz"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request \u2014 malformed or missing account_id, limit, cursor, or body field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated \u2014 missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden. Either TIER_NOT_ACTIVE \u2014 the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) \u2014 or LINKEDIN_FEATURE_NOT_SUBSCRIBED \u2014 the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "feature_not_subscribed": {
+                    "summary": "LinkedIn account lacks Sales Navigator subscription",
+                    "value": {
+                      "code": "LINKEDIN_FEATURE_NOT_SUBSCRIBED",
+                      "message": "This LinkedIn account does not have the feature or subscription required for this operation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "RESOURCE_NOT_FOUND \u2014 the account_id or list does not exist or does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "Account or list not found",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "ACCOUNT_RESTRICTED \u2014 the account cannot perform this operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED \u2014 request rate exceeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMITED",
+                      "message": "Too many requests; retry after the hinted delay.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "sn",
+        "x-badges": [
+          {
+            "name": "+SN",
+            "position": "after",
+            "color": "#E8352F"
+          }
+        ],
+        "description": "Save a LinkedIn member into a lead list. account_id and user_id go in the body. Requires a Sales Navigator seat.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "account_id": {
+                    "type": "string",
+                    "description": "The operator account whose Sales Navigator seat saves the lead. Requires a Sales Navigator seat."
+                  },
+                  "user_id": {
+                    "type": "string",
+                    "description": "The LinkedIn member id to save into the lead list."
+                  }
+                },
+                "required": [
+                  "account_id",
+                  "user_id"
+                ]
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Save a member into a lead list",
+                  "value": {
+                    "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
+                    "user_id": "ACwAABxyz"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-order": 13
       }
     },
     "/v1/search/parameters": {

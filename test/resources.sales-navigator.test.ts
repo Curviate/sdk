@@ -139,16 +139,31 @@ describe("salesNavigator.getProfile", () => {
   });
 });
 
-// ─── salesNavigator.saveLead (POST /v1/sales-navigator/leads/:user_id) ────────
-describe("salesNavigator.saveLead", () => {
-  it("POST /v1/sales-navigator/leads/:user_id saves the lead", async () => {
+// ─── salesNavigator.saveLead (v2, POST /v1/sales-navigator/lead-lists/:list_id/save) ──
+// BREAKING (2026-07-04): replaces the retired v1 `saveLead(userId, body)` —
+// there is no alias. The new signature takes a single object; `list_id` is required.
+describe("salesNavigator.saveLead (v2, breaking replace)", () => {
+  it("POST /v1/sales-navigator/lead-lists/:list_id/save saves the lead into the list", async () => {
+    let capturedBody: unknown;
     server.use(
-      http.post(`${BASE}/v1/sales-navigator/leads/ACw_abc`, () =>
-        HttpResponse.json({ object: "lead_saved", user_id: "ACw_abc" }),
-      ),
+      http.post(`${BASE}/v1/sales-navigator/lead-lists/L2/save`, async ({ request }) => {
+        capturedBody = await request.json();
+        return HttpResponse.json({ object: "sn_lead_saved", list_id: "L2", user_id: "ACw_abc" });
+      }),
     );
-    const res = await sn().saveLead("ACw_abc", { account_id: ACC });
+    const res = await sn().saveLead({ list_id: "L2", user_id: "ACw_abc", account_id: ACC });
+    expect(res.object).toBe("sn_lead_saved");
+    expect(res.list_id).toBe("L2");
     expect(res.user_id).toBe("ACw_abc");
+    // account_id present in the body — the save endpoints carry no query params.
+    expect(capturedBody).toEqual({ account_id: ACC, user_id: "ACw_abc" });
+  });
+
+  it("the v1 saveLead(userId, body) arity is gone (type error at compile time)", () => {
+    const method = sn().saveLead;
+    // Runtime arity check as a proxy for the removed two-arg call shape —
+    // the real guarantee is the TS compile error, asserted by check:types.
+    expect(method.length).toBe(1);
   });
 });
 

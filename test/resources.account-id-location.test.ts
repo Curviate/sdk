@@ -126,9 +126,16 @@ describe("account_id in body — JSON write POSTs", () => {
     expect(cap.query).toBeNull();
   });
 
-  it("salesNavigator.saveLead (POST /v1/sales-navigator/leads/:id) puts account_id in the body", async () => {
-    const cap = captureJsonBody("post", `${BASE}/v1/sales-navigator/leads/usr_1`);
-    await acc.salesNavigator.saveLead("usr_1", {} as never);
+  it("salesNavigator.saveLead (POST /v1/sales-navigator/lead-lists/:list_id/save) puts account_id in the body", async () => {
+    const cap = captureJsonBody("post", `${BASE}/v1/sales-navigator/lead-lists/list_1/save`);
+    await acc.salesNavigator.saveLead({ list_id: "list_1", user_id: "usr_1" } as never);
+    expect(cap.body?.account_id).toBe(ACC);
+    expect(cap.query).toBeNull();
+  });
+
+  it("salesNavigator.saveAccount (POST /v1/sales-navigator/account-lists/:list_id/save) puts account_id in the body", async () => {
+    const cap = captureJsonBody("post", `${BASE}/v1/sales-navigator/account-lists/list_1/save`);
+    await acc.salesNavigator.saveAccount({ list_id: "list_1", company_id: "co_1" } as never);
     expect(cap.body?.account_id).toBe(ACC);
     expect(cap.query).toBeNull();
   });

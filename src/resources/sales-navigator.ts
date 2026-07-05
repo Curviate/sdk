@@ -1,9 +1,16 @@
 /**
- * Sales Navigator resource — 7 methods (tier: sn).
+ * Sales Navigator resource — 12 methods (tier: sn).
  *
  * Account-scoped: the bound context injects `account_id` into every request.
  * `startChat` accepts optional `attachments: Array<Buffer | File>` and builds
  * `FormData` automatically before calling the transport.
+ *
+ * Five methods (`accountLists`, `leadLists`, `browseAccountList`,
+ * `browseLeadList`, `saveAccount`) are the v2 list surface — `account_id`
+ * is required by every v2 endpoint and travels in the query on the
+ * reads/browse, in the body on the two saves. `saveLead` is the v2
+ * save-lead surface that **replaces** the retired v1
+ * `POST /v1/sales-navigator/leads/{user_id}` — no alias.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -58,16 +65,72 @@ export type SNGetProfileParams = NonNullable<
 export type SNGetProfileResult =
   paths["/v1/sales-navigator/profiles/{identifier}"]["get"]["responses"]["200"]["content"]["application/json"];
 
-export type SNSaveLeadBody =
-  paths["/v1/sales-navigator/leads/{user_id}"]["post"]["requestBody"]["content"]["application/json"];
-export type SNSaveLeadResult =
-  paths["/v1/sales-navigator/leads/{user_id}"]["post"]["responses"]["200"]["content"]["application/json"];
-
 export type SNSyncMessagesParams = NonNullable<
   paths["/v1/sales-navigator/messages/sync"]["get"]["parameters"]["query"]
 >;
 export type SNSyncMessagesResult =
   paths["/v1/sales-navigator/messages/sync"]["get"]["responses"]["200"]["content"]["application/json"];
+
+// ─── v2 list surface ────────────────────────────────────────────────────────
+// Six ops: two list reads, two browse (POST-with-body-filters), two saves.
+// `account_id` is required by every endpoint and travels in the query on the
+// reads/browse and in the body on the two saves (the save endpoints take no
+// query params at all).
+
+export type SNAccountListsQuery = NonNullable<
+  paths["/v1/sales-navigator/account-lists"]["get"]["parameters"]["query"]
+>;
+export type SNAccountListsResult =
+  paths["/v1/sales-navigator/account-lists"]["get"]["responses"]["200"]["content"]["application/json"];
+
+export type SNLeadListsQuery = NonNullable<
+  paths["/v1/sales-navigator/lead-lists"]["get"]["parameters"]["query"]
+>;
+export type SNLeadListsResult =
+  paths["/v1/sales-navigator/lead-lists"]["get"]["responses"]["200"]["content"]["application/json"];
+
+export type SNBrowseAccountListQuery = NonNullable<
+  paths["/v1/sales-navigator/account-lists/{list_id}"]["post"]["parameters"]["query"]
+>;
+export type SNBrowseAccountListBody =
+  paths["/v1/sales-navigator/account-lists/{list_id}"]["post"]["requestBody"]["content"]["application/json"];
+export type SNBrowseAccountListResult =
+  paths["/v1/sales-navigator/account-lists/{list_id}"]["post"]["responses"]["200"]["content"]["application/json"];
+
+export type SNBrowseLeadListQuery = NonNullable<
+  paths["/v1/sales-navigator/lead-lists/{list_id}"]["post"]["parameters"]["query"]
+>;
+export type SNBrowseLeadListBody =
+  paths["/v1/sales-navigator/lead-lists/{list_id}"]["post"]["requestBody"]["content"]["application/json"];
+export type SNBrowseLeadListResult =
+  paths["/v1/sales-navigator/lead-lists/{list_id}"]["post"]["responses"]["200"]["content"]["application/json"];
+
+export type SNSaveAccountBody =
+  paths["/v1/sales-navigator/account-lists/{list_id}/save"]["post"]["requestBody"]["content"]["application/json"];
+export type SNSaveAccountResult =
+  paths["/v1/sales-navigator/account-lists/{list_id}/save"]["post"]["responses"]["200"]["content"]["application/json"];
+/** Caller-facing input for `saveAccount()` — `list_id` addresses the path, the rest is the body. */
+export type SNSaveAccountInput = Omit<SNSaveAccountBody, "account_id"> & {
+  list_id: string;
+  account_id?: string;
+};
+
+/**
+ * `POST /v1/sales-navigator/lead-lists/{list_id}/save` — the v2 save-lead
+ * surface. **BREAKING (2026-07-04):** replaces the retired v1
+ * `POST /v1/sales-navigator/leads/{user_id}` — there is no alias. The v2 op
+ * inverts the path/body roles (the list is now the path, the member the body)
+ * and makes the list mandatory.
+ */
+export type SNSaveLeadBody =
+  paths["/v1/sales-navigator/lead-lists/{list_id}/save"]["post"]["requestBody"]["content"]["application/json"];
+export type SNSaveLeadResult =
+  paths["/v1/sales-navigator/lead-lists/{list_id}/save"]["post"]["responses"]["200"]["content"]["application/json"];
+/** Caller-facing input for `saveLead()` — `list_id` addresses the path, the rest is the body. */
+export type SNSaveLeadInput = Omit<SNSaveLeadBody, "account_id"> & {
+  list_id: string;
+  account_id?: string;
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -201,12 +264,20 @@ export class SalesNavigatorResource {
   }
 
   /**
-   * Save a Sales Navigator member as a lead. `POST /v1/sales-navigator/leads/{user_id}`
+   * Save a Sales Navigator member into a lead list.
+   * `POST /v1/sales-navigator/lead-lists/{list_id}/save`
+   *
+   * **BREAKING (2026-07-04):** replaces the retired v1
+   * `saveLead(userId, { account_id, list_id? })` — there is no alias. The
+   * list is now mandatory and addresses the path; the member id travels in
+   * the body alongside `account_id` (the save endpoints carry no query
+   * params, so `account_id` has nowhere else to go).
    */
-  saveLead(userId: string, body: SNSaveLeadBody): Promise<SNSaveLeadResult> {
+  saveLead(input: SNSaveLeadInput): Promise<SNSaveLeadResult> {
+    const { list_id, ...body } = input;
     return this.ctx.request<SNSaveLeadResult>({
       method: "POST",
-      path: `/v1/sales-navigator/leads/${userId}`,
+      path: `/v1/sales-navigator/lead-lists/${list_id}/save`,
       body,
       accountIdIn: "body",
     });
@@ -221,6 +292,85 @@ export class SalesNavigatorResource {
       method: "GET",
       path: "/v1/sales-navigator/messages/sync",
       query: params,
+    });
+  }
+
+  // ─── v2 list surface ──────────────────────────────────────────────────────
+
+  /**
+   * List the saved-account (company) lists on the operator's Sales Navigator seat.
+   * `GET /v1/sales-navigator/account-lists`
+   */
+  accountLists(query?: Partial<SNAccountListsQuery>): Promise<SNAccountListsResult> {
+    return this.ctx.request<SNAccountListsResult>({
+      method: "GET",
+      path: "/v1/sales-navigator/account-lists",
+      ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * List the saved-lead (member) lists on the operator's Sales Navigator seat.
+   * `GET /v1/sales-navigator/lead-lists`
+   */
+  leadLists(query?: Partial<SNLeadListsQuery>): Promise<SNLeadListsResult> {
+    return this.ctx.request<SNLeadListsResult>({
+      method: "GET",
+      path: "/v1/sales-navigator/lead-lists",
+      ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * Browse the saved accounts (companies) in one account list. Pass optional
+   * `persona` / `filter` / `sort_by` / `sort_order` filters in the body.
+   * `POST /v1/sales-navigator/account-lists/{list_id}`
+   */
+  browseAccountList(
+    listId: string,
+    body?: SNBrowseAccountListBody,
+    query?: Partial<SNBrowseAccountListQuery>,
+  ): Promise<SNBrowseAccountListResult> {
+    return this.ctx.request<SNBrowseAccountListResult>({
+      method: "POST",
+      path: `/v1/sales-navigator/account-lists/${listId}`,
+      body: body ?? {},
+      ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * Browse the saved leads (members) in one lead list. Pass optional
+   * `spotlight` / `sort_by` / `sort_order` filters in the body.
+   * `POST /v1/sales-navigator/lead-lists/{list_id}`
+   */
+  browseLeadList(
+    listId: string,
+    body?: SNBrowseLeadListBody,
+    query?: Partial<SNBrowseLeadListQuery>,
+  ): Promise<SNBrowseLeadListResult> {
+    return this.ctx.request<SNBrowseLeadListResult>({
+      method: "POST",
+      path: `/v1/sales-navigator/lead-lists/${listId}`,
+      body: body ?? {},
+      ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * Save a LinkedIn company into an account list.
+   * `POST /v1/sales-navigator/account-lists/{list_id}/save`
+   *
+   * No `saved` boolean is invented — a `2xx` response body is the success
+   * signal (the substrate returns no success flag).
+   */
+  saveAccount(input: SNSaveAccountInput): Promise<SNSaveAccountResult> {
+    const { list_id, ...body } = input;
+    return this.ctx.request<SNSaveAccountResult>({
+      method: "POST",
+      path: `/v1/sales-navigator/account-lists/${list_id}/save`,
+      body,
+      accountIdIn: "body",
     });
   }
 }

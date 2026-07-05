@@ -14194,41 +14194,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/sales-navigator/leads/{user_id}": {
+    "/v1/sales-navigator/account-lists": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /**
-         * Save a lead
-         * @description Save a Sales Navigator member (ACw… ID) as a lead in your lead list. Pass list_id to assign to a specific list. Requires a Sales Navigator seat.
+         * List account lists (Sales Navigator)
+         * @description List the saved-account (company) lists on the operator's Sales Navigator seat. account_id, limit, and cursor go in query params. Requires a Sales Navigator seat.
          */
-        post: {
+        get: {
             parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description The Sales Navigator member ID (ACw… format) to save as a lead. */
-                    user_id: string;
+                query: {
+                    /** @description The operator account whose Sales Navigator seat owns the lists. Requires a Sales Navigator seat. */
+                    account_id: string;
+                    /** @description Maximum number of items to return (1–100). Default 10. */
+                    limit?: number;
+                    /** @description Opaque pagination cursor from a prior response. Omit for the first page. */
+                    cursor?: string;
                 };
+                header?: never;
+                path?: never;
                 cookie?: never;
             };
-            requestBody: {
-                content: {
-                    "application/json": {
-                        /** @description The operator account whose Sales Navigator session saves the lead. Requires a Sales Navigator seat. */
-                        account_id: string;
-                        /** @description Lead list ID to save the lead into. Resolve via type=LEAD_LISTS on search/parameters. */
-                        list_id?: string;
-                    };
-                };
-            };
+            requestBody?: never;
             responses: {
-                /** @description Lead saved successfully. */
+                /** @description The account (company) lists on the operator's Sales Navigator seat. */
                 200: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -14241,17 +14234,38 @@ export interface paths {
                              * @description Response type discriminator.
                              * @enum {string}
                              */
-                            object: "lead_saved";
-                            /** @description The Sales Navigator member ID that was saved. */
-                            user_id: string;
-                            /** @description true if the lead was saved, false if already saved. */
-                            saved: boolean;
-                            /** @description The lead list the member was saved to. Null if no list_id was provided. */
-                            list_id?: string | null;
+                            object: "sn_account_list_result";
+                            /** @description The lists on the operator's Sales Navigator seat. */
+                            items: {
+                                /**
+                                 * @description Item type discriminator.
+                                 * @enum {string}
+                                 */
+                                object: "sn_account_list";
+                                /** @description List id. */
+                                id: string;
+                                /** @description List display name. */
+                                name: string;
+                                /** @description List description. May be null. */
+                                description?: string | null;
+                                /** @description Number of items in the list. */
+                                items_count: number;
+                                /** @description ISO-8601 last-modified timestamp. */
+                                last_modified_at: string;
+                                /** @description ISO-8601 last-viewed timestamp. May be null. */
+                                last_viewed_at?: string | null;
+                            }[];
+                            /** @description Pagination metadata. */
+                            paging: {
+                                /** @description Total number of lists. May be null. */
+                                total_count?: number | null;
+                            };
+                            /** @description Opaque cursor for the next page, or null when exhausted. */
+                            cursor: string | null;
                         };
                     };
                 };
-                /** @description Invalid request — malformed user_id or invalid account_id. */
+                /** @description Invalid request — malformed or missing account_id, limit, cursor, or body field. */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -14278,7 +14292,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description ACCOUNT_NOT_FOUND — the account_id does not exist or does not belong to this tenant. */
+                /** @description RESOURCE_NOT_FOUND — the account_id or list does not exist or does not belong to this tenant. */
                 404: {
                     headers: {
                         [name: string]: unknown;
@@ -14287,8 +14301,8 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Conflict — a conflicting operation is already in progress. */
-                409: {
+                /** @description ACCOUNT_RESTRICTED — the account cannot perform this operation. */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -14296,7 +14310,864 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description ACCOUNT_RESTRICTED or the lead is already saved (action_already_performed). */
+                /** @description RATE_LIMITED — request rate exceeded. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sales-navigator/lead-lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List lead lists (Sales Navigator)
+         * @description List the saved-lead (member) lists on the operator's Sales Navigator seat. account_id, limit, and cursor go in query params. Requires a Sales Navigator seat.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description The operator account whose Sales Navigator seat owns the lists. Requires a Sales Navigator seat. */
+                    account_id: string;
+                    /** @description Maximum number of items to return (1–100). Default 10. */
+                    limit?: number;
+                    /** @description Opaque pagination cursor from a prior response. Omit for the first page. */
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The lead (member) lists on the operator's Sales Navigator seat. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "sn_lead_list_result";
+                            /** @description The lists on the operator's Sales Navigator seat. */
+                            items: {
+                                /**
+                                 * @description Item type discriminator.
+                                 * @enum {string}
+                                 */
+                                object: "sn_lead_list";
+                                /** @description List id. */
+                                id: string;
+                                /** @description List display name. */
+                                name: string;
+                                /** @description List description. May be null. */
+                                description?: string | null;
+                                /** @description Number of items in the list. */
+                                items_count: number;
+                                /** @description ISO-8601 last-modified timestamp. */
+                                last_modified_at: string;
+                                /** @description ISO-8601 last-viewed timestamp. May be null. */
+                                last_viewed_at?: string | null;
+                            }[];
+                            /** @description Pagination metadata. */
+                            paging: {
+                                /** @description Total number of lists. May be null. */
+                                total_count?: number | null;
+                            };
+                            /** @description Opaque cursor for the next page, or null when exhausted. */
+                            cursor: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request — malformed or missing account_id, limit, cursor, or body field. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Unauthenticated — missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Forbidden. Either TIER_NOT_ACTIVE — the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) — or LINKEDIN_FEATURE_NOT_SUBSCRIBED — the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RESOURCE_NOT_FOUND — the account_id or list does not exist or does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description ACCOUNT_RESTRICTED — the account cannot perform this operation. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RATE_LIMITED — request rate exceeded. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sales-navigator/account-lists/{list_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Browse an account list (Sales Navigator)
+         * @description Return the saved accounts (companies) in one account list. Pass optional filters (persona, filter, sort_by, sort_order) in the body; account_id, limit, and cursor go in query params. Requires a Sales Navigator seat.
+         */
+        post: {
+            parameters: {
+                query: {
+                    /** @description The operator account whose Sales Navigator seat owns the lists. Requires a Sales Navigator seat. */
+                    account_id: string;
+                    /** @description Maximum number of items to return (1–100). Default 10. */
+                    limit?: number;
+                    /** @description Opaque pagination cursor from a prior response. Omit for the first page. */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The account-list id (from GET /v1/sales-navigator/account-lists). */
+                    list_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description Persona filter identifier to scope the saved accounts. */
+                        persona?: string;
+                        /**
+                         * @description Restrict to a saved-account subset: STARRED, GROWTH_ALERTS, or RISK_ALERTS.
+                         * @enum {string}
+                         */
+                        filter?: "STARRED" | "GROWTH_ALERTS" | "RISK_ALERTS";
+                        /**
+                         * @description Sort field: DATE_ADDED or NAME. Defaults to NAME.
+                         * @enum {string}
+                         */
+                        sort_by?: "DATE_ADDED" | "NAME";
+                        /**
+                         * @description Sort direction: ASCENDING or DESCENDING. Defaults to ASCENDING.
+                         * @enum {string}
+                         */
+                        sort_order?: "ASCENDING" | "DESCENDING";
+                    };
+                };
+            };
+            responses: {
+                /** @description The saved accounts (companies) in one account list. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "sn_saved_account_result";
+                            /** @description The saved accounts in the list. */
+                            items: {
+                                /**
+                                 * @description Item type discriminator.
+                                 * @enum {string}
+                                 */
+                                object: "sn_saved_account";
+                                /** @description Item id. */
+                                id: string;
+                                /** @description Display name. */
+                                display_name: string;
+                            }[];
+                            paging: {
+                                /** @description Total number of items. May be null. */
+                                total_count?: number | null;
+                            };
+                            /** @description Opaque cursor for the next page, or null when exhausted. */
+                            cursor: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request — malformed or missing account_id, limit, cursor, or body field. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Unauthenticated — missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Forbidden. Either TIER_NOT_ACTIVE — the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) — or LINKEDIN_FEATURE_NOT_SUBSCRIBED — the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RESOURCE_NOT_FOUND — the account_id or list does not exist or does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description ACCOUNT_RESTRICTED — the account cannot perform this operation. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RATE_LIMITED — request rate exceeded. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sales-navigator/lead-lists/{list_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Browse a lead list (Sales Navigator)
+         * @description Return the saved leads (members) in one lead list. Pass optional filters (spotlight, sort_by, sort_order) in the body; account_id, limit, and cursor go in query params. Requires a Sales Navigator seat.
+         */
+        post: {
+            parameters: {
+                query: {
+                    /** @description The operator account whose Sales Navigator seat owns the lists. Requires a Sales Navigator seat. */
+                    account_id: string;
+                    /** @description Maximum number of items to return (1–100). Default 10. */
+                    limit?: number;
+                    /** @description Opaque pagination cursor from a prior response. Omit for the first page. */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description The lead-list id (from GET /v1/sales-navigator/lead-lists). */
+                    list_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Restrict to a spotlighted lead subset: RECENT_POSITION_CHANGE, RECENTLY_POSTED_ON_LINKEDIN, FOLLOW_YOUR_COMPANY, or SHARE_EXPERIENCE.
+                         * @enum {string}
+                         */
+                        spotlight?: "RECENT_POSITION_CHANGE" | "RECENTLY_POSTED_ON_LINKEDIN" | "FOLLOW_YOUR_COMPANY" | "SHARE_EXPERIENCE";
+                        /**
+                         * @description Sort field: DATE_ADDED, ACCOUNT, NAME, or OUTREACH_ACTIVITY. Defaults to DATE_ADDED.
+                         * @enum {string}
+                         */
+                        sort_by?: "DATE_ADDED" | "ACCOUNT" | "NAME" | "OUTREACH_ACTIVITY";
+                        /**
+                         * @description Sort direction: ASCENDING or DESCENDING. Defaults to DESCENDING.
+                         * @enum {string}
+                         */
+                        sort_order?: "ASCENDING" | "DESCENDING";
+                    };
+                };
+            };
+            responses: {
+                /** @description The saved leads (members) in one lead list. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "sn_saved_lead_result";
+                            /** @description The saved leads in the list. */
+                            items: {
+                                /**
+                                 * @description Item type discriminator.
+                                 * @enum {string}
+                                 */
+                                object: "sn_saved_lead";
+                                /** @description Item id. */
+                                id: string;
+                                /** @description Display name. */
+                                display_name: string;
+                            }[];
+                            paging: {
+                                /** @description Total number of items. May be null. */
+                                total_count?: number | null;
+                            };
+                            /** @description Opaque cursor for the next page, or null when exhausted. */
+                            cursor: string | null;
+                        };
+                    };
+                };
+                /** @description Invalid request — malformed or missing account_id, limit, cursor, or body field. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Unauthenticated — missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Forbidden. Either TIER_NOT_ACTIVE — the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) — or LINKEDIN_FEATURE_NOT_SUBSCRIBED — the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RESOURCE_NOT_FOUND — the account_id or list does not exist or does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description ACCOUNT_RESTRICTED — the account cannot perform this operation. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RATE_LIMITED — request rate exceeded. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sales-navigator/account-lists/{list_id}/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Save an account to a list (Sales Navigator)
+         * @description Save a LinkedIn company into an account list. account_id and company_id go in the body. Requires a Sales Navigator seat.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The target account-list id to save the company into. */
+                    list_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description The operator account whose Sales Navigator seat saves the account. Requires a Sales Navigator seat. */
+                        account_id: string;
+                        /** @description The LinkedIn company id to save into the account list. */
+                        company_id: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Account saved into the list. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "sn_account_saved";
+                            /** @description The account list the company was saved into. */
+                            list_id: string;
+                            /** @description The LinkedIn company id that was saved. */
+                            company_id: string;
+                        };
+                    };
+                };
+                /** @description Invalid request — malformed or missing account_id, limit, cursor, or body field. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Unauthenticated — missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Forbidden. Either TIER_NOT_ACTIVE — the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) — or LINKEDIN_FEATURE_NOT_SUBSCRIBED — the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RESOURCE_NOT_FOUND — the account_id or list does not exist or does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description ACCOUNT_RESTRICTED — the account cannot perform this operation. */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RATE_LIMITED — request rate exceeded. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sales-navigator/lead-lists/{list_id}/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Save a lead
+         * @description Save a LinkedIn member into a lead list. account_id and user_id go in the body. Requires a Sales Navigator seat.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The target lead-list id to save the member into. */
+                    list_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @description The operator account whose Sales Navigator seat saves the lead. Requires a Sales Navigator seat. */
+                        account_id: string;
+                        /** @description The LinkedIn member id to save into the lead list. */
+                        user_id: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Lead saved into the list. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "sn_lead_saved";
+                            /** @description The lead list the member was saved into. */
+                            list_id: string;
+                            /** @description The LinkedIn member id that was saved. */
+                            user_id: string;
+                        };
+                    };
+                };
+                /** @description Invalid request — malformed or missing account_id, limit, cursor, or body field. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Unauthenticated — missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Forbidden. Either TIER_NOT_ACTIVE — the Curviate seat lacks the Sales Navigator add-on (carries required_tier:'sales_nav'; upgrade the Curviate subscription) — or LINKEDIN_FEATURE_NOT_SUBSCRIBED — the connected LinkedIn account lacks the Sales Navigator subscription (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two. */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description RESOURCE_NOT_FOUND — the account_id or list does not exist or does not belong to this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description ACCOUNT_RESTRICTED — the account cannot perform this operation. */
                 422: {
                     headers: {
                         [name: string]: unknown;
