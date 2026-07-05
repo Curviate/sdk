@@ -57,20 +57,20 @@ export interface paths {
                                 seat_id?: string | null;
                                 /** @description ISO-8601 UTC connection timestamp. */
                                 connected_at?: string | null;
-                                /** @description Cached account username. Null until enriched. */
+                                /** @description Cached account username. No longer refreshed by background enrichment — null for newly connected accounts (a previously cached value is retained). */
                                 username?: string | null;
-                                /** @description Cached premium-membership id. Null until enriched, or for non-premium accounts. */
+                                /** @description Cached premium-membership id. No longer refreshed by background enrichment — null for newly connected accounts, or for non-premium accounts (a previously cached value is retained). */
                                 premium_id?: string | null;
-                                /** @description Cached public profile identifier. Null until enriched. */
+                                /** @description Cached public profile identifier. No longer refreshed by background enrichment — null for newly connected accounts (a previously cached value is retained). */
                                 public_identifier?: string | null;
-                                /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until enriched. */
+                                /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until the first background enrichment lands. */
                                 substrate_created_at?: string | null;
-                                /** @description Cached signature blocks (title + content) for the account. Empty until enriched. */
+                                /** @description Cached signature blocks (title + content). No longer refreshed by background enrichment — empty for newly connected accounts (a previously cached value is retained). */
                                 signatures?: {
                                     title?: string;
                                     content?: string;
                                 }[];
-                                /** @description Cached group names the account belongs to. Empty until enriched. */
+                                /** @description Cached group names the account belongs to. No longer refreshed by background enrichment — empty for newly connected accounts (a previously cached value is retained). */
                                 groups?: string[];
                             }[];
                             /** @description Next-page cursor; null on the last page. */
@@ -257,7 +257,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description A verification challenge is required. Submit the code to checkpoints/submit using the returned account_id. */
+                /** @description A verification challenge is required. Resolve it via the checkpoint sub-resource (POST /v1/accounts/{account_id}/checkpoint/solve) using the returned account_id. */
                 202: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -273,19 +273,24 @@ export interface paths {
                             object?: "checkpoint";
                             /** @enum {string} */
                             status?: "checkpoint_required";
-                            /** @description The (provisional) account_id to pass to checkpoints/submit. */
+                            /** @description The (provisional) account_id to pass to the checkpoint sub-resource (POST /v1/accounts/{account_id}/checkpoint/solve). */
                             account_id?: string;
                             /**
                              * @description The verification challenge LinkedIn issued.
                              * @enum {string}
                              */
-                            challenge_type?: "otp" | "two_factor_sms" | "two_factor_app" | "mobile_app_approval";
+                            challenge_type?: "otp" | "two_factor_sms" | "two_factor_app" | "two_factor_whatsapp" | "mobile_app_approval" | "otp_or_mobile_app_approval" | "contract_selection";
+                            /** @description Contract picker options (contract_selection only). Solve with the chosen id as the code. */
+                            contracts?: {
+                                id?: string;
+                                name?: string;
+                            }[];
                             /** @description ISO-8601 expiry of the challenge. */
                             expires_at?: string;
                         };
                     };
                 };
-                /** @description Invalid request — missing seat_id or a malformed auth block. */
+                /** @description Invalid request — missing seat_id, a malformed auth block, or a cookie connect without user_agent. */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -312,7 +317,16 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The verification challenge type cannot be resolved automatically. */
+                /** @description This LinkedIn account is already linked (names your own account_id when your tenant owns it). */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description The verification challenge cannot be resolved automatically (a dead-end challenge such as a CAPTCHA or a phone-number registration). For those two dead-ends the error body carries a machine-readable challenge_type (captcha | phone_register) so a client can render the right guidance; other unsupported challenges carry no challenge_type. */
                 422: {
                     headers: {
                         [name: string]: unknown;
@@ -426,20 +440,20 @@ export interface paths {
                             last_checked_at?: string;
                             /** @description The seat this account occupies (null for an admin seatless account). */
                             seat_id?: string | null;
-                            /** @description Cached account username. Null until enriched. */
+                            /** @description Cached account username. No longer refreshed by background enrichment — null for newly connected accounts (a previously cached value is retained). */
                             username?: string | null;
-                            /** @description Cached premium-membership id. Null until enriched, or for non-premium accounts. */
+                            /** @description Cached premium-membership id. No longer refreshed by background enrichment — null for newly connected accounts, or for non-premium accounts (a previously cached value is retained). */
                             premium_id?: string | null;
-                            /** @description Cached public profile identifier. Null until enriched. */
+                            /** @description Cached public profile identifier. No longer refreshed by background enrichment — null for newly connected accounts (a previously cached value is retained). */
                             public_identifier?: string | null;
-                            /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until enriched. */
+                            /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until the first background enrichment lands. */
                             substrate_created_at?: string | null;
-                            /** @description Cached signature blocks (title + content) for the account. Empty until enriched. */
+                            /** @description Cached signature blocks (title + content). No longer refreshed by background enrichment — empty for newly connected accounts (a previously cached value is retained). */
                             signatures?: {
                                 title?: string;
                                 content?: string;
                             }[];
-                            /** @description Cached group names the account belongs to. Empty until enriched. */
+                            /** @description Cached group names the account belongs to. No longer refreshed by background enrichment — empty for newly connected accounts (a previously cached value is retained). */
                             groups?: string[];
                             /** @description Usage-safety recommendations for this account — one entry per tracked family (messages.daily, connection_requests.daily, profile_views.daily, inmail.daily, profile.endorse, account.per_minute). These are advisory only: Curviate never rejects a request because a daily recommendation is exceeded; only account.per_minute is a binding limit enforced with HTTP 429. */
                             quotas?: {
@@ -628,8 +642,8 @@ export interface paths {
         options?: never;
         head?: never;
         /**
-         * Update managed-proxy configuration
-         * @description Update the managed proxy egress for an account — supply a proxy object, or a country / ip to request a managed proxy location. Credentials and seat binding are untouched. The proxy password is encrypted at rest and never returned.
+         * Update account metadata / proxy configuration
+         * @description Update an account's custom metadata (a flat string map that replaces the store wholesale) and/or its custom proxy egress — supply a proxy object to set one, or null to clear it (revert to automatic proxy protection). Credentials and seat binding are untouched. The proxy password is encrypted at rest and never returned.
          */
         patch: {
             parameters: {
@@ -644,7 +658,9 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        /** @description Managed-proxy egress configuration for this account's outbound traffic. */
+                        /** @description Flat string→string map that replaces this account's custom-data store wholesale (unprovided keys are removed). */
+                        metadata?: unknown;
+                        /** @description Custom-proxy egress config, or null to clear it (revert to automatic proxy protection). Omit to leave it unchanged. */
                         proxy?: {
                             /**
                              * @description Proxy protocol. One of http, https, socks5.
@@ -660,15 +676,11 @@ export interface paths {
                             /** @description Proxy auth password (optional). Encrypted at rest, never logged or returned. */
                             password?: string;
                         };
-                        /** @description Managed proxy location hint as an ISO 3166-1 alpha-2 country code (e.g. US, DE). */
-                        country?: string;
-                        /** @description IPv4 address used to infer the managed proxy location. */
-                        ip?: string;
                     };
                 };
             };
             responses: {
-                /** @description The managed-proxy configuration was updated. */
+                /** @description The account metadata / proxy configuration was updated. */
                 200: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -686,7 +698,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Invalid proxy / country / ip. */
+                /** @description Invalid request — a malformed proxy object or an unsupported field (country/ip are no longer accepted). */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -725,7 +737,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description This managed-proxy configuration is not supported for this account (e.g. the requested proxy mode or location is unavailable on the account's current plan). Not retryable as-is — change the request rather than resubmitting. */
+                /** @description This proxy configuration is not supported for this account (e.g. the requested proxy mode is unavailable on the account's current plan). Not retryable as-is — change the request rather than resubmitting. */
                 501: {
                     headers: {
                         [name: string]: unknown;
@@ -776,7 +788,7 @@ export interface paths {
         put?: never;
         /**
          * Generate a hosted connection link
-         * @description Mint a one-time hosted URL the end user opens to authorize a LinkedIn connection. Credentials land server-side and never transit the API or LLM context. `purpose` defaults to `create`. Required fields are conditional on `purpose`: for `purpose=create`, `seat_id` is required (the empty seat the new account fills); for `purpose=reconnect`, `account_id` is required (the existing account to re-auth). `expires_in_seconds` (60–3600, default 900) and `redirect_url` are optional. See the create and reconnect examples below — each is a complete, valid body for its purpose.
+         * @description Mint a one-time hosted URL the end user opens to authorize a NEW LinkedIn connection. Credentials land server-side and never transit the API or LLM context. `seat_id` (the empty seat the new account fills) is required; `expires_in_seconds` (60–3600, default 900) and `redirect_url` are optional. To re-authorize an EXISTING account, use POST /v1/accounts/{account_id}/reconnect-link instead.
          */
         post: {
             parameters: {
@@ -788,16 +800,8 @@ export interface paths {
             requestBody: {
                 content: {
                     "application/json": {
-                        /** @description Target seat for 'create' purpose (required when purpose=create) */
-                        seat_id?: string;
-                        /** @description Account to reconnect for 'reconnect' purpose (required when purpose=reconnect) */
-                        account_id?: string;
-                        /**
-                         * @description 'create' = new account onboarding; 'reconnect' = re-auth of existing account
-                         * @default create
-                         * @enum {string}
-                         */
-                        purpose?: "create" | "reconnect";
+                        /** @description The empty seat the newly connected account will fill. */
+                        seat_id: string;
                         /**
                          * @description Seconds until the link expires (60–3600, default 900)
                          * @default 900
@@ -809,7 +813,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description A one-time hosted authorization link. Contains no credential material. */
+                /** @description A one-time hosted authorization link for a new connection. Contains no credential material. */
                 201: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -828,12 +832,12 @@ export interface paths {
                             /** @description Poll handle for GET /v1/accounts/connect-sessions/{session_id}. */
                             session_id?: string;
                             expires_at?: string;
-                            seat_id?: string | null;
-                            account_id?: string | null;
+                            /** @description The seat the new account will fill. */
+                            seat_id?: string;
                         };
                     };
                 };
-                /** @description Invalid request — missing seat_id (create) or account_id (reconnect). */
+                /** @description Invalid request — missing or invalid seat_id. */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -851,7 +855,133 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The referenced seat or account was not found. */
+                /** @description The referenced seat was not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Internal error. */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description A temporary error occurred. Please try again. */
+                502: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Service unavailable. */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gateway timeout. */
+                504: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/accounts/{account_id}/reconnect-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate a hosted re-authorization link
+         * @description Mint a one-time hosted URL the end user opens to re-authorize an EXISTING connected account in place (same account_id, same seat) after it became disconnected. Credentials land server-side and never transit the API or LLM context. `expires_in_seconds` (60–3600, default 900) and `redirect_url` are optional. For a brand-new connection, use POST /v1/accounts/connect-link instead.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description The account ID (`acc_…`) of the account to re-authorize. */
+                    account_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Seconds until the link expires (60–3600, default 900)
+                         * @default 900
+                         */
+                        expires_in_seconds?: number;
+                        /** @description Optional browser return URL after the hosted flow. No credential material. */
+                        redirect_url?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description A one-time hosted re-authorization link for an existing account. Contains no credential material. */
+                201: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "hosted_auth_url";
+                            /** @description The hosted URL the end user opens. */
+                            url?: string;
+                            /** @description Poll handle for GET /v1/accounts/connect-sessions/{session_id}. */
+                            session_id?: string;
+                            expires_at?: string;
+                            /** @description The account being re-authorized. */
+                            account_id?: string;
+                        };
+                    };
+                };
+                /** @description No such account for this tenant. */
                 404: {
                     headers: {
                         [name: string]: unknown;
@@ -1045,7 +1175,7 @@ export interface paths {
         put?: never;
         /**
          * Reconnect a LinkedIn account
-         * @description Re-authorize an account in place (same account_id, same seat) after it became disconnected. Accepts the same auth methods and optional auth-knob set as link.
+         * @description Re-authorize an account in place (same account_id, same seat) after it became disconnected. Accepts the same auth methods and optional auth-knob set as link. May return a 202 checkpoint challenge (resolve it via the checkpoint sub-resource) exactly like link.
          */
         post: {
             parameters: {
@@ -1136,7 +1266,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description A verification challenge is required (same as link). Submit the code to checkpoints/submit. */
+                /** @description A verification challenge is required (same as link). Resolve it via the checkpoint sub-resource (POST /v1/accounts/{account_id}/checkpoint/solve). */
                 202: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -1152,13 +1282,18 @@ export interface paths {
                             object?: "checkpoint";
                             /** @enum {string} */
                             status?: "checkpoint_required";
-                            /** @description The (provisional) account_id to pass to checkpoints/submit. */
+                            /** @description The (provisional) account_id to pass to the checkpoint sub-resource (POST /v1/accounts/{account_id}/checkpoint/solve). */
                             account_id?: string;
                             /**
                              * @description The verification challenge LinkedIn issued.
                              * @enum {string}
                              */
-                            challenge_type?: "otp" | "two_factor_sms" | "two_factor_app" | "mobile_app_approval";
+                            challenge_type?: "otp" | "two_factor_sms" | "two_factor_app" | "two_factor_whatsapp" | "mobile_app_approval" | "otp_or_mobile_app_approval" | "contract_selection";
+                            /** @description Contract picker options (contract_selection only). Solve with the chosen id as the code. */
+                            contracts?: {
+                                id?: string;
+                                name?: string;
+                            }[];
                             /** @description ISO-8601 expiry of the challenge. */
                             expires_at?: string;
                         };
@@ -1184,6 +1319,15 @@ export interface paths {
                 };
                 /** @description No such account for this tenant. */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description This LinkedIn account is already linked. */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1256,7 +1400,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/accounts/{account_id}/refresh": {
+    "/v1/accounts/{account_id}/checkpoint/solve": {
         parameters: {
             query?: never;
             header?: never;
@@ -1266,137 +1410,23 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Refresh a frozen account's sources
-         * @description Force a state re-sync to restart sources on a frozen account, without changing credentials or seat binding. Returns the current account status inline.
+         * Solve a checkpoint verification challenge
+         * @description Resolve the pending verification challenge for an account by submitting the code — an OTP / 2FA code, the chosen contract id (for a contract_selection challenge), or the special value TRY_ANOTHER_WAY to switch the challenge method. A chained challenge returns another 202.
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description The account ID (`acc_…`) of the account to refresh. */
+                    /** @description The account ID (`acc_…`) whose checkpoint is mid-flight (returned with the 202 checkpoint_required response). */
                     account_id: string;
                 };
                 cookie?: never;
             };
             requestBody: {
                 content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-            responses: {
-                /** @description The account's sources were restarted; current status returned. */
-                200: {
-                    headers: {
-                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                        RateLimit: components["headers"]["RateLimit"];
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            /**
-                             * @description Response type discriminator.
-                             * @enum {string}
-                             */
-                            object?: "account";
-                            account_id?: string;
-                            /** @enum {string} */
-                            status?: "active" | "reconnect_needed" | "restricted";
-                            last_checked_at?: string;
-                        };
-                    };
-                };
-                /** @description No such account for this tenant. */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Rate limited — slow down and retry after the hinted delay. */
-                429: {
-                    headers: {
-                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                        RateLimit: components["headers"]["RateLimit"];
-                        "Retry-After": components["headers"]["Retry-After"];
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Internal error. */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description A temporary error occurred. Please try again. */
-                502: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Service unavailable. */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-                /** @description Gateway timeout. */
-                504: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Error"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/accounts/checkpoints/submit": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Submit a checkpoint verification code
-         * @description Resolve the pending verification challenge for an account by submitting the OTP / 2FA code. Addressed by account_id in the body (the account_id returned with the 202 checkpoint_required response). A chained challenge returns another 202.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
                     "application/json": {
-                        /** @description The account whose connect/reconnect is mid-flight (returned with the 202 checkpoint_required response). */
-                        account_id: string;
-                        /** @description The OTP / 2FA verification code. Special value TRY_ANOTHER_WAY switches the challenge type (e.g. in-app → 2FA). */
+                        /** @description The OTP / 2FA verification code, the chosen contract id (contract_selection), or the special value TRY_ANOTHER_WAY to switch the challenge method. */
                         code: string;
                     };
                 };
@@ -1429,7 +1459,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description A chained challenge follows (e.g. OTP -> 2FA). Submit the next code to the same account_id. */
+                /** @description A chained challenge follows (e.g. OTP -> 2FA). Solve the next code at the same account's checkpoint/solve. */
                 202: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -1445,13 +1475,18 @@ export interface paths {
                             object?: "checkpoint";
                             /** @enum {string} */
                             status?: "checkpoint_required";
-                            /** @description The (provisional) account_id to pass to checkpoints/submit. */
+                            /** @description The (provisional) account_id to pass to the checkpoint sub-resource (POST /v1/accounts/{account_id}/checkpoint/solve). */
                             account_id?: string;
                             /**
                              * @description The verification challenge LinkedIn issued.
                              * @enum {string}
                              */
-                            challenge_type?: "otp" | "two_factor_sms" | "two_factor_app" | "mobile_app_approval";
+                            challenge_type?: "otp" | "two_factor_sms" | "two_factor_app" | "two_factor_whatsapp" | "mobile_app_approval" | "otp_or_mobile_app_approval" | "contract_selection";
+                            /** @description Contract picker options (contract_selection only). Solve with the chosen id as the code. */
+                            contracts?: {
+                                id?: string;
+                                name?: string;
+                            }[];
                             /** @description ISO-8601 expiry of the challenge. */
                             expires_at?: string;
                         };
@@ -1540,7 +1575,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/accounts/checkpoints/resend": {
+    "/v1/accounts/{account_id}/checkpoint/request": {
         parameters: {
             query?: never;
             header?: never;
@@ -1550,22 +1585,22 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Resend a checkpoint verification notification
-         * @description Re-push / re-issue the pending verification challenge notification for an account. Addressed by account_id in the body (the account_id returned with the 202 checkpoint_required response). Meaningful for otp / two_factor_sms / mobile_app_approval challenges; a two_factor_app challenge has nothing to resend (the code is generated on the device) and returns resent:false rather than an error — the response never claims a resend that did not happen. Does not reset the checkpoint's expiry.
+         * Re-request a checkpoint verification notification
+         * @description Re-issue the pending verification challenge notification for an account. Meaningful for code-delivery challenges (otp / two_factor_sms / mobile_app_approval); a two_factor_app challenge has nothing to re-request (the code is generated on the device) and returns resent:false rather than an error — the response never claims a re-send that did not happen. Does not reset the checkpoint's expiry.
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    /** @description The account ID (`acc_…`) whose pending checkpoint notification should be re-issued. */
+                    account_id: string;
+                };
                 cookie?: never;
             };
             requestBody: {
                 content: {
-                    "application/json": {
-                        /** @description The account whose pending checkpoint notification should be re-sent (returned with the 202 checkpoint_required response, or from link/poll). */
-                        account_id: string;
-                    };
+                    "application/json": Record<string, never>;
                 };
             };
             responses: {
@@ -1671,7 +1706,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/accounts/checkpoints/poll": {
+    "/v1/accounts/{account_id}/checkpoint/poll": {
         parameters: {
             query?: never;
             header?: never;
@@ -1682,21 +1717,21 @@ export interface paths {
         put?: never;
         /**
          * Poll a mobile-app-approval checkpoint
-         * @description Poll the pending mobile-app-approval challenge for an account to check whether the user has approved the sign-in on their LinkedIn mobile app. Addressed by account_id in the body (the account_id returned with the 202 checkpoint_required response). There is no code to submit — approve on the phone, then poll. Returns status:"pending" while waiting, status:"active" once approved, or status:"expired"/"failed" on timeout/failure. Only valid for mobile_app_approval checkpoints — use submit for code-based challenges.
+         * @description Poll the pending mobile-app-approval challenge for an account to check whether the user has approved the sign-in on their LinkedIn mobile app. There is no code to submit — approve on the phone, then poll. Returns status:"pending" while waiting, status:"active" once approved, or status:"expired"/"failed" on timeout/failure. Valid for mobile_app_approval and the in-app branch of otp_or_mobile_app_approval — use solve for code-based challenges.
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    /** @description The account ID (`acc_…`) whose mobile-app-approval connect is mid-flight (returned with the 202 checkpoint_required response). */
+                    account_id: string;
+                };
                 cookie?: never;
             };
             requestBody: {
                 content: {
-                    "application/json": {
-                        /** @description The account whose mobile-app-approval connect is mid-flight (returned with the 202 checkpoint_required response). */
-                        account_id: string;
-                    };
+                    "application/json": Record<string, never>;
                 };
             };
             responses: {
@@ -2897,7 +2932,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description You must be a page administrator of this company to read its followers. */
+                /** @description The account does not have the required Core seat. */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -2906,7 +2941,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description The account_id does not belong to this tenant. */
+                /** @description Company not found, or you do not administer this company's page. */
                 404: {
                     headers: {
                         [name: string]: unknown;

@@ -7,6 +7,40 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.13.0] — 2026-07-05
+
+Accounts/Auth surface migration. This is a **breaking** minor (pre-1.0): the account
+connection and checkpoint surface was reshaped end-to-end. All changes are on the
+`accounts` namespace; no other namespace is affected.
+
+### Removed (BREAKING)
+
+- **`accounts.refresh(accountId)` removed** — the underlying endpoint (`POST /v1/accounts/{account_id}/refresh`) no longer exists and has no alias. Accounts now restart and re-sync automatically; status freshness is served by the real-time account-status webhook, the nightly reconcile, and `accounts.get()`'s stale-while-revalidate background refresh. Remove any `accounts.refresh()` call sites. Type `AccountRefreshResult` is removed.
+- **`accounts.submitCheckpoint(body)` removed** — renamed to `accounts.solveCheckpoint(accountId, { code })` (see below). No alias.
+- **`accounts.resendCheckpoint(body)` removed** — renamed to `accounts.requestCheckpoint(accountId)` (see below). No alias.
+
+### Changed (BREAKING)
+
+- **Checkpoint operations are now account-in-path.** The three checkpoint methods take the account id as a **path argument** instead of an `account_id` body field:
+  - `submitCheckpoint({ account_id, code })` → **`solveCheckpoint(account_id, { code })`** (`POST /v1/accounts/{account_id}/checkpoint/solve`). Returns the connected account (201) or a chained checkpoint (202).
+  - `resendCheckpoint({ account_id })` → **`requestCheckpoint(account_id)`** (`POST /v1/accounts/{account_id}/checkpoint/request`). Returns `{ object, account_id, resent }` — `resent` is still honest (`false` when there is nothing to re-send).
+  - `pollCheckpoint({ account_id })` → **`pollCheckpoint(account_id)`** (`POST /v1/accounts/{account_id}/checkpoint/poll`) — same name, now a single string arg (no body).
+  - Migration: `submitCheckpoint({ account_id, code })` → `solveCheckpoint(account_id, { code })`; `resendCheckpoint({ account_id })` → `requestCheckpoint(account_id)`; `pollCheckpoint({ account_id })` → `pollCheckpoint(account_id)`.
+  - Types: `AccountSubmitCheckpointBody`/`AccountSubmitCheckpointResult` → `AccountSolveCheckpointBody`/`AccountSolveCheckpointResult`; `AccountResendCheckpointBody`/`AccountResendCheckpointResult` → `AccountRequestCheckpointResult` (no body type); `AccountPollCheckpointBody` removed (no body).
+- **`accounts.createConnectLink()` is create-only.** The `purpose` and `account_id` body fields are removed — it now only mints a link to connect a **new** account (`{ seat_id, expires_in_seconds?, redirect_url? }`). To re-authorize an existing account via a hosted link, use the new `accounts.createReconnectLink()` (below). Type `AccountConnectLinkBody` no longer carries `purpose`/`account_id`.
+- **`accounts.update()` body reshaped.** The managed `country` / `ip` knobs are removed from `PATCH /v1/accounts/{account_id}`; the body is now `{ metadata?, proxy? }`. `metadata` is a flat string map that **replaces** the account's custom-data store wholesale; `proxy` sets a custom egress proxy (the managed location is now chosen at connect time, not here). Passing `country`/`ip` is rejected with `INVALID_REQUEST`. Type `AccountUpdateBody` changed. *(Known limitation: the generated body type does not yet express `proxy: null` to clear a custom proxy — the server accepts it, but a strict TypeScript caller must cast until the schema surfaces the nullability. The CLI's `account update --clear-proxy` sends it directly.)*
+- **Cookie auth requires `user_agent`.** `accounts.link()` and `accounts.reconnect()` now require a `user_agent` when `auth_method: "cookie"`; without one the request is rejected with `INVALID_REQUEST`. It stays optional for `auth_method: "credentials"`. (Enforced server-side; the flat request-body type cannot make it conditionally required, so pass it whenever you connect by cookie.)
+- **`accounts.reconnect()` result is now a `200 | 202` union.** A reconnect can itself surface a checkpoint challenge — resolve it with `solveCheckpoint` / `pollCheckpoint`, exactly like `accounts.link()`. Discriminate on `result.object`. Type `AccountReconnectResult` is now a union.
+
+### Added
+
+- **`accounts.createReconnectLink(accountId, body?)`.** Mint a one-time hosted **re-authorization** link for an existing disconnected account (`POST /v1/accounts/{account_id}/reconnect-link`) — the hosted counterpart of `accounts.reconnect()`. Body is optional (`{ expires_in_seconds?, redirect_url? }`). Returns `{ object: "hosted_auth_url", url, session_id, expires_at, account_id }`; poll completion with `accounts.getConnectSession(session_id)`. Types: `AccountReconnectLinkBody`, `AccountReconnectLinkResult`. The `accounts` namespace stays at 12 methods (`refresh` out, `createReconnectLink` in).
+- **Wider checkpoint challenge vocabulary.** The 202 `challenge_type` enum now covers `otp | two_factor_sms | two_factor_app | two_factor_whatsapp | mobile_app_approval | otp_or_mobile_app_approval | contract_selection`, and a `contract_selection` challenge additionally carries `contracts: [{ id, name }]` (choose one and pass its id to `solveCheckpoint`).
+
+### Changed
+
+- Regenerated types from the current API surface. `accounts.get()` / `accounts.list()` still return the six cached enrichment fields, but `username`, `premium_id`, `public_identifier`, `signatures`, and `groups` are no longer refreshed by background enrichment — they read `null`/`[]` for newly connected accounts (any previously cached value is retained). `full_name` and `substrate_created_at` continue to populate; `substrate_created_at` remains ISO-8601 UTC.
+
 ## [0.12.0] — 2026-07-05
 
 ### Added

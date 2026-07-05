@@ -1,5 +1,6 @@
-// accounts namespace methods (all 9 remaining after list() in the reference slice)
-// TDD: MSW happy-path for every method + a smoke test for the full method count.
+// accounts namespace methods.
+// TDD: MSW happy-path for every method + explicit wire-path assertions for the
+// account-id-in-path operations (checkpoint solve/request/poll, reconnect-link).
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";
@@ -36,7 +37,7 @@ describe("accounts.link", () => {
         return HttpResponse.json({ object: "account", account_id: "acc_1", status: "active" }, { status: 201 });
       }),
     );
-    await client.accounts.link({ seat_id: "s", auth_method: "cookie", cookie: { li_at: "x" } });
+    await client.accounts.link({ seat_id: "s", auth_method: "cookie", cookie: { li_at: "x" }, user_agent: "UA" });
     expect(ct).toContain("application/json");
   });
 
@@ -65,72 +66,89 @@ describe("accounts.link", () => {
   });
 });
 
-// ─── accounts.submitCheckpoint (POST /v1/accounts/checkpoints/submit) ────────
-describe("accounts.submitCheckpoint", () => {
-  it("POST /v1/accounts/checkpoints/submit returns account on 200", async () => {
-    server.use(
-      http.post(`${BASE}/v1/accounts/checkpoints/submit`, () =>
-        HttpResponse.json({ object: "account", account_id: "acc_1", status: "active" }),
-      ),
-    );
-    const res = await client.accounts.submitCheckpoint({
-      account_id: "acc_prov",
-      code: "123456",
-    });
-    expect(res.object).toBe("account");
-  });
-});
-
-// ─── accounts.pollCheckpoint (POST /v1/accounts/checkpoints/poll) ─────────────
-describe("accounts.pollCheckpoint", () => {
-  it("POST /v1/accounts/checkpoints/poll returns status", async () => {
-    server.use(
-      http.post(`${BASE}/v1/accounts/checkpoints/poll`, () =>
-        HttpResponse.json({ object: "checkpoint", status: "checkpoint_required", account_id: "acc_prov" }),
-      ),
-    );
-    const res = await client.accounts.pollCheckpoint({ account_id: "acc_prov" });
-    expect(res.account_id).toBe("acc_prov");
-  });
-});
-
-// ─── accounts.resendCheckpoint (POST /v1/accounts/checkpoints/resend) ────────
-describe("accounts.resendCheckpoint", () => {
-  it("POST /v1/accounts/checkpoints/resend returns resent:true", async () => {
-    server.use(
-      http.post(`${BASE}/v1/accounts/checkpoints/resend`, () =>
-        HttpResponse.json({ object: "checkpoint", account_id: "acc_prov", resent: true }),
-      ),
-    );
-    const res = await client.accounts.resendCheckpoint({ account_id: "acc_prov" });
-    expect(res.object).toBe("checkpoint");
-    expect(res.account_id).toBe("acc_prov");
-    expect(res.resent).toBe(true);
-  });
-
-  it("honest no-op: returns resent:false without throwing (e.g. two_factor_app has nothing to resend)", async () => {
-    server.use(
-      http.post(`${BASE}/v1/accounts/checkpoints/resend`, () =>
-        HttpResponse.json({ object: "checkpoint", account_id: "acc_prov", resent: false }),
-      ),
-    );
-    const res = await client.accounts.resendCheckpoint({ account_id: "acc_prov" });
-    expect(res.resent).toBe(false);
-  });
-
-  it("sends Content-Type: application/json and the account_id body", async () => {
-    let ct: string | null = null;
+// ─── accounts.solveCheckpoint (POST /v1/accounts/{account_id}/checkpoint/solve) ─
+describe("accounts.solveCheckpoint", () => {
+  it("addresses the account in the PATH and sends {code} in the body", async () => {
+    let seenPath: string | null = null;
     let body: unknown;
+    let ct: string | null = null;
     server.use(
-      http.post(`${BASE}/v1/accounts/checkpoints/resend`, async ({ request }) => {
+      http.post(`${BASE}/v1/accounts/acc_prov/checkpoint/solve`, async ({ request }) => {
+        seenPath = new URL(request.url).pathname;
         ct = request.headers.get("content-type");
         body = await request.json();
+        return HttpResponse.json({ object: "account", account_id: "acc_prov", status: "active" }, { status: 201 });
+      }),
+    );
+    const res = await client.accounts.solveCheckpoint("acc_prov", { code: "123456" });
+    // The account_id must interpolate into the path — not land in the body.
+    expect(seenPath).toBe("/v1/accounts/acc_prov/checkpoint/solve");
+    expect(ct).toContain("application/json");
+    expect(body).toEqual({ code: "123456" });
+    expect(res.object).toBe("account");
+  });
+
+  it("surfaces a chained challenge on 202", async () => {
+    server.use(
+      http.post(`${BASE}/v1/accounts/acc_prov/checkpoint/solve`, () =>
+        HttpResponse.json(
+          { object: "checkpoint", status: "checkpoint_required", account_id: "acc_prov", challenge_type: "two_factor_sms" },
+          { status: 202 },
+        ),
+      ),
+    );
+    const res = await client.accounts.solveCheckpoint("acc_prov", { code: "111" });
+    expect(res.object).toBe("checkpoint");
+  });
+});
+
+// ─── accounts.requestCheckpoint (POST /v1/accounts/{account_id}/checkpoint/request) ─
+describe("accounts.requestCheckpoint", () => {
+  it("addresses the account in the PATH, sends no body, returns {resent}", async () => {
+    let seenPath: string | null = null;
+    let rawBody: string | null = null;
+    server.use(
+      http.post(`${BASE}/v1/accounts/acc_prov/checkpoint/request`, async ({ request }) => {
+        seenPath = new URL(request.url).pathname;
+        rawBody = await request.text();
         return HttpResponse.json({ object: "checkpoint", account_id: "acc_prov", resent: true });
       }),
     );
-    await client.accounts.resendCheckpoint({ account_id: "acc_prov" });
-    expect(ct).toContain("application/json");
-    expect(body).toEqual({ account_id: "acc_prov" });
+    const res = await client.accounts.requestCheckpoint("acc_prov");
+    expect(seenPath).toBe("/v1/accounts/acc_prov/checkpoint/request");
+    // Bodyless POST: no JSON body on the wire.
+    expect(rawBody).toBe("");
+    expect(res.object).toBe("checkpoint");
+    expect(res.resent).toBe(true);
+  });
+
+  it("honest no-op: returns resent:false without throwing (nothing to re-send for this challenge type)", async () => {
+    server.use(
+      http.post(`${BASE}/v1/accounts/acc_prov/checkpoint/request`, () =>
+        HttpResponse.json({ object: "checkpoint", account_id: "acc_prov", resent: false }),
+      ),
+    );
+    const res = await client.accounts.requestCheckpoint("acc_prov");
+    expect(res.resent).toBe(false);
+  });
+});
+
+// ─── accounts.pollCheckpoint (POST /v1/accounts/{account_id}/checkpoint/poll) ─
+describe("accounts.pollCheckpoint", () => {
+  it("addresses the account in the PATH, sends no body, returns status", async () => {
+    let seenPath: string | null = null;
+    let rawBody: string | null = null;
+    server.use(
+      http.post(`${BASE}/v1/accounts/acc_prov/checkpoint/poll`, async ({ request }) => {
+        seenPath = new URL(request.url).pathname;
+        rawBody = await request.text();
+        return HttpResponse.json({ object: "checkpoint", status: "pending", account_id: "acc_prov" });
+      }),
+    );
+    const res = await client.accounts.pollCheckpoint("acc_prov");
+    expect(seenPath).toBe("/v1/accounts/acc_prov/checkpoint/poll");
+    expect(rawBody).toBe("");
+    expect(res.account_id).toBe("acc_prov");
   });
 });
 
@@ -161,6 +179,42 @@ describe("accounts.createConnectLink", () => {
     );
     const res = await client.accounts.createConnectLink({ seat_id: "seat_1" });
     expect(res.session_id).toBe("cs_1");
+  });
+});
+
+// ─── accounts.createReconnectLink (POST /v1/accounts/{account_id}/reconnect-link) ─
+describe("accounts.createReconnectLink", () => {
+  it("addresses the account in the PATH and returns a hosted re-auth session", async () => {
+    let seenPath: string | null = null;
+    server.use(
+      http.post(`${BASE}/v1/accounts/acc_1/reconnect-link`, ({ request }) => {
+        seenPath = new URL(request.url).pathname;
+        return HttpResponse.json(
+          { object: "hosted_auth_url", url: "https://connect.curviate.com/re", session_id: "cs_re", expires_at: "2026-06-21T13:00:00Z", account_id: "acc_1" },
+          { status: 201 },
+        );
+      }),
+    );
+    const res = await client.accounts.createReconnectLink("acc_1");
+    expect(seenPath).toBe("/v1/accounts/acc_1/reconnect-link");
+    expect(res.object).toBe("hosted_auth_url");
+    expect(res.session_id).toBe("cs_re");
+    expect(res.account_id).toBe("acc_1");
+  });
+
+  it("forwards optional body fields (expires_in_seconds, redirect_url)", async () => {
+    let body: unknown;
+    server.use(
+      http.post(`${BASE}/v1/accounts/acc_1/reconnect-link`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json(
+          { object: "hosted_auth_url", url: "https://connect.curviate.com/re", session_id: "cs_re", expires_at: "2026-06-21T13:00:00Z", account_id: "acc_1" },
+          { status: 201 },
+        );
+      }),
+    );
+    await client.accounts.createReconnectLink("acc_1", { expires_in_seconds: 600, redirect_url: "https://app.example.com/done" });
+    expect(body).toEqual({ expires_in_seconds: 600, redirect_url: "https://app.example.com/done" });
   });
 });
 
@@ -206,7 +260,7 @@ describe("accounts.get", () => {
 
 // ─── accounts.reconnect (POST /v1/accounts/:account_id/reconnect) ─────────────
 describe("accounts.reconnect", () => {
-  it("POST /v1/accounts/:account_id/reconnect returns account", async () => {
+  it("POST /v1/accounts/:account_id/reconnect returns account on 200", async () => {
     server.use(
       http.post(`${BASE}/v1/accounts/acc_1/reconnect`, () =>
         HttpResponse.json({ object: "account", account_id: "acc_1", status: "active" }),
@@ -215,34 +269,56 @@ describe("accounts.reconnect", () => {
     const res = await client.accounts.reconnect("acc_1", {
       auth_method: "cookie",
       cookie: { li_at: "y" },
+      user_agent: "UA",
     });
     expect(res.account_id).toBe("acc_1");
   });
-});
 
-// ─── accounts.refresh (POST /v1/accounts/:account_id/refresh) ─────────────────
-describe("accounts.refresh", () => {
-  it("POST /v1/accounts/:account_id/refresh returns account", async () => {
+  it("surfaces a checkpoint challenge on 202 (same as link)", async () => {
     server.use(
-      http.post(`${BASE}/v1/accounts/acc_1/refresh`, () =>
-        HttpResponse.json({ object: "account", account_id: "acc_1" }),
+      http.post(`${BASE}/v1/accounts/acc_1/reconnect`, () =>
+        HttpResponse.json(
+          { object: "checkpoint", status: "checkpoint_required", account_id: "acc_1", challenge_type: "otp" },
+          { status: 202 },
+        ),
       ),
     );
-    const res = await client.accounts.refresh("acc_1");
-    expect(res.account_id).toBe("acc_1");
+    const res = await client.accounts.reconnect("acc_1", { auth_method: "cookie", cookie: { li_at: "y" }, user_agent: "UA" });
+    expect(res.object).toBe("checkpoint");
   });
 });
 
 // ─── accounts.update (PATCH /v1/accounts/:account_id) ────────────────────────
 describe("accounts.update", () => {
-  it("PATCH /v1/accounts/:account_id returns updated account", async () => {
+  it("PATCH /v1/accounts/:account_id forwards metadata and returns updated account", async () => {
+    let body: unknown;
     server.use(
-      http.patch(`${BASE}/v1/accounts/acc_1`, () =>
-        HttpResponse.json({ object: "account", account_id: "acc_1" }),
-      ),
+      http.patch(`${BASE}/v1/accounts/acc_1`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json({ object: "account", account_id: "acc_1" });
+      }),
     );
-    const res = await client.accounts.update("acc_1", { country: "DE" });
+    const res = await client.accounts.update("acc_1", { metadata: { team: "growth" } });
+    expect(body).toEqual({ metadata: { team: "growth" } });
     expect(res.account_id).toBe("acc_1");
+  });
+
+  it("sets a custom proxy (password forwarded in the body only, never in the response)", async () => {
+    let body: unknown;
+    server.use(
+      http.patch(`${BASE}/v1/accounts/acc_1`, async ({ request }) => {
+        body = await request.json();
+        // The server never echoes the proxy back — the 200 body is minimal.
+        return HttpResponse.json({ object: "account", account_id: "acc_1" });
+      }),
+    );
+    const res = await client.accounts.update("acc_1", {
+      proxy: { protocol: "http", host: "proxy.example.com", port: 8080, username: "u", password: "s3cret" },
+    });
+    expect(body).toEqual({
+      proxy: { protocol: "http", host: "proxy.example.com", port: 8080, username: "u", password: "s3cret" },
+    });
+    expect(JSON.stringify(res)).not.toContain("s3cret");
   });
 });
 
