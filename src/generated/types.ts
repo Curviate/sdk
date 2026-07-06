@@ -242,7 +242,7 @@ export interface paths {
                             object?: "account";
                             account_id?: string;
                             /** @enum {string} */
-                            status?: "active";
+                            status?: "active" | "reconnect_needed" | "restricted" | "disconnected";
                             /** @enum {string} */
                             auth_method?: "credentials" | "cookie";
                             full_name?: string | null;
@@ -254,6 +254,8 @@ export interface paths {
                              * @description Deprecated — use seat_id (same value). Removed at the GA /v1 cutover.
                              */
                             attached_seat_id?: string | null;
+                            /** @description Present and true only when this connect recovered an existing LinkedIn identity already present on the workspace (claiming it into your account) instead of connecting a brand-new one. Absent on a normal connect. The account's status reflects its real observed state, which may need a reconnect. */
+                            recovered?: boolean;
                         };
                     };
                 };
@@ -807,7 +809,7 @@ export interface paths {
                          * @default 900
                          */
                         expires_in_seconds?: number;
-                        /** @description Optional browser return URL after the hosted flow. No credential material. */
+                        /** @description Where the user's browser is sent after the connect flow completes. Must be an absolute https URL you control; you are responsible for its safety. Omit to return the user to a Curviate confirmation page. */
                         redirect_url?: string;
                     };
                 };
@@ -951,7 +953,7 @@ export interface paths {
                          * @default 900
                          */
                         expires_in_seconds?: number;
-                        /** @description Optional browser return URL after the hosted flow. No credential material. */
+                        /** @description Where the user's browser is sent after the connect flow completes. Must be an absolute https URL you control; you are responsible for its safety. Omit to return the user to a Curviate confirmation page. */
                         redirect_url?: string;
                     };
                 };
@@ -1432,7 +1434,7 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description The challenge was resolved; the account is now active. */
+                /** @description The challenge was resolved; the account is now connected. */
                 201: {
                     headers: {
                         "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -1448,7 +1450,7 @@ export interface paths {
                             object?: "account";
                             account_id?: string;
                             /** @enum {string} */
-                            status?: "active";
+                            status?: "active" | "reconnect_needed" | "restricted" | "disconnected";
                             /** @description The seat this account occupies (canonical — supersedes the deprecated attached_seat_id). */
                             seat_id?: string | null;
                             /**
@@ -1456,6 +1458,8 @@ export interface paths {
                              * @description Deprecated — use seat_id (same value). Removed at the GA /v1 cutover.
                              */
                             attached_seat_id?: string | null;
+                            /** @description Present and true only when this connect recovered an existing LinkedIn identity already present on the workspace (claiming it into your account) instead of connecting a brand-new one. Absent on a normal connect. The account's status reflects its real observed state, which may need a reconnect. */
+                            recovered?: boolean;
                         };
                     };
                 };
@@ -1766,6 +1770,13 @@ export interface paths {
                             attached_seat_id?: string | null;
                             /** @description ISO-8601 expiry. Present on status:"pending". */
                             expires_at?: string;
+                            /**
+                             * @description Machine-readable challenge discriminator. Present on status:"expired" so a client can render the right recovery guidance without parsing prose.
+                             * @enum {string}
+                             */
+                            challenge_type?: "mobile_app_approval";
+                            /** @description Human-readable, actionable next step when the approval timed out. Present on status:"expired". */
+                            recovery_hint?: string;
                         };
                     };
                 };

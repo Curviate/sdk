@@ -36,6 +36,10 @@ connection and checkpoint surface was reshaped end-to-end. All changes are on th
 
 - **`accounts.createReconnectLink(accountId, body?)`.** Mint a one-time hosted **re-authorization** link for an existing disconnected account (`POST /v1/accounts/{account_id}/reconnect-link`) — the hosted counterpart of `accounts.reconnect()`. Body is optional (`{ expires_in_seconds?, redirect_url? }`). Returns `{ object: "hosted_auth_url", url, session_id, expires_at, account_id }`; poll completion with `accounts.getConnectSession(session_id)`. Types: `AccountReconnectLinkBody`, `AccountReconnectLinkResult`. The `accounts` namespace stays at 12 methods (`refresh` out, `createReconnectLink` in).
 - **Wider checkpoint challenge vocabulary.** The 202 `challenge_type` enum now covers `otp | two_factor_sms | two_factor_app | two_factor_whatsapp | mobile_app_approval | otp_or_mobile_app_approval | contract_selection`, and a `contract_selection` challenge additionally carries `contracts: [{ id, name }]` (choose one and pass its id to `solveCheckpoint`).
+- **Connect-recovery + honest terminal signals on the connection responses (additive, non-breaking).**
+  - `accounts.link()` and `accounts.solveCheckpoint()` 201 responses now carry an optional `recovered` boolean — `true` only when the connect reclaimed a LinkedIn identity already present on the workspace (claiming it into your account) rather than connecting a brand-new one; absent on a normal connect.
+  - The `status` on those same 201 responses is widened from `"active"` to `"active" | "reconnect_needed" | "restricted" | "disconnected"` — it now reflects the account's real observed state, which a recovered identity often reports as needing a reconnect.
+  - `accounts.pollCheckpoint()` now carries `challenge_type` (`"mobile_app_approval"`) and a human-readable `recovery_hint` on a `status: "expired"` mobile-approval timeout, so a client can render the right recovery guidance without parsing prose.
 
 ### Changed
 

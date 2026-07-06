@@ -554,7 +554,10 @@
                     "status": {
                       "type": "string",
                       "enum": [
-                        "active"
+                        "active",
+                        "reconnect_needed",
+                        "restricted",
+                        "disconnected"
                       ]
                     },
                     "auth_method": {
@@ -590,6 +593,10 @@
                       ],
                       "deprecated": true,
                       "description": "Deprecated — use seat_id (same value). Removed at the GA /v1 cutover."
+                    },
+                    "recovered": {
+                      "type": "boolean",
+                      "description": "Present and true only when this connect recovered an existing LinkedIn identity already present on the workspace (claiming it into your account) instead of connecting a brand-new one. Absent on a normal connect. The account's status reflects its real observed state, which may need a reconnect."
                     }
                   }
                 },
@@ -605,6 +612,15 @@
                       "headline": "Engineer",
                       "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
                       "attached_seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8"
+                    }
+                  },
+                  "recovered": {
+                    "summary": "Recovered an existing connection (already present on the workspace)",
+                    "value": {
+                      "object": "account",
+                      "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
+                      "status": "active",
+                      "recovered": true
                     }
                   }
                 }
@@ -2354,7 +2370,7 @@
                   },
                   "redirect_url": {
                     "type": "string",
-                    "description": "Optional browser return URL after the hosted flow. No credential material."
+                    "description": "Where the user's browser is sent after the connect flow completes. Must be an absolute https URL you control; you are responsible for its safety. Omit to return the user to a Curviate confirmation page."
                   }
                 },
                 "required": [
@@ -2608,7 +2624,7 @@
                   },
                   "redirect_url": {
                     "type": "string",
-                    "description": "Optional browser return URL after the hosted flow. No credential material."
+                    "description": "Where the user's browser is sent after the connect flow completes. Must be an absolute https URL you control; you are responsible for its safety. Omit to return the user to a Curviate confirmation page."
                   }
                 }
               },
@@ -3439,7 +3455,7 @@
         ],
         "responses": {
           "201": {
-            "description": "The challenge was resolved; the account is now active.",
+            "description": "The challenge was resolved; the account is now connected.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3458,7 +3474,10 @@
                     "status": {
                       "type": "string",
                       "enum": [
-                        "active"
+                        "active",
+                        "reconnect_needed",
+                        "restricted",
+                        "disconnected"
                       ]
                     },
                     "seat_id": {
@@ -3475,6 +3494,10 @@
                       ],
                       "deprecated": true,
                       "description": "Deprecated — use seat_id (same value). Removed at the GA /v1 cutover."
+                    },
+                    "recovered": {
+                      "type": "boolean",
+                      "description": "Present and true only when this connect recovered an existing LinkedIn identity already present on the workspace (claiming it into your account) instead of connecting a brand-new one. Absent on a normal connect. The account's status reflects its real observed state, which may need a reconnect."
                     }
                   }
                 },
@@ -3487,6 +3510,15 @@
                       "status": "active",
                       "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
                       "attached_seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8"
+                    }
+                  },
+                  "recovered": {
+                    "summary": "Recovered an existing connection (already present on the workspace)",
+                    "value": {
+                      "object": "account",
+                      "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
+                      "status": "active",
+                      "recovered": true
                     }
                   }
                 }
@@ -4151,6 +4183,17 @@
                     "expires_at": {
                       "type": "string",
                       "description": "ISO-8601 expiry. Present on status:\"pending\"."
+                    },
+                    "challenge_type": {
+                      "type": "string",
+                      "enum": [
+                        "mobile_app_approval"
+                      ],
+                      "description": "Machine-readable challenge discriminator. Present on status:\"expired\" so a client can render the right recovery guidance without parsing prose."
+                    },
+                    "recovery_hint": {
+                      "type": "string",
+                      "description": "Human-readable, actionable next step when the approval timed out. Present on status:\"expired\"."
                     }
                   }
                 },
@@ -4176,10 +4219,12 @@
                     }
                   },
                   "expired": {
-                    "summary": "Timed out",
+                    "summary": "Timed out — approval not completed in time",
                     "value": {
                       "object": "checkpoint",
-                      "status": "expired"
+                      "status": "expired",
+                      "challenge_type": "mobile_app_approval",
+                      "recovery_hint": "This sign-in wasn't completed in time. If you approved it in the LinkedIn app, this identity may already be connected — try Reconnect, sign in with the cookie method, or check your connected accounts."
                     }
                   }
                 }

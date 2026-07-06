@@ -133,6 +133,13 @@ export class AccountsResource {
    * For `auth_method: "cookie"`, `user_agent` is **required** — connecting by
    * session cookie without one is rejected with `INVALID_REQUEST`. It stays
    * optional for `auth_method: "credentials"`.
+   *
+   * On a 201 account, `recovered` is `true` only when the connect reclaimed a
+   * LinkedIn identity already present on the workspace (claiming it into your
+   * account) rather than connecting a brand-new one — it is absent on a normal
+   * connect. Its `status` reflects the account's real observed state: as well as
+   * `active` it may be `reconnect_needed`, `restricted`, or `disconnected` (a
+   * recovered identity often needs a reconnect).
    */
   link(body: AccountLinkBody): Promise<AccountLinkResult> {
     return this.ctx.request<AccountLinkResult>({
@@ -150,6 +157,12 @@ export class AccountsResource {
    * `code`. Returns the connected account (201) or, when LinkedIn chains a
    * second challenge, another checkpoint (202) — resolve that one with a
    * further `solveCheckpoint` call for the same `accountId`.
+   *
+   * On the 201 account, `recovered` is `true` only when solving the challenge
+   * reclaimed a LinkedIn identity already present on the workspace (rather than
+   * connecting a brand-new one); it is absent otherwise. Its `status` reflects
+   * the account's real observed state — as well as `active` it may be
+   * `reconnect_needed`, `restricted`, or `disconnected`.
    *
    * @param accountId - the provisional `account_id` from the 202 response.
    * @param body - the verification `code`.
@@ -188,6 +201,11 @@ export class AccountsResource {
    * from the 202 response). `status` is `pending` until the end user approves
    * on their device, then `active` (the account is connected), or
    * `expired` / `failed`. Poll until it leaves `pending`.
+   *
+   * On `status: "expired"` (the approval timed out), the response carries
+   * `challenge_type` (`"mobile_app_approval"`) and a human-readable
+   * `recovery_hint` — the actionable next step — so a client can render the
+   * right recovery guidance without parsing prose.
    *
    * @param accountId - the provisional `account_id` from the 202 response.
    */

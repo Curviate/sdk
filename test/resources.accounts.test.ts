@@ -64,6 +64,26 @@ describe("accounts.link", () => {
     expect(res.object).toBe("checkpoint");
     expect(res.account_id).toBe("acc_prov");
   });
+
+  it("passes through `recovered` and the widened status on a recovered 201", async () => {
+    server.use(
+      http.post(`${BASE}/v1/accounts/link`, () =>
+        HttpResponse.json(
+          { object: "account", account_id: "acc_rec", status: "reconnect_needed", recovered: true },
+          { status: 201 },
+        ),
+      ),
+    );
+    const res = await client.accounts.link({
+      seat_id: "seat_1",
+      auth_method: "credentials",
+      credentials: { email: "u@x.com", password: "p" },
+    });
+    if (res.object !== "account") throw new Error("expected the account branch");
+    // Typed field surfaced by the connect-fix regen (compile-time + wire pass-through).
+    expect(res.recovered).toBe(true);
+    expect(res.status).toBe("reconnect_needed");
+  });
 });
 
 // ─── accounts.solveCheckpoint (POST /v1/accounts/{account_id}/checkpoint/solve) ─
@@ -99,6 +119,20 @@ describe("accounts.solveCheckpoint", () => {
     );
     const res = await client.accounts.solveCheckpoint("acc_prov", { code: "111" });
     expect(res.object).toBe("checkpoint");
+  });
+
+  it("passes through `recovered` on a recovered 201", async () => {
+    server.use(
+      http.post(`${BASE}/v1/accounts/acc_prov/checkpoint/solve`, () =>
+        HttpResponse.json(
+          { object: "account", account_id: "acc_prov", status: "active", recovered: true },
+          { status: 201 },
+        ),
+      ),
+    );
+    const res = await client.accounts.solveCheckpoint("acc_prov", { code: "123456" });
+    if (res.object !== "account") throw new Error("expected the account branch");
+    expect(res.recovered).toBe(true);
   });
 });
 
@@ -149,6 +183,24 @@ describe("accounts.pollCheckpoint", () => {
     expect(seenPath).toBe("/v1/accounts/acc_prov/checkpoint/poll");
     expect(rawBody).toBe("");
     expect(res.account_id).toBe("acc_prov");
+  });
+
+  it("surfaces challenge_type + recovery_hint on an expired mobile-approval timeout", async () => {
+    server.use(
+      http.post(`${BASE}/v1/accounts/acc_prov/checkpoint/poll`, () =>
+        HttpResponse.json({
+          object: "checkpoint",
+          status: "expired",
+          challenge_type: "mobile_app_approval",
+          recovery_hint: "This sign-in wasn't completed in time. Try Reconnect.",
+        }),
+      ),
+    );
+    const res = await client.accounts.pollCheckpoint("acc_prov");
+    expect(res.status).toBe("expired");
+    // Typed guidance fields surfaced by the connect-fix regen.
+    expect(res.challenge_type).toBe("mobile_app_approval");
+    expect(res.recovery_hint).toContain("Reconnect");
   });
 });
 
