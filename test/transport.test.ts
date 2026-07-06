@@ -262,6 +262,38 @@ describe("retry logic", () => {
     await execute("GET", "/v1/accounts/x", det()).catch(() => {});
     expect(calls).toBe(1);
   });
+
+  // 409 ACCOUNT_ALREADY_LINKED (duplicate connect) must decode to its own code,
+  // not fall back to INTERNAL — and must NOT be retried. Proven on a GET so a
+  // retryable INTERNAL fallback would otherwise re-fire up to maxRetries times;
+  // real callers only ever see this code from accounts.link/reconnect/solveCheckpoint
+  // (all writes, which never auto-retry anyway), so this isolates the code-mapping
+  // and RETRYABLE_CODES-exclusion behavior independent of write/read semantics.
+  it("maps 409 ACCOUNT_ALREADY_LINKED to its own code and does not retry it (1 fetch)", async () => {
+    let calls = 0;
+    server.use(
+      http.get(`${BASE}/v1/accounts/x`, () => {
+        calls += 1;
+        return HttpResponse.json(
+          {
+            code: "ACCOUNT_ALREADY_LINKED",
+            message:
+              "This LinkedIn account is already linked. Reconnect or disconnect the existing account instead of linking it again.",
+            user_fixable: true,
+            retry_likely_to_succeed: false,
+            retry_hint: { kind: "never" },
+          },
+          { status: 409 },
+        );
+      }),
+    );
+    const err = await execute("GET", "/v1/accounts/x", det()).catch((e) => e);
+    expect(isCurviateError(err)).toBe(true);
+    expect((err as CurviateError).code).toBe("ACCOUNT_ALREADY_LINKED");
+    expect((err as CurviateError).httpStatus).toBe(409);
+    expect((err as CurviateError).retryLikelyToSucceed).toBe(false);
+    expect(calls).toBe(1);
+  });
 });
 
 describe("backoff computation", () => {

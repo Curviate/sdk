@@ -129,6 +129,7 @@ describe("ErrorCode union", () => {
       "PAYLOAD_TOO_LARGE",
       "ACCOUNT_NOT_FOUND",
       "ACCOUNT_RESTRICTED",
+      "ACCOUNT_ALREADY_LINKED",
       "RESOURCE_NOT_FOUND",
       "RESOURCE_ACCESS_RESTRICTED",
       "TIER_NOT_ACTIVE",

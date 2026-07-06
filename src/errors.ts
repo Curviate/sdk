@@ -35,6 +35,8 @@ export type ErrorCode =
   // Account state
   | "ACCOUNT_NOT_FOUND"
   | "ACCOUNT_RESTRICTED"
+  /** Duplicate connect — reconnect or adopt the existing account instead of linking again. Not retryable. */
+  | "ACCOUNT_ALREADY_LINKED"
   | "RESOURCE_NOT_FOUND"
   | "RESOURCE_ACCESS_RESTRICTED"
   // Tier / subscription gating
