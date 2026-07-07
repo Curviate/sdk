@@ -154,7 +154,7 @@ import { constructEvent, WebhookSignatureError } from "@curviate/sdk";
 
 // Express (Node 18+)
 app.post("/webhook", express.raw({ type: "application/json" }), async (req, res) => {
-  const sig = req.headers["x-curviate-signature"] as string;
+  const sig = req.headers["curviate-signature"] as string;
   const secret = process.env.CURVIATE_WEBHOOK_SECRET!;
 
   let event;
@@ -185,7 +185,7 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (req, res)
 // Hono / Vercel Edge — always await (Web Crypto is async)
 app.post("/webhook", async (c) => {
   const rawBody = await c.req.text();
-  const event = await constructEvent(rawBody, c.req.header("x-curviate-signature")!, secret);
+  const event = await constructEvent(rawBody, c.req.header("curviate-signature")!, secret);
   return c.text("ok");
 });
 ```

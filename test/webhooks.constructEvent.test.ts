@@ -17,7 +17,7 @@ import {
 import { CurviateError } from "../src/index.js";
 import type { paths } from "../src/generated/types.js";
 
-// ─── Test helper: build a valid X-Curviate-Signature header ─────────────────
+// ─── Test helper: build a valid Curviate-Signature header ───────────────────
 //
 // timestamp must be Unix SECONDS (integer) — the server signs with
 // Math.floor(Date.now()/1000), and the SDK verifies against the same unit.

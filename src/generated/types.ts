@@ -16686,7 +16686,7 @@ export interface paths {
                             key: string;
                             value: string;
                         }[];
-                        /** @description Account-status events to subscribe to (default: all 7) */
+                        /** @description Account-status events to subscribe to (default: all 11 lifecycle events) */
                         events?: ("account.created" | "account.connected" | "account.synced" | "account.reconnected" | "account.reconnect_needed" | "account.creation_failed" | "account.disconnected" | "account.error" | "account.paused" | "account.connecting" | "account.permission_revoked" | "account.initial_sync.running" | "account.initial_sync.completed" | "account.initial_sync.failed")[];
                     };
                 };

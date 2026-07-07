@@ -41245,7 +41245,7 @@
                             "account.initial_sync.failed"
                           ]
                         },
-                        "description": "Account-status events to subscribe to (default: all 7)"
+                        "description": "Account-status events to subscribe to (default: all 11 lifecycle events)"
                       }
                     },
                     "required": [

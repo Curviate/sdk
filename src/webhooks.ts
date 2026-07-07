@@ -306,7 +306,7 @@ function verifyAndParse(
  *
  * @param rawBody - The raw (un-parsed) request body as a string or Buffer.
  *   **Must be the exact bytes received** — do not JSON.parse then re-serialize.
- * @param signatureHeader - Full value of the `X-Curviate-Signature` header.
+ * @param signatureHeader - Full value of the `Curviate-Signature` header.
  * @param secret - The webhook signing secret from your webhook registration.
  * @param opts - Optional verification settings.
  * @returns `Promise<CurviateEvent>` — a typed event once verified.
@@ -316,7 +316,7 @@ function verifyAndParse(
  * @example
  * // Express handler (Node 18+)
  * app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
- *   const sig = req.headers['x-curviate-signature'] as string;
+ *   const sig = req.headers['curviate-signature'] as string;
  *   let event;
  *   try {
  *     event = await constructEvent(req.body, sig, secret);
@@ -334,7 +334,7 @@ function verifyAndParse(
  * // Hono / Vercel Edge
  * app.post('/webhook', async (c) => {
  *   const rawBody = await c.req.text();
- *   const event = await constructEvent(rawBody, c.req.header('x-curviate-signature')!, secret);
+ *   const event = await constructEvent(rawBody, c.req.header('curviate-signature')!, secret);
  *   return c.text('ok');
  * });
  */

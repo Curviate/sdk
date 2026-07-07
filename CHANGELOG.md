@@ -7,6 +7,14 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.14.1] — 2026-07-07
+
+### Fixed
+
+- **`constructEvent` examples referenced a wrong header name (`X-Curviate-Signature` → `Curviate-Signature`); corrected a stale default-count description.** The JSDoc and both code examples (Express/Node, Hono) for `constructEvent` named the header `X-Curviate-Signature`; the dispatcher actually sends `Curviate-Signature` (Node lowercases it to `curviate-signature` on `req.headers`), so integrators copying the examples verbatim got `undefined` for the signature header. Also corrected the generated `events` field description on the webhook-create schema from a stale "default: all 7" to "default: all 11 lifecycle events", matching the account_status catalogue.
+
+---
+
 ## [0.14.0] — 2026-07-07
 
 Webhooks surface re-based onto the v2 catalogue. Additive minor: one new method,
