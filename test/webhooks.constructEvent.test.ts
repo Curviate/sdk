@@ -15,6 +15,7 @@ import {
   WebhookSignatureError,
 } from "../src/index.js";
 import { CurviateError } from "../src/index.js";
+import type { paths } from "../src/generated/types.js";
 
 // ─── Test helper: build a valid X-Curviate-Signature header ─────────────────
 //
@@ -61,6 +62,34 @@ describe("constructEvent — happy path", () => {
     const header = makeHeader(BODY_ACCOUNT, SECRET, t);
     const event = await constructEvent(BODY_ACCOUNT, header, SECRET, { replayWindowSecs: 60 });
     expect(event.type).toBe("account.connected");
+  });
+
+  // ─── W2 re-key — representative new event types round-trip (behavior
+  // coverage; NOT the union-completeness proof — see the compile-time pin
+  // below, since verifyAndParse casts unconditionally and would pass for any
+  // string).
+  it("handles a chat.updated event (new, messaging-grouped)", async () => {
+    const t = nowSecs();
+    const body = JSON.stringify({ type: "chat.updated", data: { account_id: "acc_1" } });
+    const header = makeHeader(body, SECRET, t);
+    const event = await constructEvent(body, header, SECRET, { replayWindowSecs: 60 });
+    expect(event.type).toBe("chat.updated");
+  });
+
+  it("handles a connection.new event (new, user-grouped)", async () => {
+    const t = nowSecs();
+    const body = JSON.stringify({ type: "connection.new", data: { account_id: "acc_1" } });
+    const header = makeHeader(body, SECRET, t);
+    const event = await constructEvent(body, header, SECRET, { replayWindowSecs: 60 });
+    expect(event.type).toBe("connection.new");
+  });
+
+  it("handles an account.initial_sync.failed event (new, account_status-grouped)", async () => {
+    const t = nowSecs();
+    const body = JSON.stringify({ type: "account.initial_sync.failed", data: { account_id: "acc_1" } });
+    const header = makeHeader(body, SECRET, t);
+    const event = await constructEvent(body, header, SECRET, { replayWindowSecs: 60 });
+    expect(event.type).toBe("account.initial_sync.failed");
   });
 
   it("accepts an event ~1 second old (within window)", async () => {
@@ -210,5 +239,65 @@ describe("WebhookSignatureError identity", () => {
       expect(wse.message.length).toBeGreaterThan(0);
       expect(wse.name).toBe("WebhookSignatureError");
     }
+  });
+});
+
+// ─── CurviateEvent union pin — W2 re-key ─────────────────────────────────────
+//
+// `verifyAndParse` casts `parsed as CurviateEvent` UNCONDITIONALLY (no runtime
+// `type` check) — so a runtime "feed event X -> expect(event.type).toBe(X)"
+// test (the happy-path tests above) is VACUOUS for union COMPLETENESS: it
+// passes for any string, re-keyed or not. This drifted silently once already —
+// 0.13.0 shipped `CurviateEvent` holding `account.stopped` / `sync_started` /
+// `sync_complete` / `creation_success` / `sync_success` / `reconnect_required` /
+// `checkpoint` while the server's create-events enum had already moved on to
+// `account.synced` / `paused` / `connecting` / ... — nothing linked the two.
+//
+// This block is the actual proof. It only matters to `tsc --noEmit`
+// (`pnpm typecheck`) — vitest transpiles via esbuild and does not type-check,
+// so these assertions are inert at runtime by design; the `expect` calls exist
+// only so the `it`s register as real tests.
+describe("CurviateEvent union pin — matches the generated create-events catalogue", () => {
+  it("CurviateEvent['type'] equals the union of the 3 generated create-variant `events` enums", () => {
+    type GeneratedCreateBody =
+      paths["/v1/webhooks"]["post"]["requestBody"]["content"]["application/json"];
+    type GeneratedCreateEventName = NonNullable<GeneratedCreateBody["events"]>[number];
+
+    // Exact (two-way) type equality — NOT `extends` subtyping, which would
+    // silently pass on a strict subset or superset and hide drift.
+    type Equal<X, Y> =
+      (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2) ? true : false;
+    type AssertTrue<T extends true> = T;
+
+    // If this type alias fails to compile, CurviateEvent["type"] and the
+    // generated create-events enum have diverged — update the CurviateEvent
+    // union in src/webhooks.ts (never relax this to `extends` subtyping).
+    type _Pinned = AssertTrue<Equal<CurviateEvent["type"], GeneratedCreateEventName>>;
+    const pinned: _Pinned = true;
+    expect(pinned).toBe(true);
+  });
+
+  it("the 7 event names removed by the W2 re-key are no longer assignable", () => {
+    // Each assignment below is expected to fail to compile (the literal is not
+    // a member of CurviateEvent["type"]). If any of these names is ever
+    // re-added by mistake, the assignment starts compiling and the
+    // `@ts-expect-error` above it goes unused — `tsc` fails on "Unused
+    // '@ts-expect-error' directive", catching the regression.
+    // @ts-expect-error — 'account.stopped' removed (W2 re-key; split into account.connecting/reconnected/paused/etc)
+    const removed1: CurviateEvent["type"] = "account.stopped";
+    // @ts-expect-error — 'account.sync_started' removed (W2 re-key; no successor push event)
+    const removed2: CurviateEvent["type"] = "account.sync_started";
+    // @ts-expect-error — 'account.sync_complete' removed (W2 re-key; superseded by account.synced)
+    const removed3: CurviateEvent["type"] = "account.sync_complete";
+    // @ts-expect-error — 'account.creation_success' removed (W2 re-key; superseded by account.created)
+    const removed4: CurviateEvent["type"] = "account.creation_success";
+    // @ts-expect-error — 'account.sync_success' removed (W2 re-key; superseded by account.synced)
+    const removed5: CurviateEvent["type"] = "account.sync_success";
+    // @ts-expect-error — 'account.reconnect_required' removed (W2 re-key; superseded by account.reconnect_needed)
+    const removed6: CurviateEvent["type"] = "account.reconnect_required";
+    // @ts-expect-error — 'account.checkpoint' removed (W2 re-key; no successor push event)
+    const removed7: CurviateEvent["type"] = "account.checkpoint";
+    void [removed1, removed2, removed3, removed4, removed5, removed6, removed7];
+    expect(true).toBe(true); // runtime no-op — the real proof is the 7 suppressed errors above
   });
 });

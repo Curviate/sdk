@@ -176,7 +176,7 @@ app.post("/webhook", express.raw({ type: "application/json" }), async (req, res)
     case "account.connected":
       handleAccountConnected(event.data);
       break;
-    // 17 more event types — all in the CurviateEvent union
+    // 22 more event types — all in the CurviateEvent union
   }
 
   res.sendStatus(200);

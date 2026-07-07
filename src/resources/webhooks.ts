@@ -1,10 +1,11 @@
 /**
- * Webhooks resource — 6 methods (root-scoped).
+ * Webhooks resource — 7 methods (root-scoped).
  *
  * Root-scoped: webhooks are tenant-wide, not account-scoped. All methods are
  * mounted directly on the root client (like `accounts`).
  * `getStateDiff` is placed here because it is tagged Webhooks in the OpenAPI
  * (`GET /v1/accounts/:id/state-diff` enables event-driven state sync).
+ * `get` is net-new — a single tenant-scoped read by id.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -24,6 +25,9 @@ export type WebhookListResult =
 
 export type WebhookListEventsResult =
   paths["/v1/webhooks/events"]["get"]["responses"]["200"]["content"]["application/json"];
+
+export type WebhookGetResult =
+  paths["/v1/webhooks/{id}"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export type WebhookUpdateBody =
   paths["/v1/webhooks/{id}"]["patch"]["requestBody"]["content"]["application/json"];
@@ -71,13 +75,25 @@ export class WebhooksResource {
   }
 
   /**
-   * Return the complete canonical webhook event catalogue (21 events, grouped by source).
+   * Return the complete canonical webhook event catalogue (27 events, grouped by source).
    * `GET /v1/webhooks/events`
    */
   listEvents(): Promise<WebhookListEventsResult> {
     return this.ctx.request<WebhookListEventsResult>({
       method: "GET",
       path: "/v1/webhooks/events",
+    });
+  }
+
+  /**
+   * Return a single webhook owned by the calling tenant.
+   * `GET /v1/webhooks/{id}`
+   * The plaintext secret is never present on a read — only `secret_prefix`.
+   */
+  get(id: string): Promise<WebhookGetResult> {
+    return this.ctx.request<WebhookGetResult>({
+      method: "GET",
+      path: `/v1/webhooks/${id}`,
     });
   }
 

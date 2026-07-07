@@ -7,6 +7,22 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.14.0] — 2026-07-07
+
+Webhooks surface re-based onto the v2 catalogue. Additive minor: one new method,
+one type-only breaking note for `CurviateEvent` (see below).
+
+### Added
+
+- **`webhooks.get(id)`.** Return a single webhook owned by the calling tenant (`GET /v1/webhooks/{id}`). The plaintext secret is never present on a read — only `secret_prefix`. Type `WebhookGetResult`. The `webhooks` namespace is now 7 methods (was 6).
+- **Webhook event catalogue expanded 21 → 27** (`webhooks.listEvents()`), grouped messaging (8) / user (2) / account_status (14), plus 3 tier-gated. New subscribable-but-not-default events: `chat.updated`, `chat.deleted` (messaging), `connection.new` (user), `account.initial_sync.running` / `account.initial_sync.completed` / `account.initial_sync.failed` (account_status). Catalogue entries may now carry an `availability: "realtime" | "no_longer_realtime" | "not_realtime"` field.
+
+### Changed (type-only breaking note)
+
+- **`CurviateEvent` union re-keyed 19 → 24 deliverable events** to match the create-subscribable catalogue. Renamed/removed: `account.stopped`, `account.sync_started`, `account.sync_complete`, `account.creation_success`, `account.sync_success`, `account.reconnect_required`, `account.checkpoint` are gone; the account-lifecycle names now split across `account.synced`, `account.reconnected`, `account.reconnect_needed`, `account.paused`, `account.connecting`, `account.permission_revoked`. Net-new members: `chat.updated`, `chat.deleted`, `connection.new`, `account.initial_sync.running`, `account.initial_sync.completed`, `account.initial_sync.failed`. A `switch`/exhaustiveness check on `event.type` for any of the 7 removed names will now fail to compile — update the case list. Runtime HMAC verification (`constructEvent`) is unaffected; this is a types-only change.
+
+---
+
 ## [0.13.0] — 2026-07-05
 
 Accounts/Auth surface migration. This is a **breaking** minor (pre-1.0): the account

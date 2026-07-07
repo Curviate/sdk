@@ -1,5 +1,5 @@
-// webhooks namespace (6 methods; root-scoped)
-// MSW happy-path for every method + coverage test asserting 88 total methods.
+// webhooks namespace (7 methods; root-scoped — W2 added get())
+// MSW happy-path for every method + coverage test asserting 94 total methods.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "./msw/server.js";
@@ -77,6 +77,39 @@ describe("webhooks.listEvents", () => {
   });
 });
 
+// ─── webhooks.get (GET /v1/webhooks/:id) — net-new ───────────────────────────
+describe("webhooks.get", () => {
+  it("GET /v1/webhooks/:id returns the webhook (no plaintext secret)", async () => {
+    server.use(
+      http.get(`${BASE}/v1/webhooks/wh_1`, () =>
+        HttpResponse.json({
+          object: "webhook",
+          id: "wh_1",
+          source: "messaging",
+          request_url: "https://example.com/hook",
+          secret_prefix: "sk_12345",
+        }),
+      ),
+    );
+    const res = await client.webhooks.get("wh_1");
+    expect(res.object).toBe("webhook");
+    expect(res.id).toBe("wh_1");
+    expect((res as Record<string, unknown>)["secret"]).toBeUndefined();
+  });
+
+  it("404s for a webhook not owned by the tenant", async () => {
+    server.use(
+      http.get(`${BASE}/v1/webhooks/wh_missing`, () =>
+        HttpResponse.json(
+          { error: { code: "NOT_FOUND", message: "Webhook not found." } },
+          { status: 404 },
+        ),
+      ),
+    );
+    await expect(client.webhooks.get("wh_missing")).rejects.toBeDefined();
+  });
+});
+
 // ─── webhooks.update (PATCH /v1/webhooks/:id) ─────────────────────────────────
 describe("webhooks.update", () => {
   it("PATCH /v1/webhooks/:id returns updated webhook", async () => {
@@ -142,11 +175,10 @@ describe("webhooks.getStateDiff", () => {
   });
 });
 
-// ─── coverage: total public method count == 93 ───────────────────────────────
-// (was 88: salesNavigator gained the 5-method v2 list-surface cascade, 7→12;
-// saveLead's breaking re-signature does not change the method count)
-describe("coverage: total public method count == 93", () => {
-  it("counts all public function properties across all resource namespaces (target: 93)", () => {
+// ─── coverage: total public method count == 94 ───────────────────────────────
+// (was 93: W2 added webhooks.get() — net-new GET /v1/webhooks/:id)
+describe("coverage: total public method count == 94", () => {
+  it("counts all public function properties across all resource namespaces (target: 94)", () => {
     const c = new Curviate({ apiKey: "k", baseUrl: BASE });
 
     function countMethods(obj: object): number {
@@ -158,7 +190,7 @@ describe("coverage: total public method count == 93", () => {
     // root-scoped namespaces
     const rootCount =
       countMethods(c.accounts) +     // 12
-      countMethods(c.webhooks);      //  6
+      countMethods(c.webhooks);      //  7 (was 6; +get)
 
     // account-scoped namespaces (get an instance via account())
     const scoped = c.account("acc_test");
@@ -174,6 +206,6 @@ describe("coverage: total public method count == 93", () => {
       countMethods(scoped.companies);        //  5
 
     const total = rootCount + scopedCount;
-    expect(total).toBe(93);
+    expect(total).toBe(94);
   });
 });

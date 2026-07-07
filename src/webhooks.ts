@@ -75,8 +75,19 @@ export interface AccountPayload {
 }
 
 /**
- * The complete discriminated union of all 19 canonical Curviate webhook events.
- * The `type` field is the discriminant.
+ * The complete discriminated union of all 24 canonical, create-subscribable
+ * Curviate webhook events. The `type` field is the discriminant.
+ *
+ * Re-keyed for the v2 catalogue (was 19). Renamed/removed vs. the prior set:
+ * `account.stopped`, `account.sync_started`, `account.sync_complete`,
+ * `account.creation_success`, `account.sync_success`, `account.reconnect_required`,
+ * and `account.checkpoint` are gone — the account-lifecycle names now split
+ * across `account.synced` / `account.reconnected` / `account.reconnect_needed` /
+ * `account.paused` / `account.connecting` / `account.permission_revoked`. Net-new:
+ * `chat.updated`, `chat.deleted`, `connection.new`, and the three
+ * `account.initial_sync.*` events. This union is pinned at compile time against
+ * the generated create-events enum (see `test/webhooks.constructEvent.test.ts`)
+ * — it must never drift from the served catalogue again.
  *
  * @example
  * const event = await constructEvent(rawBody, header, secret);
@@ -91,19 +102,24 @@ export type CurviateEvent =
   | { type: "message.edited"; data: MessagePayload }
   | { type: "message.deleted"; data: MessagePayload }
   | { type: "message.reaction"; data: MessagePayload }
+  | { type: "chat.updated"; data: MessagePayload }
+  | { type: "chat.deleted"; data: MessagePayload }
   | { type: "connection.accepted"; data: ConnectionPayload }
+  | { type: "connection.new"; data: ConnectionPayload }
   | { type: "account.created"; data: AccountPayload }
   | { type: "account.connected"; data: AccountPayload }
+  | { type: "account.synced"; data: AccountPayload }
+  | { type: "account.reconnected"; data: AccountPayload }
+  | { type: "account.reconnect_needed"; data: AccountPayload }
+  | { type: "account.creation_failed"; data: AccountPayload }
   | { type: "account.disconnected"; data: AccountPayload }
   | { type: "account.error"; data: AccountPayload }
-  | { type: "account.stopped"; data: AccountPayload }
-  | { type: "account.sync_started"; data: AccountPayload }
-  | { type: "account.sync_complete"; data: AccountPayload }
-  | { type: "account.creation_success"; data: AccountPayload }
-  | { type: "account.creation_failed"; data: AccountPayload }
-  | { type: "account.sync_success"; data: AccountPayload }
-  | { type: "account.reconnect_required"; data: AccountPayload }
-  | { type: "account.checkpoint"; data: AccountPayload };
+  | { type: "account.paused"; data: AccountPayload }
+  | { type: "account.connecting"; data: AccountPayload }
+  | { type: "account.permission_revoked"; data: AccountPayload }
+  | { type: "account.initial_sync.running"; data: AccountPayload }
+  | { type: "account.initial_sync.completed"; data: AccountPayload }
+  | { type: "account.initial_sync.failed"; data: AccountPayload };
 
 // ─── Header parsing ──────────────────────────────────────────────────────────
 

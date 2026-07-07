@@ -16617,7 +16617,7 @@ export interface paths {
                             value: string;
                         }[];
                         /** @description Messaging events to subscribe to (default: [message.received]) */
-                        events?: ("message.received" | "message.delivered" | "message.read" | "message.reaction" | "message.edited" | "message.deleted")[];
+                        events?: ("message.received" | "message.delivered" | "message.read" | "message.reaction" | "message.edited" | "message.deleted" | "chat.updated" | "chat.deleted")[];
                         /**
                          * @description Field-remapping keys for the messaging delivery payload
                          * @default []
@@ -16652,7 +16652,7 @@ export interface paths {
                             value: string;
                         }[];
                         /** @description User/relation events to subscribe to (default: [connection.accepted]) */
-                        events?: "connection.accepted"[];
+                        events?: ("connection.accepted" | "connection.new")[];
                         /**
                          * @description Field-remapping keys for the user/relation delivery payload
                          * @default []
@@ -16687,7 +16687,7 @@ export interface paths {
                             value: string;
                         }[];
                         /** @description Account-status events to subscribe to (default: all 7) */
-                        events?: ("account.created" | "account.connected" | "account.synced" | "account.reconnected" | "account.reconnect_needed" | "account.creation_failed" | "account.disconnected" | "account.error" | "account.paused" | "account.connecting" | "account.permission_revoked")[];
+                        events?: ("account.created" | "account.connected" | "account.synced" | "account.reconnected" | "account.reconnect_needed" | "account.creation_failed" | "account.disconnected" | "account.error" | "account.paused" | "account.connecting" | "account.permission_revoked" | "account.initial_sync.running" | "account.initial_sync.completed" | "account.initial_sync.failed")[];
                     };
                 };
             };
@@ -16809,7 +16809,7 @@ export interface paths {
         };
         /**
          * List webhook event types
-         * @description Returns the complete canonical event catalogue (21 events) grouped by source: messaging (6), user (1), account_status (11), plus 3 tier-gated events. No quota consumed.
+         * @description Returns the complete canonical event catalogue (27 events) grouped by source: messaging (8), user (2), account_status (14), plus 3 tier-gated events. No quota consumed.
          */
         get: {
             parameters: {
@@ -16851,6 +16851,11 @@ export interface paths {
                                      * @enum {string}
                                      */
                                     tier?: "recruiter" | "sales_nav";
+                                    /**
+                                     * @description Delivery timing. Omitted (equivalent to 'realtime') on every live-pushed event. 'no_longer_realtime' means no push exists for this event; 'not_realtime' means the event is polled, not pushed, and may lag the underlying LinkedIn event.
+                                     * @enum {string}
+                                     */
+                                    availability?: "realtime" | "no_longer_realtime" | "not_realtime";
                                 }[];
                             }[];
                         };
@@ -16894,7 +16899,113 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Get a webhook
+         * @description Returns a single webhook owned by the calling tenant. The plaintext secret is never present on a read — only the prefix.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Webhook id (wh_-prefixed ULID). */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The webhook, if owned by the calling tenant. The signing secret is never returned on a read — only the prefix. */
+                200: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "webhook";
+                            /** @description Webhook id (wh_-prefixed ULID). */
+                            id?: string;
+                            /**
+                             * @description The event source this webhook subscribes to (immutable).
+                             * @enum {string}
+                             */
+                            source?: "messaging" | "user" | "account_status";
+                            /** @description The URL that receives delivery POST requests. */
+                            request_url?: string;
+                            /** @description Human-readable label. */
+                            name?: string | null;
+                            /**
+                             * @description Delivery body encoding.
+                             * @enum {string}
+                             */
+                            format?: "json" | "form";
+                            /** @description Accounts targeted by this webhook. Non-empty — each id is owned by the tenant. */
+                            account_ids?: string[];
+                            /** @description A disabled webhook is kept but delivers nothing. */
+                            enabled?: boolean;
+                            /** @description Custom headers added to each delivery POST. */
+                            headers?: {
+                                key?: string;
+                                value?: string;
+                            }[];
+                            /** @description Canonical event names this webhook subscribes to. */
+                            events?: string[];
+                            /** @description Field-remapping keys for the delivery payload (messaging and user sources only). */
+                            data?: string[];
+                            /** @description First 8 characters of the signing secret. The full secret is never returned on edit — it is preserved unchanged. */
+                            secret_prefix?: string;
+                            /** @description ISO-8601 creation timestamp. */
+                            created_at?: string;
+                        };
+                    };
+                };
+                /** @description Malformed or empty webhook id. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid API key. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Webhook not found or not owned by this tenant. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Rate limited — slow down and retry after the hinted delay. */
+                429: {
+                    headers: {
+                        "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                        RateLimit: components["headers"]["RateLimit"];
+                        "Retry-After": components["headers"]["Retry-After"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
         put?: never;
         post?: never;
         /**
