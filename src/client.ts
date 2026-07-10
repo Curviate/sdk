@@ -26,6 +26,7 @@ import {
   buildAccountScopedNamespaces,
   type AccountScopedNamespaces,
   type AccountsResource,
+  type AuthResource,
   type MessagingResource,
   type ProfilesResource,
   type InvitesResource,
@@ -43,6 +44,7 @@ export class Curviate {
   readonly config: ResolvedConfig;
 
   readonly accounts: AccountsResource;
+  readonly auth: AuthResource;
   readonly messaging: MessagingResource;
   readonly profiles: ProfilesResource;
   readonly invites: InvitesResource;
@@ -59,6 +61,7 @@ export class Curviate {
     const ctx = createContext(this.config);
     const ns = buildNamespaces(ctx);
     this.accounts = ns.accounts;
+    this.auth = ns.auth;
     this.messaging = ns.messaging;
     this.profiles = ns.profiles;
     this.invites = ns.invites;

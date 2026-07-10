@@ -1,13 +1,15 @@
 /**
  * Resource namespace assembly.
  *
- * The root client and every `account(id)` accessor expose the same set of
- * resource namespaces. All 11 namespaces are fully implemented:
- * accounts, messaging, profiles, invites, search, posts,
- * salesNavigator, recruiter, jobs, companies, and webhooks.
+ * The root client and every `account(id)` accessor expose the same bag of
+ * resource namespaces, minus the root-only ones. `accounts` and `auth` are
+ * root-scoped (connected-account and connect/reconnect management are not
+ * per-account concepts) and are stripped out of the `account(id)` accessor by
+ * {@link buildAccountScopedNamespaces}.
  */
 import type { RequestContext } from "../internal/context.js";
 import { AccountsResource } from "./accounts.js";
+import { AuthResource } from "./auth.js";
 import { MessagingResource } from "./messaging.js";
 import { ProfilesResource } from "./profiles.js";
 import { InvitesResource } from "./invites.js";
@@ -20,6 +22,7 @@ import { CompaniesResource } from "./companies.js";
 import { WebhooksResource } from "./webhooks.js";
 
 export { AccountsResource } from "./accounts.js";
+export { AuthResource } from "./auth.js";
 export { MessagingResource } from "./messaging.js";
 export { ProfilesResource } from "./profiles.js";
 export { InvitesResource } from "./invites.js";
@@ -34,6 +37,7 @@ export { WebhooksResource } from "./webhooks.js";
 /** The full namespace surface, shared by the root client and account scopes. */
 export interface ResourceNamespaces {
   accounts: AccountsResource;
+  auth: AuthResource;
   messaging: MessagingResource;
   profiles: ProfilesResource;
   invites: InvitesResource;
@@ -50,6 +54,7 @@ export interface ResourceNamespaces {
 export function buildNamespaces(ctx: RequestContext): ResourceNamespaces {
   return {
     accounts: new AccountsResource(ctx),
+    auth: new AuthResource(ctx),
     messaging: new MessagingResource(ctx),
     profiles: new ProfilesResource(ctx),
     invites: new InvitesResource(ctx),
@@ -64,17 +69,19 @@ export function buildNamespaces(ctx: RequestContext): ResourceNamespaces {
 }
 
 /**
- * The account-scoped accessor surface — every namespace except `accounts`
- * itself (account-level operations are the root client's concern). The fixed
- * `account_id` is injected by the bound context.
+ * The account-scoped accessor surface — every namespace except the root-only
+ * `accounts` and `auth` (connected-account and connect/reconnect management
+ * are not per-account concepts). The fixed `account_id` is injected by the
+ * bound context.
  */
-export type AccountScopedNamespaces = Omit<ResourceNamespaces, "accounts">;
+export type AccountScopedNamespaces = Omit<ResourceNamespaces, "accounts" | "auth">;
 
-/** Build the account-scoped namespace bag (drops `accounts`). */
+/** Build the account-scoped namespace bag (drops `accounts` and `auth`). */
 export function buildAccountScopedNamespaces(
   ctx: RequestContext,
 ): AccountScopedNamespaces {
-  const { accounts: _accounts, ...rest } = buildNamespaces(ctx);
+  const { accounts: _accounts, auth: _auth, ...rest } = buildNamespaces(ctx);
   void _accounts;
+  void _auth;
   return rest;
 }
