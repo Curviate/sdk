@@ -1248,8 +1248,74 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
-  // ─── Later chunks append their own account-scoped rows here (recruiter,
-  // jobs). ─────────────────────────────────────────────────────────────────
+  // ─── Account-scoped: jobs (SDK-D1) ──────────────────────────────────────
+  {
+    name: "jobs.list",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/jobs`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "job_posting_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).jobs.list({ state: "OPEN" });
+      return captured!;
+    },
+  },
+  {
+    name: "jobs.get",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/jobs/4428113858`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "job_posting", id: "4428113858", title: "Eng", company: {}, state: "DRAFT", is_repost: false, is_application_limit_reached: false, created_at: "2026-01-01T00:00:00.000Z", description: "d", applications_count: 0, workplace_type: "REMOTE", employment_status: "FULL_TIME" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).jobs.get("4428113858");
+      return captured!;
+    },
+  },
+  {
+    name: "jobs.close",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/jobs/job_1/close`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "job_posting_closed" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).jobs.close("job_1");
+      return captured!;
+    },
+  },
+  {
+    name: "jobs.listApplicants",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/jobs/job_1/applicants`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "job_applicant_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).jobs.listApplicants("job_1");
+      return captured!;
+    },
+  },
+
+  // ─── Later chunks append their own account-scoped rows here (recruiter).
+  // ─────────────────────────────────────────────────────────────────────────
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
