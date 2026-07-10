@@ -1,175 +1,170 @@
 /**
- * Posts resource — 7 methods.
+ * Posts resource — 9 methods.
  *
- * Account-scoped: the bound context injects `account_id` into every request.
- * Create and comment are multipart-only per the OpenAPI spec. The SDK body type
- * mirrors the multipart/form-data shape (non-file scalars) plus an optional
- * `attachments` array — the transport detects FormData and sends multipart.
+ * Account-scoped: the bound context injects `account_id` as the leading
+ * `/v1/` path segment on every request (account-first grammar) — never a
+ * query param or body field.
+ *
+ * `create` is pure `application/json` — the served surface has ZERO
+ * multipart ops; media attachments travel as base64-encoded objects
+ * (`{content,content_type,filename}`), not `FormData`.
+ *
+ * `listUserPosts` was `profiles.listPosts`; `listUserReactions` was
+ * `profiles.listReactions` (relocated here, both realigns — not new).
+ * `delete` and `unreact` are new. `unreact` is a **DELETE-with-body**:
+ * `DELETE /v1/{account_id}/posts/{post_id}/reactions` carries `{reaction}`.
+ *
+ * The comment-write surface (`comment` + comment listing/editing) has
+ * relocated to the dedicated `comments` namespace — `listComments` stays
+ * here (it is a *read* of a post's comments, the served op the account
+ * scope already owns), but creating/editing/replying to a comment is a
+ * `comments.*` call now.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
 
 // ─── Type aliases from generated OpenAPI snapshot ──────────────────────────
 
-export type PostListPage =
-  paths["/v1/posts"]["get"]["responses"]["200"]["content"]["application/json"];
-export type PostListParams = NonNullable<
-  paths["/v1/posts"]["get"]["parameters"]["query"]
+export type PostCommentListPage =
+  paths["/v1/{account_id}/posts/{post_id}/comments"]["get"]["responses"]["200"]["content"]["application/json"];
+export type PostCommentListQuery = NonNullable<
+  paths["/v1/{account_id}/posts/{post_id}/comments"]["get"]["parameters"]["query"]
 >;
-
-/**
- * `POST /v1/posts` body — mirrors the multipart/form-data schema (non-file scalars)
- * plus an optional `attachments` array the SDK builds into FormData.
- * `account_id` is optional because the account-scoped context injects it.
- */
-type CreatePostFormFields =
-  paths["/v1/posts"]["post"]["requestBody"]["content"]["multipart/form-data"];
-export type CreatePostBody = Omit<CreatePostFormFields, "account_id" | "attachments" | "video_thumbnail"> & {
-  account_id?: string;
-  attachments?: Array<Buffer | File>;
-  video_thumbnail?: Buffer | File;
-};
-export type CreatePostResult =
-  paths["/v1/posts"]["post"]["responses"]["201"]["content"]["application/json"];
 
 export type PostDetail =
-  paths["/v1/posts/{post_id}"]["get"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/posts/{post_id}"]["get"]["responses"]["200"]["content"]["application/json"];
 
-export type PostCommentListPage =
-  paths["/v1/posts/{post_id}/comments"]["get"]["responses"]["200"]["content"]["application/json"];
-export type PostCommentListParams = NonNullable<
-  paths["/v1/posts/{post_id}/comments"]["get"]["parameters"]["query"]
+export type PostDeleteResult =
+  paths["/v1/{account_id}/posts/{post_id}"]["delete"]["responses"]["204"]["content"]["application/json"];
+
+export type CreatePostBody =
+  paths["/v1/{account_id}/posts"]["post"]["requestBody"]["content"]["application/json"];
+export type CreatePostResult =
+  paths["/v1/{account_id}/posts"]["post"]["responses"]["201"]["content"]["application/json"];
+
+export type UserPostListPage =
+  paths["/v1/{account_id}/users/{user_id}/posts"]["get"]["responses"]["200"]["content"]["application/json"];
+export type UserPostListQuery = NonNullable<
+  paths["/v1/{account_id}/users/{user_id}/posts"]["get"]["parameters"]["query"]
 >;
 
-/**
- * `POST /v1/posts/{post_id}/comments` body — mirrors the multipart/form-data schema
- * plus an optional `attachments` array the SDK builds into FormData.
- * `account_id` is optional because the account-scoped context injects it.
- */
-type CommentFormFields =
-  paths["/v1/posts/{post_id}/comments"]["post"]["requestBody"]["content"]["multipart/form-data"];
-export type PostCommentBody = Omit<CommentFormFields, "account_id" | "attachments"> & {
-  account_id?: string;
-  attachments?: Array<Buffer | File>;
-};
-export type PostCommentResult =
-  paths["/v1/posts/{post_id}/comments"]["post"]["responses"]["201"]["content"]["application/json"];
-
 export type PostReactionListPage =
-  paths["/v1/posts/{post_id}/reactions"]["get"]["responses"]["200"]["content"]["application/json"];
-export type PostReactionListParams = NonNullable<
-  paths["/v1/posts/{post_id}/reactions"]["get"]["parameters"]["query"]
+  paths["/v1/{account_id}/posts/{post_id}/reactions"]["get"]["responses"]["200"]["content"]["application/json"];
+export type PostReactionListQuery = NonNullable<
+  paths["/v1/{account_id}/posts/{post_id}/reactions"]["get"]["parameters"]["query"]
 >;
 
 export type PostReactBody =
-  paths["/v1/posts/{post_id}/reactions"]["post"]["requestBody"]["content"]["application/json"];
+  paths["/v1/{account_id}/posts/{post_id}/reactions"]["post"]["requestBody"]["content"]["application/json"];
 export type PostReactResult =
-  paths["/v1/posts/{post_id}/reactions"]["post"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/posts/{post_id}/reactions"]["post"]["responses"]["200"]["content"]["application/json"];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+export type PostUnreactBody =
+  paths["/v1/{account_id}/posts/{post_id}/reactions"]["delete"]["requestBody"]["content"]["application/json"];
+export type PostUnreactResult =
+  paths["/v1/{account_id}/posts/{post_id}/reactions"]["delete"]["responses"]["200"]["content"]["application/json"];
 
-function buildFormData(
-  scalars: Record<string, unknown>,
-  attachments?: Array<Buffer | File>,
-): FormData {
-  const form = new FormData();
-  for (const [key, value] of Object.entries(scalars)) {
-    if (value !== undefined && value !== null) {
-      form.append(key, String(value));
-    }
-  }
-  for (const attachment of attachments ?? []) {
-    if (attachment instanceof File) {
-      form.append("attachments", attachment);
-    } else {
-      form.append("attachments", new Blob([attachment as unknown as BlobPart]));
-    }
-  }
-  return form;
-}
+export type UserReactionListPage =
+  paths["/v1/{account_id}/users/{user_id}/reactions"]["get"]["responses"]["200"]["content"]["application/json"];
+export type UserReactionListQuery = NonNullable<
+  paths["/v1/{account_id}/users/{user_id}/reactions"]["get"]["parameters"]["query"]
+>;
 
 // ─── Resource class ───────────────────────────────────────────────────────────
 
 export class PostsResource {
   constructor(protected readonly ctx: RequestContext) {}
 
-  /** List the account's own posts. `GET /v1/posts` */
-  list(params?: PostListParams): Promise<PostListPage> {
-    return this.ctx.request<PostListPage>({
+  /** List comments on a post. `GET /v1/{account_id}/posts/{post_id}/comments` */
+  listComments(postId: string, params?: PostCommentListQuery): Promise<PostCommentListPage> {
+    return this.ctx.request<PostCommentListPage>({
       method: "GET",
-      path: "/v1/posts",
-      ...(params ? { query: params } : {}),
+      path: `/v1/{account_id}/posts/${postId}/comments`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
-  /**
-   * Create a new post. Always sent as multipart/form-data (the API only accepts
-   * multipart for this endpoint). `POST /v1/posts`
-   */
-  create(body: CreatePostBody): Promise<CreatePostResult> {
-    const { attachments, video_thumbnail, ...scalars } = body;
-    const form = buildFormData(scalars as Record<string, unknown>, attachments);
-    if (video_thumbnail) {
-      if (video_thumbnail instanceof File) {
-        form.append("video_thumbnail", video_thumbnail);
-      } else {
-        form.append("video_thumbnail", new Blob([video_thumbnail as unknown as BlobPart]));
-      }
-    }
-    return this.ctx.request<CreatePostResult>({
-      method: "POST",
-      path: "/v1/posts",
-      body: form,
-      accountIdIn: "body",
-    });
-  }
-
-  /** Get a single post. `GET /v1/posts/{post_id}` */
+  /** Get a single post. `GET /v1/{account_id}/posts/{post_id}` */
   get(postId: string): Promise<PostDetail> {
     return this.ctx.request<PostDetail>({
       method: "GET",
-      path: `/v1/posts/${postId}`,
+      path: `/v1/{account_id}/posts/${postId}`,
     });
   }
 
-  /** List comments on a post. `GET /v1/posts/{post_id}/comments` */
-  listComments(postId: string, params?: PostCommentListParams): Promise<PostCommentListPage> {
-    return this.ctx.request<PostCommentListPage>({
-      method: "GET",
-      path: `/v1/posts/${postId}/comments`,
-      ...(params ? { query: params } : {}),
+  /** Delete a post (bodyless, 204). `DELETE /v1/{account_id}/posts/{post_id}` */
+  delete(postId: string): Promise<PostDeleteResult> {
+    return this.ctx.request<PostDeleteResult>({
+      method: "DELETE",
+      path: `/v1/{account_id}/posts/${postId}`,
     });
   }
 
   /**
-   * Comment on a post. Always sent as multipart/form-data. `POST /v1/posts/{post_id}/comments`
+   * Publish a new post. Always `application/json` — attachments (if any) are
+   * base64-encoded objects, never `FormData`/multipart.
+   * `POST /v1/{account_id}/posts`
    */
-  comment(postId: string, body: PostCommentBody): Promise<PostCommentResult> {
-    const { attachments, ...scalars } = body;
-    return this.ctx.request<PostCommentResult>({
+  create(body: CreatePostBody): Promise<CreatePostResult> {
+    return this.ctx.request<CreatePostResult>({
       method: "POST",
-      path: `/v1/posts/${postId}/comments`,
-      body: buildFormData(scalars as Record<string, unknown>, attachments),
-      accountIdIn: "body",
+      path: "/v1/{account_id}/posts",
+      body,
     });
   }
 
-  /** List reactions on a post. `GET /v1/posts/{post_id}/reactions` */
-  listReactions(postId: string, params?: PostReactionListParams): Promise<PostReactionListPage> {
+  /**
+   * List a user's own posts. `GET /v1/{account_id}/users/{user_id}/posts`
+   * Was `profiles.listPosts`.
+   */
+  listUserPosts(userId: string, params?: UserPostListQuery): Promise<UserPostListPage> {
+    return this.ctx.request<UserPostListPage>({
+      method: "GET",
+      path: `/v1/{account_id}/users/${userId}/posts`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /** List reactions on a post. `GET /v1/{account_id}/posts/{post_id}/reactions` */
+  listReactions(postId: string, params?: PostReactionListQuery): Promise<PostReactionListPage> {
     return this.ctx.request<PostReactionListPage>({
       method: "GET",
-      path: `/v1/posts/${postId}/reactions`,
-      ...(params ? { query: params } : {}),
+      path: `/v1/{account_id}/posts/${postId}/reactions`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
-  /** React to a post. `POST /v1/posts/{post_id}/reactions` */
+  /** React to a post. `POST /v1/{account_id}/posts/{post_id}/reactions` */
   react(postId: string, body: PostReactBody): Promise<PostReactResult> {
     return this.ctx.request<PostReactResult>({
       method: "POST",
-      path: `/v1/posts/${postId}/reactions`,
+      path: `/v1/{account_id}/posts/${postId}/reactions`,
       body,
-      accountIdIn: "body",
+    });
+  }
+
+  /**
+   * Remove this account's reaction from a post — a **DELETE-with-body**:
+   * the reaction value to remove travels in the JSON body, not the path.
+   * `DELETE /v1/{account_id}/posts/{post_id}/reactions`
+   */
+  unreact(postId: string, body: PostUnreactBody): Promise<PostUnreactResult> {
+    return this.ctx.request<PostUnreactResult>({
+      method: "DELETE",
+      path: `/v1/{account_id}/posts/${postId}/reactions`,
+      body,
+    });
+  }
+
+  /**
+   * List a user's reactions. `GET /v1/{account_id}/users/{user_id}/reactions`
+   * Was `profiles.listReactions`.
+   */
+  listUserReactions(userId: string, params?: UserReactionListQuery): Promise<UserReactionListPage> {
+    return this.ctx.request<UserReactionListPage>({
+      method: "GET",
+      path: `/v1/{account_id}/users/${userId}/reactions`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 }
