@@ -463,24 +463,209 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
-  // ─── Later chunks append their own account-scoped rows here, e.g.:
-  //
-  //   {
-  //     name: "messaging.listChats",
-  //     scope: "account",
-  //     run: async (client) => {
-  //       let captured: CapturedRequest | undefined;
-  //       server.use(
-  //         http.get(`${BASE}/v1/${ACCOUNT_ID}/chats`, ({ request }) => {
-  //           const url = new URL(request.url);
-  //           captured = { path: url.pathname, search: url.searchParams };
-  //           return HttpResponse.json({ object: "chat_list", items: [], cursor: null });
-  //         }),
-  //       );
-  //       await client.account(ACCOUNT_ID).messaging.listChats();
-  //       return captured!;
-  //     },
-  //   },
+  // ─── Account-scoped: messaging ──────────────────────────────────────────
+  {
+    name: "messaging.listChats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/chats`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.listChats();
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.startChat",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/chats`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "chat_started", chat_id: "chat_1", message_id: "msg_1" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.startChat({ attendees_ids: ["ACo1"], text: "hi" });
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.getChat",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "chat", id: "chat_1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.getChat("chat_1");
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.markChatRead",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.patch(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "chat_updated", chat_id: "chat_1", read: true });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.markChatRead("chat_1", { read: true });
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.listMessages",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1/messages`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "message_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.listMessages("chat_1");
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.sendMessage",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1/messages`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "message_sent", message_id: "msg_1" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.sendMessage("chat_1", { text: "hi" });
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.getMessage",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1/messages/msg_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "message", id: "msg_1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.getMessage("chat_1", "msg_1");
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.editMessage",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.patch(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1/messages/msg_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "message_edited", message_id: "msg_1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.editMessage("chat_1", "msg_1", { text: "edited" });
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.deleteMessage",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1/messages/msg_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "message_deleted", message_id: "msg_1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.deleteMessage("chat_1", "msg_1");
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.addReaction",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1/messages/msg_1/reactions`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "message_reaction_added", message_id: "msg_1", reaction: "👍" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.addReaction("chat_1", "msg_1", { reaction: "👍" });
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.getAttachment",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/chats/chat_1/messages/msg_1/attachments/att_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return new HttpResponse(new Uint8Array([1]).buffer, {
+            status: 200,
+            headers: { "Content-Type": "application/octet-stream" },
+          });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.getAttachment("chat_1", "msg_1", "att_1");
+      return captured!;
+    },
+  },
+  {
+    name: "messaging.sendInMail",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/messages/inmail`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "inmail_sent", message_id: "msg_1", chat_id: "chat_1" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.sendInMail({
+        recipient_urn: "urn:li:member:1",
+        subject: "Hi",
+        text: "Hello",
+      });
+      return captured!;
+    },
+  },
+
+  // ─── Later chunks append their own account-scoped rows here (invites,
+  // posts, recruiter, sales-navigator, jobs, comments). ────────────────────
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
