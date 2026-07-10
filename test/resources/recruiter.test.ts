@@ -269,7 +269,7 @@ describe("recruiter.listPipeline", () => {
   });
 });
 
-describe("recruiter.listProjectJobs", () => {
+describe("recruiter.getProjectJob", () => {
   it("GET .../projects/{project_id}/jobs — returns the single attached posting", async () => {
     let seenPath: string | undefined;
     server.use(
@@ -278,7 +278,7 @@ describe("recruiter.listProjectJobs", () => {
         return HttpResponse.json({ object: "recruiter_job_posting", id: "job_1", project_id: "proj_1" });
       }),
     );
-    const res = await rec().listProjectJobs("proj_1");
+    const res = await rec().getProjectJob("proj_1");
     expect(seenPath).toBe(`/v1/${ACC}/recruiter/projects/proj_1/jobs`);
     expect(res.object).toBe("recruiter_job_posting");
   });

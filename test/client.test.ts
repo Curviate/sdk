@@ -134,21 +134,30 @@ describe("account-scoped accessor", () => {
     expect((caught as CurviateError).code).toBe("INVALID_REQUEST");
   });
 
-  // same resource namespaces as the root client.
-  it("exposes the documented resource namespaces", () => {
+  // Account-scoped accessor exposes exactly the account-scoped namespaces and
+  // none of the root-only ones (accounts, auth, webhooks).
+  it("exposes the account-scoped resource namespaces", () => {
     const scoped = new Curviate({ apiKey: "k", baseUrl: BASE }).account("acc_123");
     for (const ns of [
-      "messaging",
       "users",
-      "invites",
+      "companies",
       "search",
+      "messaging",
+      "comments",
       "posts",
-      "salesNavigator",
-      "recruiter",
+      "invites",
       "jobs",
-      "webhooks",
+      "recruiter",
+      "salesNavigator",
     ]) {
       expect(scoped, `namespace ${ns} should exist`).toHaveProperty(ns);
+    }
+  });
+
+  it("does not leak the root-only namespaces onto the account accessor", () => {
+    const scoped = new Curviate({ apiKey: "k", baseUrl: BASE }).account("acc_123");
+    for (const ns of ["accounts", "auth", "webhooks", "profiles"]) {
+      expect(scoped, `namespace ${ns} must not exist`).not.toHaveProperty(ns);
     }
   });
 

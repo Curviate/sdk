@@ -298,7 +298,7 @@ export class RecruiterResource {
    * returns one posting, not a list — a project with no attached job 404s).
    * `GET /v1/{account_id}/recruiter/projects/{project_id}/jobs`
    */
-  listProjectJobs(projectId: string): Promise<RecruiterProjectJob> {
+  getProjectJob(projectId: string): Promise<RecruiterProjectJob> {
     return this.ctx.request<RecruiterProjectJob>({
       method: "GET",
       path: `/v1/{account_id}/recruiter/projects/${projectId}/jobs`,

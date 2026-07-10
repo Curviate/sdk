@@ -229,7 +229,7 @@ export async function execute<T = unknown>(
     let res: Response;
     try {
       res = await doFetch(url, buildInit(method, opts, controller.signal));
-    } catch (cause) {
+    } catch {
       clearTimeout(timer);
       // Distinguish a timeout (AbortError) from a generic network failure.
       const aborted = controller.signal.aborted;

@@ -22,21 +22,11 @@ import {
   type PaginatableMethod,
 } from "./internal/paginate.js";
 import {
-  buildNamespaces,
+  buildRootNamespaces,
   buildAccountScopedNamespaces,
   type AccountScopedNamespaces,
   type AccountsResource,
   type AuthResource,
-  type MessagingResource,
-  type UsersResource,
-  type InvitesResource,
-  type SearchResource,
-  type PostsResource,
-  type CommentsResource,
-  type SalesNavigatorResource,
-  type RecruiterResource,
-  type JobsResource,
-  type CompaniesResource,
   type WebhooksResource,
 } from "./resources/index.js";
 
@@ -44,36 +34,19 @@ export class Curviate {
   /** Frozen, fully-resolved config. */
   readonly config: ResolvedConfig;
 
+  // Root-scoped namespaces only. Account-scoped namespaces (users, messaging,
+  // posts, …) are reachable exclusively via `account(id)` — they cannot build a
+  // valid path without a bound `account_id`.
   readonly accounts: AccountsResource;
   readonly auth: AuthResource;
-  readonly messaging: MessagingResource;
-  readonly users: UsersResource;
-  readonly invites: InvitesResource;
-  readonly search: SearchResource;
-  readonly posts: PostsResource;
-  readonly comments: CommentsResource;
-  readonly salesNavigator: SalesNavigatorResource;
-  readonly recruiter: RecruiterResource;
-  readonly jobs: JobsResource;
-  readonly companies: CompaniesResource;
   readonly webhooks: WebhooksResource;
 
   constructor(config: CurviateConfig) {
     this.config = resolveConfig(config);
     const ctx = createContext(this.config);
-    const ns = buildNamespaces(ctx);
+    const ns = buildRootNamespaces(ctx);
     this.accounts = ns.accounts;
     this.auth = ns.auth;
-    this.messaging = ns.messaging;
-    this.users = ns.users;
-    this.invites = ns.invites;
-    this.search = ns.search;
-    this.posts = ns.posts;
-    this.comments = ns.comments;
-    this.salesNavigator = ns.salesNavigator;
-    this.recruiter = ns.recruiter;
-    this.jobs = ns.jobs;
-    this.companies = ns.companies;
     this.webhooks = ns.webhooks;
   }
 

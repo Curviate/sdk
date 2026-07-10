@@ -1,11 +1,17 @@
 /**
  * Resource namespace assembly.
  *
- * The root client and every `account(id)` accessor expose the same bag of
- * resource namespaces, minus the root-only ones. `accounts` and `auth` are
- * root-scoped (connected-account and connect/reconnect management are not
- * per-account concepts) and are stripped out of the `account(id)` accessor by
- * {@link buildAccountScopedNamespaces}.
+ * The surface is split cleanly in two, with no overlap:
+ * - **Root-scoped** (`accounts`, `auth`, `webhooks`) hang off the root client
+ *   only. Connected-account management, connect/reconnect, and webhook
+ *   registration are tenant-wide concerns, not per-account ones — they carry no
+ *   `account_id` path segment.
+ * - **Account-scoped** (everything else) hang off `curviate.account(id)` only.
+ *   Every one of their paths leads with the fixed `account_id` segment, so they
+ *   cannot function without an account bound and are never mounted at the root.
+ *
+ * {@link buildRootNamespaces} and {@link buildAccountScopedNamespaces} realize
+ * the two disjoint halves.
  */
 import type { RequestContext } from "../internal/context.js";
 import { AccountsResource } from "./accounts.js";
@@ -73,19 +79,49 @@ export function buildNamespaces(ctx: RequestContext): ResourceNamespaces {
 }
 
 /**
- * The account-scoped accessor surface — every namespace except the root-only
- * `accounts` and `auth` (connected-account and connect/reconnect management
- * are not per-account concepts). The fixed `account_id` is injected by the
- * bound context.
+ * The root-client surface — exactly the three tenant-wide namespaces. The root
+ * client mounts these and nothing else; account-scoped namespaces are reachable
+ * only via `curviate.account(id)`.
  */
-export type AccountScopedNamespaces = Omit<ResourceNamespaces, "accounts" | "auth">;
+export type RootNamespaces = Pick<
+  ResourceNamespaces,
+  "accounts" | "auth" | "webhooks"
+>;
 
-/** Build the account-scoped namespace bag (drops `accounts` and `auth`). */
+/** Build the root-client namespace bag (`accounts`, `auth`, `webhooks`). */
+export function buildRootNamespaces(ctx: RequestContext): RootNamespaces {
+  return {
+    accounts: new AccountsResource(ctx),
+    auth: new AuthResource(ctx),
+    webhooks: new WebhooksResource(ctx),
+  };
+}
+
+/**
+ * The account-scoped accessor surface — every namespace except the three
+ * root-only ones (`accounts`, `auth`, `webhooks`). The fixed `account_id` is
+ * injected by the bound context as the leading path segment.
+ */
+export type AccountScopedNamespaces = Omit<
+  ResourceNamespaces,
+  "accounts" | "auth" | "webhooks"
+>;
+
+/**
+ * Build the account-scoped namespace bag (drops `accounts`, `auth`, and
+ * `webhooks` — the root-only namespaces).
+ */
 export function buildAccountScopedNamespaces(
   ctx: RequestContext,
 ): AccountScopedNamespaces {
-  const { accounts: _accounts, auth: _auth, ...rest } = buildNamespaces(ctx);
+  const {
+    accounts: _accounts,
+    auth: _auth,
+    webhooks: _webhooks,
+    ...rest
+  } = buildNamespaces(ctx);
   void _accounts;
   void _auth;
+  void _webhooks;
   return rest;
 }
