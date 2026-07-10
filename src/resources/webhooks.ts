@@ -1,11 +1,9 @@
 /**
- * Webhooks resource — 7 methods (root-scoped).
+ * Webhooks resource — 6 methods (root-scoped).
  *
  * Root-scoped: webhooks are tenant-wide, not account-scoped. All methods are
- * mounted directly on the root client (like `accounts`).
- * `getStateDiff` is placed here because it is tagged Webhooks in the OpenAPI
- * (`GET /v1/accounts/:id/state-diff` enables event-driven state sync).
- * `get` is net-new — a single tenant-scoped read by id.
+ * mounted directly on the root client (like `accounts`). `getStateDiff` had
+ * no served equivalent and is removed.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -36,12 +34,6 @@ export type WebhookUpdateResult =
 
 export type WebhookDeleteResult =
   paths["/v1/webhooks/{id}"]["delete"]["responses"]["200"]["content"]["application/json"];
-
-export type AccountStateDiffParams = NonNullable<
-  paths["/v1/accounts/{id}/state-diff"]["get"]["parameters"]["query"]
->;
-export type AccountStateDiffResult =
-  paths["/v1/accounts/{id}/state-diff"]["get"]["responses"]["200"]["content"]["application/json"];
 
 // ─── Resource class ───────────────────────────────────────────────────────────
 
@@ -117,19 +109,6 @@ export class WebhooksResource {
     return this.ctx.request<WebhookDeleteResult>({
       method: "DELETE",
       path: `/v1/webhooks/${id}`,
-    });
-  }
-
-  /**
-   * Return the set of changes since the last known version for a connected account.
-   * Enables event-driven state sync without polling the account endpoint.
-   * `GET /v1/accounts/{id}/state-diff`
-   */
-  getStateDiff(accountId: string, params?: AccountStateDiffParams): Promise<AccountStateDiffResult> {
-    return this.ctx.request<AccountStateDiffResult>({
-      method: "GET",
-      path: `/v1/accounts/${accountId}/state-diff`,
-      ...(params ? { query: params } : {}),
     });
   }
 }
