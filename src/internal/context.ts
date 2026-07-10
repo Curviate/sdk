@@ -6,48 +6,39 @@
  * behind `curviate.account(id).<resource>`. Resources never touch the transport
  * directly; they call `ctx.request(...)`.
  *
+ * Account-first path grammar: an account-scoped method declares its path
+ * template with a leading `{account_id}` placeholder (e.g.
+ * `/v1/{account_id}/chats/${chatId}`); the bound context substitutes the fixed
+ * account id into that placeholder. `account_id` is therefore always a path
+ * segment — never a query param, never a body field. Root-scoped namespaces
+ * (`accounts`, `auth`, `webhooks`) are built with a context that carries no
+ * account id, so their paths (which have no placeholder) are used verbatim.
+ *
  * Each resource takes a `RequestContext` and maps one method to one `/v1/*`
  * operation.
  */
 import { execute, type HttpMethod } from "../transport.js";
 import type { ResolvedConfig } from "../config.js";
 
-/**
- * Where the account-scoped `account_id` is injected for this call.
- *
- * `account_id`'s location is per-endpoint and method-dependent:
- *   - `"body"`  — account-scoped write requests that carry a body declare
- *     `account_id` as a body field. The context writes it into the JSON object,
- *     or appends it as a form field when the body is `FormData` (multipart).
- *   - `"query"` — GET reads, body-less destructive verbs (DELETE), and
- *     filter-search POSTs (whose body is the filter set, with `account_id` in
- *     the query string) all carry it as a query parameter.
- *   - `"none"`  — the endpoint resolves the owning account server-side; the
- *     SDK sends no `account_id` in the query or body. Use for id-scoped
- *     operations where the server infers ownership from the resource id
- *     (e.g. `deleteMessage`, `addReaction`).
- *
- * Defaults to `"query"` so a method that omits it keeps the read-style location.
- */
-export type AccountIdLocation = "body" | "query" | "none";
+/** The placeholder a path template uses for the account-scoping segment. */
+const ACCOUNT_ID_PLACEHOLDER = "{account_id}";
 
 /** Per-call request shape passed by a resource method. */
 export interface RequestArgs {
   method: HttpMethod;
+  /**
+   * Path template. Account-scoped methods embed the literal `{account_id}`
+   * placeholder as the leading `/v1/` segment; the bound context substitutes
+   * the fixed account id. Root-scoped methods carry no placeholder.
+   */
   path: string;
   /**
    * Query params. Array values serialize as repeated params (e.g. `?k=a&k=b`)
-   * to support multi-value fields like `linkedin_sections`.
+   * to support multi-value fields like `linkedin_sections`. `account_id` is
+   * never a query param — it is the leading path segment.
    */
   query?: Record<string, string | number | boolean | string[] | undefined | null>;
   body?: unknown;
-  /**
-   * Where to inject the context's fixed `account_id`. Defaults to `"query"`.
-   * Methods whose endpoint requires `account_id` in the request body set
-   * `"body"`; the context then routes it into the JSON object or appends it as
-   * a `FormData` field, matching the body kind.
-   */
-  accountIdIn?: AccountIdLocation;
 }
 
 /** The bound caller a resource receives. */
@@ -60,60 +51,36 @@ export interface RequestContext {
 }
 
 /**
- * Inject `account_id` into a request body. For a `FormData` body it appends a
- * form field (multipart); for a plain object it adds a property (JSON). In both
- * cases a caller-supplied `account_id` already present wins and is not
- * overwritten. A `body` that is neither (absent, or a non-object such as a
- * primitive) is returned unchanged.
+ * Substitute the fixed `account_id` into the `{account_id}` placeholder of a
+ * path template. When the context carries no account id (root client), or the
+ * template has no placeholder (root-scoped op), the path is returned unchanged.
  */
-function injectAccountIdIntoBody(body: unknown, accountId: string): unknown {
-  if (body instanceof FormData) {
-    if (!body.has("account_id")) body.append("account_id", accountId);
-    return body;
-  }
-  if (body !== null && typeof body === "object") {
-    const obj = body as Record<string, unknown>;
-    // Caller-supplied account_id wins; never double-inject.
-    return "account_id" in obj ? obj : { account_id: accountId, ...obj };
-  }
-  return body;
+function injectAccountIdIntoPath(path: string, accountId: string | undefined): string {
+  if (accountId === undefined) return path;
+  return path.split(ACCOUNT_ID_PLACEHOLDER).join(accountId);
 }
 
 /**
  * Build a {@link RequestContext} from the resolved config. When `accountId` is
- * provided, it is injected into every request — into the query by default, or
- * into the body (JSON field / `FormData` field) for methods that declare
- * `accountIdIn: "body"`. A caller-supplied `account_id` always wins and is
- * never double-injected.
+ * provided, it is substituted into the `{account_id}` placeholder of every
+ * request path (the account-first grammar); the query and body are forwarded to
+ * the transport untouched.
  */
 export function createContext(
   config: ResolvedConfig,
   accountId?: string,
 ): RequestContext {
   const request: RequestFn = <T>(args: RequestArgs) => {
-    const target: AccountIdLocation = args.accountIdIn ?? "query";
+    const path = injectAccountIdIntoPath(args.path, accountId);
 
-    let { query, body } = args;
-    if (accountId !== undefined) {
-      if (target === "body") {
-        body = injectAccountIdIntoBody(body, accountId);
-      } else if (target === "none") {
-        // "none": endpoint resolves the owning account server-side from the
-        // resource id — SDK sends no account_id in query or body.
-      } else {
-        // Default: query. Caller-supplied query wins via the spread order.
-        query = { account_id: accountId, ...args.query };
-      }
-    }
-
-    return execute<T>(args.method, args.path, {
+    return execute<T>(args.method, path, {
       apiKey: config.apiKey,
       baseUrl: config.baseUrl,
       timeout: config.timeout,
       maxRetries: config.maxRetries,
       ...(config.fetch ? { fetch: config.fetch } : {}),
-      ...(query !== undefined ? { query } : {}),
-      ...(body !== undefined ? { body } : {}),
+      ...(args.query !== undefined ? { query: args.query } : {}),
+      ...(args.body !== undefined ? { body: args.body } : {}),
     });
   };
   return { request, accountId };
