@@ -299,6 +299,72 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
+  // ─── Account-scoped: companies ──────────────────────────────────────────
+  {
+    name: "companies.get",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/t-systems`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_profile", id: "1", name: "T-Systems" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.get("t-systems");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.employees",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/employees`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_employee_list", items: [], paging: { total_count: 0 }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.employees("1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.posts",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/posts`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_post_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.posts("1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.jobs",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/jobs`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_job_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.jobs("1");
+      return captured!;
+    },
+  },
+
   // ─── Later chunks append their own account-scoped rows here, e.g.:
   //
   //   {
