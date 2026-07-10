@@ -1314,8 +1314,262 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
-  // ─── Later chunks append their own account-scoped rows here (recruiter).
-  // ─────────────────────────────────────────────────────────────────────────
+  // ─── Account-scoped: recruiter (SDK-D2) ─────────────────────────────────
+  // Representative rows covering every distinct account-first path shape in
+  // the project-centric namespace: id-GET, POST (incl. the was-GET
+  // searchParameters), PATCH, deep project-scoped GET/POST, the deepest
+  // publish path, bodyless POST, client-side-resolved getJob, and binary GET.
+  {
+    name: "recruiter.getProfile",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/recruiter/profiles/ACo1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_profile", id: "ACo1", type: "individual", display_name: "Alice", provider: "linkedin", recruiting_profile: {} });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.getProfile("ACo1");
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.startChat",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/chats`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "chat_started", chat_id: "chat_1", message_id: "msg_1" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.startChat({ attendees_ids: ["AEo1"], text: "hi", subject: "s", signature: "— A" });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.searchParameters",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/search/parameters`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_search_parameter_list", data: [] });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.searchParameters({ source: "SEARCH", type: "JOB_TITLE" });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.searchFromUrl",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/search`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_people_search_result", data: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.searchFromUrl({ url: "https://www.linkedin.com/talent/search" });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.listProjects",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_project_list", data: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.listProjects();
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.updateProject",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.patch(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_project_edited" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.updateProject("proj_1", { name: "Renamed" });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.searchTalentPool",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1/talent-pool/search`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_people_search_result", data: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.searchTalentPool("proj_1", { channel_id: "chan_1" });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.createProjectJob",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1/jobs`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_job_posting_created", job_id: "job_1", project_id: "proj_1" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.createProjectJob("proj_1", {
+        job_title: { id: "title_1", name: "Eng" },
+        company: { name: "Acme" },
+        workplace_type: "REMOTE",
+        location: "l",
+        employment_status: "FULL_TIME",
+        seniority_level: "MID_SENIOR_LEVEL",
+        description: "d".repeat(200),
+        industry: ["4"],
+        job_function: ["eng"],
+        apply_method: { method: "linkedin", notification_email: "jobs@acme.test" },
+      });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.getProjectJobBudget",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1/jobs/job_1/budget`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_job_posting_budget" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.getProjectJobBudget("proj_1", "job_1");
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.getJob",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/recruiter/jobs/4428113858`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_job_posting", id: "4428113858", project_id: "proj_1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.getJob("https://www.linkedin.com/jobs/view/4428113858");
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.publishJob",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1/jobs/job_1/publish`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_job_posting_published", job_state: "LISTED" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.publishJob("proj_1", "job_1", { mode: "FREE" });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.closeJob",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1/jobs/job_1/close`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_job_posting_closed" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.closeJob("proj_1", "job_1");
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.saveCandidate",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1/pipeline/candidate/save`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_candidate_saved" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.saveCandidate("proj_1", { stage_id: "s", candidate_id: "c" });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.listApplicants",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1/talent-pool/applicants`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "recruiter_job_applicant_list", data: [], cursor: null, total_count: 0 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.listApplicants("proj_1", { channel_id: "chan_1" });
+      return captured!;
+    },
+  },
+  {
+    name: "recruiter.downloadResume",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/recruiter/projects/proj_1/talent-pool/applicants/app_1/resume`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return new HttpResponse(new Uint8Array([1]).buffer, { status: 200, headers: { "Content-Type": "application/octet-stream" } });
+        }),
+      );
+      await client.account(ACCOUNT_ID).recruiter.downloadResume("proj_1", "app_1");
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
