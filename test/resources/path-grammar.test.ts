@@ -664,8 +664,106 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
-  // ─── Later chunks append their own account-scoped rows here (invites,
-  // posts, recruiter, sales-navigator, jobs, comments). ────────────────────
+  // ─── Account-scoped: invites ─────────────────────────────────────────────
+  {
+    name: "invites.send",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/invites`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "invitation_sent", id: "SENT_1", status: "sent" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).invites.send({ recipient_identifier: "ACo1" });
+      return captured!;
+    },
+  },
+  {
+    name: "invites.listSent",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/invites/sent`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "invitation_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).invites.listSent();
+      return captured!;
+    },
+  },
+  {
+    name: "invites.listReceived",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/invites/received`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "invitation_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).invites.listReceived();
+      return captured!;
+    },
+  },
+  {
+    name: "invites.accept",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/invites/received/inv_1/accept`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "invitation_accepted", invitation_id: "inv_1", status: "accepted" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).invites.accept("inv_1");
+      return captured!;
+    },
+  },
+  {
+    name: "invites.decline",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/invites/received/inv_1/decline`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "invitation_declined", invitation_id: "inv_1", status: "declined" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).invites.decline("inv_1");
+      return captured!;
+    },
+  },
+  {
+    name: "invites.cancel",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/invites/sent/inv_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "invitation_withdrawn", invitation_id: "inv_1", status: "withdrawn" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).invites.cancel("inv_1");
+      return captured!;
+    },
+  },
+
+  // ─── Later chunks append their own account-scoped rows here (posts,
+  // recruiter, sales-navigator, jobs, comments). ───────────────────────────
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
