@@ -11,7 +11,7 @@ describe("curviate.paginate", () => {
   it("yields all items across two pages, stops on null cursor", async () => {
     let callCount = 0;
     server.use(
-      http.get(`${BASE}/v1/profiles/relations`, ({ request }) => {
+      http.get(`${BASE}/v1/acc_1/profiles/relations`, ({ request }) => {
         callCount++;
         const cursor = new URL(request.url).searchParams.get("cursor");
         if (!cursor) {
@@ -24,7 +24,7 @@ describe("curviate.paginate", () => {
     const curviate = new Curviate({ apiKey: "k", baseUrl: BASE });
     const scoped = curviate.account("acc_1");
     const items: { profile_id?: string }[] = [];
-    for await (const item of curviate.paginate(scoped.profiles.listConnections.bind(scoped.profiles), {})) {
+    for await (const item of curviate.paginate(scoped.users.listRelations.bind(scoped.users), {})) {
       items.push(item as { profile_id?: string });
     }
 
@@ -37,7 +37,7 @@ describe("curviate.paginate", () => {
   // stops immediately on a single-page response with cursor:null
   it("stops immediately if first page has null cursor", async () => {
     server.use(
-      http.get(`${BASE}/v1/profiles/relations`, () =>
+      http.get(`${BASE}/v1/acc_1/profiles/relations`, () =>
         HttpResponse.json({ items: [{ profile_id: "only" }], cursor: null }),
       ),
     );
@@ -45,7 +45,7 @@ describe("curviate.paginate", () => {
     const curviate = new Curviate({ apiKey: "k", baseUrl: BASE });
     const scoped = curviate.account("acc_1");
     const items: unknown[] = [];
-    for await (const item of curviate.paginate(scoped.profiles.listConnections.bind(scoped.profiles), {})) {
+    for await (const item of curviate.paginate(scoped.users.listRelations.bind(scoped.users), {})) {
       items.push(item);
     }
     expect(items).toHaveLength(1);
@@ -55,7 +55,7 @@ describe("curviate.paginate", () => {
   it("follows cursor for POST paginated methods", async () => {
     let callCount = 0;
     server.use(
-      http.post(`${BASE}/v1/search/people`, async ({ request }) => {
+      http.post(`${BASE}/v1/acc_1/search/people`, async ({ request }) => {
         callCount++;
         const url = new URL(request.url);
         const cursor = url.searchParams.get("cursor");
