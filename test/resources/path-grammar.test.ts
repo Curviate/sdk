@@ -908,8 +908,202 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
+  // ─── Account-scoped: salesNavigator (SDK-C2b) ───────────────────────────
+  {
+    name: "salesNavigator.searchPeople",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/search/people`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_people_search_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.searchPeople({ keywords: "eng" });
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.searchCompanies",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/search/companies`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_company_search_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.searchCompanies({ keywords: "acme" });
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.getParameters",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/search/parameters`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_search_parameter_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.getParameters({ type: "INDUSTRY" });
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.startChat",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/chats`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "chat_started", chat_id: "sn_chat_1", message_id: "msg_1" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.startChat({ attendees_ids: ["ACw_1"], text: "hi", subject: "s" });
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.getProfile",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/profiles/ACw_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile", id: "ACw_1", type: "individual", display_name: "Alice", provider: "linkedin", specifics: {} });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.getProfile("ACw_1");
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.accountLists",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/account-lists`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_account_list_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.accountLists();
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.leadLists",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/lead-lists`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_lead_list_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.leadLists();
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.browseAccountList",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/account-lists/list_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_saved_account_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.browseAccountList("list_1");
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.browseLeadList",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/lead-lists/list_2`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_saved_lead_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.browseLeadList("list_2");
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.saveAccount",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/account-lists/list_1/save`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_account_saved" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.saveAccount({ list_id: "list_1", company_id: "co_1" });
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.saveLead",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/lead-lists/list_2/save`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_lead_saved" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.saveLead({ list_id: "list_2", user_id: "ACw_1" });
+      return captured!;
+    },
+  },
+  {
+    name: "salesNavigator.searchFromUrl",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/sales-navigator/search`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "sn_search_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).salesNavigator.searchFromUrl({ url: "https://www.linkedin.com/sales/search/people" });
+      return captured!;
+    },
+  },
+
   // ─── Later chunks append their own account-scoped rows here (recruiter,
-  // sales-navigator, jobs, comments). ───────────────────────────────────────
+  // jobs, comments). ─────────────────────────────────────────────────────────
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {

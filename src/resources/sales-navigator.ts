@@ -1,16 +1,21 @@
 /**
  * Sales Navigator resource — 12 methods (tier: sn).
  *
- * Account-scoped: the bound context injects `account_id` into every request.
- * `startChat` accepts optional `attachments: Array<Buffer | File>` and builds
- * `FormData` automatically before calling the transport.
+ * Account-scoped: the bound context injects `account_id` as the leading
+ * `/v1/` path segment on every request (account-first grammar) — never a
+ * query param or body field. The v2 list surface (`accountLists`,
+ * `leadLists`, `browseAccountList`, `browseLeadList`, `saveAccount`,
+ * `saveLead`) already stopped carrying `account_id` in the body/query once
+ * it moved into the path, so those bodies shrink to just their own fields
+ * (`company_id` / `user_id` for the two saves).
  *
- * Five methods (`accountLists`, `leadLists`, `browseAccountList`,
- * `browseLeadList`, `saveAccount`) are the v2 list surface — `account_id`
- * is required by every v2 endpoint and travels in the query on the
- * reads/browse, in the body on the two saves. `saveLead` is the v2
- * save-lead surface that **replaces** the retired v1
- * `POST /v1/sales-navigator/leads/{user_id}` — no alias.
+ * `startChat` is pure `application/json` — the served surface has ZERO
+ * multipart ops; file/voice/video attachments travel as base64-encoded
+ * objects (`{content,content_type,filename,send_mode?,metadata?}`).
+ *
+ * `searchFromUrl` is new. `syncMessages` has no served equivalent and is
+ * removed. Naming stays `Sales*`-family / `salesNavigator` namespace per
+ * the established convention.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -18,163 +23,86 @@ import type { paths } from "../generated/types.js";
 // ─── Type aliases from generated OpenAPI snapshot ──────────────────────────
 
 export type SNSearchPeopleBody =
-  paths["/v1/sales-navigator/search/people"]["post"]["requestBody"]["content"]["application/json"];
-export type SNSearchPeopleParams = NonNullable<
-  paths["/v1/sales-navigator/search/people"]["post"]["parameters"]["query"]
+  paths["/v1/{account_id}/sales-navigator/search/people"]["post"]["requestBody"]["content"]["application/json"];
+export type SNSearchPeopleQuery = NonNullable<
+  paths["/v1/{account_id}/sales-navigator/search/people"]["post"]["parameters"]["query"]
 >;
 export type SNSearchPeopleResult =
-  paths["/v1/sales-navigator/search/people"]["post"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/search/people"]["post"]["responses"]["200"]["content"]["application/json"];
 
 export type SNSearchCompaniesBody =
-  paths["/v1/sales-navigator/search/companies"]["post"]["requestBody"]["content"]["application/json"];
-export type SNSearchCompaniesParams = NonNullable<
-  paths["/v1/sales-navigator/search/companies"]["post"]["parameters"]["query"]
+  paths["/v1/{account_id}/sales-navigator/search/companies"]["post"]["requestBody"]["content"]["application/json"];
+export type SNSearchCompaniesQuery = NonNullable<
+  paths["/v1/{account_id}/sales-navigator/search/companies"]["post"]["parameters"]["query"]
 >;
 export type SNSearchCompaniesResult =
-  paths["/v1/sales-navigator/search/companies"]["post"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/search/companies"]["post"]["responses"]["200"]["content"]["application/json"];
 
-export type SNGetParametersParams = NonNullable<
-  paths["/v1/sales-navigator/search/parameters"]["get"]["parameters"]["query"]
->;
+export type SNGetParametersQuery =
+  paths["/v1/{account_id}/sales-navigator/search/parameters"]["get"]["parameters"]["query"];
 export type SNGetParametersResult =
-  paths["/v1/sales-navigator/search/parameters"]["get"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/search/parameters"]["get"]["responses"]["200"]["content"]["application/json"];
 
-/** `POST /v1/sales-navigator/chats` multipart/form-data fields (non-file scalars). */
-type StartChatFormFields =
-  paths["/v1/sales-navigator/chats"]["post"]["requestBody"]["content"]["multipart/form-data"];
-/**
- * Caller-facing body: scalar fields plus optional `attachments`, `voice_message`,
- * and `video_message` (the SDK builds `FormData` internally when files are present).
- * `account_id` is optional because the account-scoped context injects it.
- */
-export type SNStartChatBody = Omit<
-  StartChatFormFields,
-  "account_id" | "attachments" | "voice_message" | "video_message"
-> & {
-  account_id?: string;
-  attachments?: Array<Buffer | File>;
-  voice_message?: Buffer | File;
-  video_message?: Buffer | File;
-};
+export type SNStartChatBody =
+  paths["/v1/{account_id}/sales-navigator/chats"]["post"]["requestBody"]["content"]["application/json"];
 export type SNStartChatResult =
-  paths["/v1/sales-navigator/chats"]["post"]["responses"]["201"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/chats"]["post"]["responses"]["201"]["content"]["application/json"];
 
-export type SNGetProfileParams = NonNullable<
-  paths["/v1/sales-navigator/profiles/{identifier}"]["get"]["parameters"]["query"]
+export type SNGetProfileQuery = NonNullable<
+  paths["/v1/{account_id}/sales-navigator/profiles/{identifier}"]["get"]["parameters"]["query"]
 >;
 export type SNGetProfileResult =
-  paths["/v1/sales-navigator/profiles/{identifier}"]["get"]["responses"]["200"]["content"]["application/json"];
-
-export type SNSyncMessagesParams = NonNullable<
-  paths["/v1/sales-navigator/messages/sync"]["get"]["parameters"]["query"]
->;
-export type SNSyncMessagesResult =
-  paths["/v1/sales-navigator/messages/sync"]["get"]["responses"]["200"]["content"]["application/json"];
-
-// ─── v2 list surface ────────────────────────────────────────────────────────
-// Six ops: two list reads, two browse (POST-with-body-filters), two saves.
-// `account_id` is required by every endpoint and travels in the query on the
-// reads/browse and in the body on the two saves (the save endpoints take no
-// query params at all).
+  paths["/v1/{account_id}/sales-navigator/profiles/{identifier}"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export type SNAccountListsQuery = NonNullable<
-  paths["/v1/sales-navigator/account-lists"]["get"]["parameters"]["query"]
+  paths["/v1/{account_id}/sales-navigator/account-lists"]["get"]["parameters"]["query"]
 >;
 export type SNAccountListsResult =
-  paths["/v1/sales-navigator/account-lists"]["get"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/account-lists"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export type SNLeadListsQuery = NonNullable<
-  paths["/v1/sales-navigator/lead-lists"]["get"]["parameters"]["query"]
+  paths["/v1/{account_id}/sales-navigator/lead-lists"]["get"]["parameters"]["query"]
 >;
 export type SNLeadListsResult =
-  paths["/v1/sales-navigator/lead-lists"]["get"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/lead-lists"]["get"]["responses"]["200"]["content"]["application/json"];
 
 export type SNBrowseAccountListQuery = NonNullable<
-  paths["/v1/sales-navigator/account-lists/{list_id}"]["post"]["parameters"]["query"]
+  paths["/v1/{account_id}/sales-navigator/account-lists/{list_id}"]["post"]["parameters"]["query"]
 >;
 export type SNBrowseAccountListBody =
-  paths["/v1/sales-navigator/account-lists/{list_id}"]["post"]["requestBody"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/account-lists/{list_id}"]["post"]["requestBody"]["content"]["application/json"];
 export type SNBrowseAccountListResult =
-  paths["/v1/sales-navigator/account-lists/{list_id}"]["post"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/account-lists/{list_id}"]["post"]["responses"]["200"]["content"]["application/json"];
 
 export type SNBrowseLeadListQuery = NonNullable<
-  paths["/v1/sales-navigator/lead-lists/{list_id}"]["post"]["parameters"]["query"]
+  paths["/v1/{account_id}/sales-navigator/lead-lists/{list_id}"]["post"]["parameters"]["query"]
 >;
 export type SNBrowseLeadListBody =
-  paths["/v1/sales-navigator/lead-lists/{list_id}"]["post"]["requestBody"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/lead-lists/{list_id}"]["post"]["requestBody"]["content"]["application/json"];
 export type SNBrowseLeadListResult =
-  paths["/v1/sales-navigator/lead-lists/{list_id}"]["post"]["responses"]["200"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/lead-lists/{list_id}"]["post"]["responses"]["200"]["content"]["application/json"];
 
 export type SNSaveAccountBody =
-  paths["/v1/sales-navigator/account-lists/{list_id}/save"]["post"]["requestBody"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/account-lists/{list_id}/save"]["post"]["requestBody"]["content"]["application/json"];
 export type SNSaveAccountResult =
-  paths["/v1/sales-navigator/account-lists/{list_id}/save"]["post"]["responses"]["200"]["content"]["application/json"];
-/** Caller-facing input for `saveAccount()` — `list_id` addresses the path, the rest is the body. */
-export type SNSaveAccountInput = Omit<SNSaveAccountBody, "account_id"> & {
-  list_id: string;
-  account_id?: string;
-};
+  paths["/v1/{account_id}/sales-navigator/account-lists/{list_id}/save"]["post"]["responses"]["200"]["content"]["application/json"];
+/** Caller-facing input for `saveAccount()` — `list_id` addresses the path, `company_id` is the body. */
+export type SNSaveAccountInput = SNSaveAccountBody & { list_id: string };
 
-/**
- * `POST /v1/sales-navigator/lead-lists/{list_id}/save` — the v2 save-lead
- * surface. **BREAKING (2026-07-04):** replaces the retired v1
- * `POST /v1/sales-navigator/leads/{user_id}` — there is no alias. The v2 op
- * inverts the path/body roles (the list is now the path, the member the body)
- * and makes the list mandatory.
- */
 export type SNSaveLeadBody =
-  paths["/v1/sales-navigator/lead-lists/{list_id}/save"]["post"]["requestBody"]["content"]["application/json"];
+  paths["/v1/{account_id}/sales-navigator/lead-lists/{list_id}/save"]["post"]["requestBody"]["content"]["application/json"];
 export type SNSaveLeadResult =
-  paths["/v1/sales-navigator/lead-lists/{list_id}/save"]["post"]["responses"]["200"]["content"]["application/json"];
-/** Caller-facing input for `saveLead()` — `list_id` addresses the path, the rest is the body. */
-export type SNSaveLeadInput = Omit<SNSaveLeadBody, "account_id"> & {
-  list_id: string;
-  account_id?: string;
-};
+  paths["/v1/{account_id}/sales-navigator/lead-lists/{list_id}/save"]["post"]["responses"]["200"]["content"]["application/json"];
+/** Caller-facing input for `saveLead()` — `list_id` addresses the path, `user_id` is the body. */
+export type SNSaveLeadInput = SNSaveLeadBody & { list_id: string };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildFormData(
-  scalars: Record<string, unknown>,
-  attachments?: Array<Buffer | File>,
-  voice_message?: Buffer | File,
-  video_message?: Buffer | File,
-): FormData {
-  const form = new FormData();
-  for (const [key, value] of Object.entries(scalars)) {
-    if (value !== undefined && value !== null) {
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          form.append(key, String(item));
-        }
-      } else {
-        form.append(key, String(value));
-      }
-    }
-  }
-  for (const attachment of attachments ?? []) {
-    if (attachment instanceof File) {
-      form.append("attachments", attachment);
-    } else {
-      form.append("attachments", new Blob([attachment as unknown as BlobPart]));
-    }
-  }
-  if (voice_message) {
-    if (voice_message instanceof File) {
-      form.append("voice_message", voice_message);
-    } else {
-      form.append("voice_message", new Blob([voice_message as unknown as BlobPart]));
-    }
-  }
-  if (video_message) {
-    if (video_message instanceof File) {
-      form.append("video_message", video_message);
-    } else {
-      form.append("video_message", new Blob([video_message as unknown as BlobPart]));
-    }
-  }
-  return form;
-}
+export type SNSearchFromUrlBody =
+  paths["/v1/{account_id}/sales-navigator/search"]["post"]["requestBody"]["content"]["application/json"];
+export type SNSearchFromUrlQuery = NonNullable<
+  paths["/v1/{account_id}/sales-navigator/search"]["post"]["parameters"]["query"]
+>;
+export type SNSearchFromUrlResult =
+  paths["/v1/{account_id}/sales-navigator/search"]["post"]["responses"]["200"]["content"]["application/json"];
 
 // ─── Resource class ───────────────────────────────────────────────────────────
 
@@ -183,140 +111,92 @@ export class SalesNavigatorResource {
 
   /**
    * Search LinkedIn members using the full Sales Navigator filter set.
-   * `POST /v1/sales-navigator/search/people`
+   * `POST /v1/{account_id}/sales-navigator/search/people`
    * Requires tier `sn`. Returns `TIER_NOT_ACTIVE` (403) when the seat lacks it.
    */
-  searchPeople(body: SNSearchPeopleBody, params?: Partial<SNSearchPeopleParams>): Promise<SNSearchPeopleResult> {
+  searchPeople(body: SNSearchPeopleBody, query?: Partial<SNSearchPeopleQuery>): Promise<SNSearchPeopleResult> {
     return this.ctx.request<SNSearchPeopleResult>({
       method: "POST",
-      path: "/v1/sales-navigator/search/people",
+      path: "/v1/{account_id}/sales-navigator/search/people",
       body,
-      ...(params ? { query: params } : {}),
+      ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
   /**
    * Search LinkedIn companies using the full Sales Navigator company filter set.
-   * `POST /v1/sales-navigator/search/companies`
+   * `POST /v1/{account_id}/sales-navigator/search/companies`
    */
-  searchCompanies(body: SNSearchCompaniesBody, params?: Partial<SNSearchCompaniesParams>): Promise<SNSearchCompaniesResult> {
+  searchCompanies(
+    body: SNSearchCompaniesBody,
+    query?: Partial<SNSearchCompaniesQuery>,
+  ): Promise<SNSearchCompaniesResult> {
     return this.ctx.request<SNSearchCompaniesResult>({
       method: "POST",
-      path: "/v1/sales-navigator/search/companies",
+      path: "/v1/{account_id}/sales-navigator/search/companies",
       body,
-      ...(params ? { query: params } : {}),
+      ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
   /**
    * Resolve human-readable terms to opaque Sales Navigator filter IDs.
-   * `GET /v1/sales-navigator/search/parameters`
+   * `GET /v1/{account_id}/sales-navigator/search/parameters`
    */
-  getParameters(params: SNGetParametersParams): Promise<SNGetParametersResult> {
+  getParameters(query: SNGetParametersQuery): Promise<SNGetParametersResult> {
     return this.ctx.request<SNGetParametersResult>({
       method: "GET",
-      path: "/v1/sales-navigator/search/parameters",
-      query: params,
+      path: "/v1/{account_id}/sales-navigator/search/parameters",
+      query: query as Record<string, string | number | boolean | string[] | undefined | null>,
     });
   }
 
   /**
-   * Start a new Sales Navigator chat. Accepts optional `attachments[]`,
-   * `voice_message`, and `video_message` — when present, the request is sent
-   * as `multipart/form-data`. `POST /v1/sales-navigator/chats`
+   * Start a new Sales Navigator chat. `attachments[]`, when supplied, carry
+   * base64-encoded file bytes — always sent as JSON, never multipart.
+   * `POST /v1/{account_id}/sales-navigator/chats`
    */
   startChat(body: SNStartChatBody): Promise<SNStartChatResult> {
-    const { attachments, voice_message, video_message, ...scalars } = body;
-    const hasFiles =
-      (attachments && attachments.length > 0) || voice_message || video_message;
-    if (hasFiles) {
-      return this.ctx.request<SNStartChatResult>({
-        method: "POST",
-        path: "/v1/sales-navigator/chats",
-        body: buildFormData(
-          scalars as Record<string, unknown>,
-          attachments,
-          voice_message,
-          video_message,
-        ),
-        accountIdIn: "body",
-      });
-    }
     return this.ctx.request<SNStartChatResult>({
       method: "POST",
-      path: "/v1/sales-navigator/chats",
-      body: scalars,
-      accountIdIn: "body",
+      path: "/v1/{account_id}/sales-navigator/chats",
+      body,
     });
   }
 
   /**
    * Retrieve a LinkedIn profile with Sales Navigator enrichment.
-   * `GET /v1/sales-navigator/profiles/{identifier}`
+   * `GET /v1/{account_id}/sales-navigator/profiles/{identifier}`
    */
-  getProfile(identifier: string, params?: Partial<SNGetProfileParams>): Promise<SNGetProfileResult> {
+  getProfile(identifier: string, query?: Partial<SNGetProfileQuery>): Promise<SNGetProfileResult> {
     return this.ctx.request<SNGetProfileResult>({
       method: "GET",
-      path: `/v1/sales-navigator/profiles/${identifier}`,
-      // cast needed: linkedin_sections is string[] but transport encodes arrays as repeated params
-      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+      path: `/v1/{account_id}/sales-navigator/profiles/${identifier}`,
+      // cast needed: with_sections is string[] but transport encodes arrays as repeated params
+      ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
-
-  /**
-   * Save a Sales Navigator member into a lead list.
-   * `POST /v1/sales-navigator/lead-lists/{list_id}/save`
-   *
-   * **BREAKING (2026-07-04):** replaces the retired v1
-   * `saveLead(userId, { account_id, list_id? })` — there is no alias. The
-   * list is now mandatory and addresses the path; the member id travels in
-   * the body alongside `account_id` (the save endpoints carry no query
-   * params, so `account_id` has nowhere else to go).
-   */
-  saveLead(input: SNSaveLeadInput): Promise<SNSaveLeadResult> {
-    const { list_id, ...body } = input;
-    return this.ctx.request<SNSaveLeadResult>({
-      method: "POST",
-      path: `/v1/sales-navigator/lead-lists/${list_id}/save`,
-      body,
-      accountIdIn: "body",
-    });
-  }
-
-  /**
-   * Trigger a re-sync of the account's Sales Navigator message history.
-   * `GET /v1/sales-navigator/messages/sync`
-   */
-  syncMessages(params: SNSyncMessagesParams): Promise<SNSyncMessagesResult> {
-    return this.ctx.request<SNSyncMessagesResult>({
-      method: "GET",
-      path: "/v1/sales-navigator/messages/sync",
-      query: params,
-    });
-  }
-
-  // ─── v2 list surface ──────────────────────────────────────────────────────
 
   /**
    * List the saved-account (company) lists on the operator's Sales Navigator seat.
-   * `GET /v1/sales-navigator/account-lists`
+   * `GET /v1/{account_id}/sales-navigator/account-lists`
    */
   accountLists(query?: Partial<SNAccountListsQuery>): Promise<SNAccountListsResult> {
     return this.ctx.request<SNAccountListsResult>({
       method: "GET",
-      path: "/v1/sales-navigator/account-lists",
+      path: "/v1/{account_id}/sales-navigator/account-lists",
       ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
   /**
    * List the saved-lead (member) lists on the operator's Sales Navigator seat.
-   * `GET /v1/sales-navigator/lead-lists`
+   * `GET /v1/{account_id}/sales-navigator/lead-lists`
    */
   leadLists(query?: Partial<SNLeadListsQuery>): Promise<SNLeadListsResult> {
     return this.ctx.request<SNLeadListsResult>({
       method: "GET",
-      path: "/v1/sales-navigator/lead-lists",
+      path: "/v1/{account_id}/sales-navigator/lead-lists",
       ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
@@ -324,7 +204,7 @@ export class SalesNavigatorResource {
   /**
    * Browse the saved accounts (companies) in one account list. Pass optional
    * `persona` / `filter` / `sort_by` / `sort_order` filters in the body.
-   * `POST /v1/sales-navigator/account-lists/{list_id}`
+   * `POST /v1/{account_id}/sales-navigator/account-lists/{list_id}`
    */
   browseAccountList(
     listId: string,
@@ -333,7 +213,7 @@ export class SalesNavigatorResource {
   ): Promise<SNBrowseAccountListResult> {
     return this.ctx.request<SNBrowseAccountListResult>({
       method: "POST",
-      path: `/v1/sales-navigator/account-lists/${listId}`,
+      path: `/v1/{account_id}/sales-navigator/account-lists/${listId}`,
       body: body ?? {},
       ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
@@ -342,7 +222,7 @@ export class SalesNavigatorResource {
   /**
    * Browse the saved leads (members) in one lead list. Pass optional
    * `spotlight` / `sort_by` / `sort_order` filters in the body.
-   * `POST /v1/sales-navigator/lead-lists/{list_id}`
+   * `POST /v1/{account_id}/sales-navigator/lead-lists/{list_id}`
    */
   browseLeadList(
     listId: string,
@@ -351,15 +231,16 @@ export class SalesNavigatorResource {
   ): Promise<SNBrowseLeadListResult> {
     return this.ctx.request<SNBrowseLeadListResult>({
       method: "POST",
-      path: `/v1/sales-navigator/lead-lists/${listId}`,
+      path: `/v1/{account_id}/sales-navigator/lead-lists/${listId}`,
       body: body ?? {},
       ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 
   /**
-   * Save a LinkedIn company into an account list.
-   * `POST /v1/sales-navigator/account-lists/{list_id}/save`
+   * Save a LinkedIn company into an account list. Body is just `{company_id}`
+   * — `account_id` lives in the path, not the body.
+   * `POST /v1/{account_id}/sales-navigator/account-lists/{list_id}/save`
    *
    * No `saved` boolean is invented — a `2xx` response body is the success
    * signal (the substrate returns no success flag).
@@ -368,9 +249,37 @@ export class SalesNavigatorResource {
     const { list_id, ...body } = input;
     return this.ctx.request<SNSaveAccountResult>({
       method: "POST",
-      path: `/v1/sales-navigator/account-lists/${list_id}/save`,
+      path: `/v1/{account_id}/sales-navigator/account-lists/${list_id}/save`,
       body,
-      accountIdIn: "body",
+    });
+  }
+
+  /**
+   * Save a Sales Navigator member into a lead list. Body is just `{user_id}`
+   * — `account_id` lives in the path, not the body.
+   * `POST /v1/{account_id}/sales-navigator/lead-lists/{list_id}/save`
+   */
+  saveLead(input: SNSaveLeadInput): Promise<SNSaveLeadResult> {
+    const { list_id, ...body } = input;
+    return this.ctx.request<SNSaveLeadResult>({
+      method: "POST",
+      path: `/v1/{account_id}/sales-navigator/lead-lists/${list_id}/save`,
+      body,
+    });
+  }
+
+  /**
+   * Run a pasted Sales Navigator search/list URL directly.
+   * `POST /v1/{account_id}/sales-navigator/search`
+   * `url` is the only accepted body field. Response items are polymorphic,
+   * each discriminated individually by its own `object`.
+   */
+  searchFromUrl(body: SNSearchFromUrlBody, query?: Partial<SNSearchFromUrlQuery>): Promise<SNSearchFromUrlResult> {
+    return this.ctx.request<SNSearchFromUrlResult>({
+      method: "POST",
+      path: "/v1/{account_id}/sales-navigator/search",
+      body,
+      ...(query ? { query: query as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }
 }
