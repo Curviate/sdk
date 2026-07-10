@@ -32,6 +32,7 @@ import {
   type InvitesResource,
   type SearchResource,
   type PostsResource,
+  type CommentsResource,
   type SalesNavigatorResource,
   type RecruiterResource,
   type JobsResource,
@@ -50,6 +51,7 @@ export class Curviate {
   readonly invites: InvitesResource;
   readonly search: SearchResource;
   readonly posts: PostsResource;
+  readonly comments: CommentsResource;
   readonly salesNavigator: SalesNavigatorResource;
   readonly recruiter: RecruiterResource;
   readonly jobs: JobsResource;
@@ -67,6 +69,7 @@ export class Curviate {
     this.invites = ns.invites;
     this.search = ns.search;
     this.posts = ns.posts;
+    this.comments = ns.comments;
     this.salesNavigator = ns.salesNavigator;
     this.recruiter = ns.recruiter;
     this.jobs = ns.jobs;

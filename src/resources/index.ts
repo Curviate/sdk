@@ -15,6 +15,7 @@ import { UsersResource } from "./users.js";
 import { InvitesResource } from "./invites.js";
 import { SearchResource } from "./search.js";
 import { PostsResource } from "./posts.js";
+import { CommentsResource } from "./comments.js";
 import { SalesNavigatorResource } from "./sales-navigator.js";
 import { RecruiterResource } from "./recruiter.js";
 import { JobsResource } from "./jobs.js";
@@ -28,6 +29,7 @@ export { UsersResource } from "./users.js";
 export { InvitesResource } from "./invites.js";
 export { SearchResource } from "./search.js";
 export { PostsResource } from "./posts.js";
+export { CommentsResource } from "./comments.js";
 export { SalesNavigatorResource } from "./sales-navigator.js";
 export { RecruiterResource } from "./recruiter.js";
 export { JobsResource } from "./jobs.js";
@@ -43,6 +45,7 @@ export interface ResourceNamespaces {
   invites: InvitesResource;
   search: SearchResource;
   posts: PostsResource;
+  comments: CommentsResource;
   salesNavigator: SalesNavigatorResource;
   recruiter: RecruiterResource;
   jobs: JobsResource;
@@ -60,6 +63,7 @@ export function buildNamespaces(ctx: RequestContext): ResourceNamespaces {
     invites: new InvitesResource(ctx),
     search: new SearchResource(ctx),
     posts: new PostsResource(ctx),
+    comments: new CommentsResource(ctx),
     salesNavigator: new SalesNavigatorResource(ctx),
     recruiter: new RecruiterResource(ctx),
     jobs: new JobsResource(ctx),

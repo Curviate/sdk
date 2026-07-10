@@ -1102,8 +1102,154 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
+  // ─── Account-scoped: comments (SDK-D1) ──────────────────────────────────
+  {
+    name: "comments.listUserComments",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/users/me/comments`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "comment_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.listUserComments("me");
+      return captured!;
+    },
+  },
+  {
+    name: "comments.create",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/posts/post_1/comments`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "comment", id: "c_1" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.create("post_1", { text: "Nice post!" });
+      return captured!;
+    },
+  },
+  {
+    name: "comments.edit",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.patch(`${BASE}/v1/${ACCOUNT_ID}/posts/post_1/comments/c_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "comment", id: "c_1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.edit("post_1", "c_1", { text: "Edited." });
+      return captured!;
+    },
+  },
+  {
+    name: "comments.delete",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/posts/post_1/comments/c_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.delete("post_1", "c_1");
+      return captured!;
+    },
+  },
+  {
+    name: "comments.reply",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/posts/post_1/comments/c_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "comment", id: "c_2" }, { status: 201 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.reply("post_1", "c_1", { text: "Agreed!" });
+      return captured!;
+    },
+  },
+  {
+    name: "comments.listReplies",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/posts/post_1/comments/c_1/replies`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "reply_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.listReplies("post_1", "c_1");
+      return captured!;
+    },
+  },
+  {
+    name: "comments.listReactions",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/posts/post_1/comments/c_1/reactions`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "reaction_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.listReactions("post_1", "c_1");
+      return captured!;
+    },
+  },
+  {
+    name: "comments.addReaction",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/posts/post_1/comments/c_1/reactions`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "comment_reaction_added", comment_id: "c_1", reaction: "like" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.addReaction("post_1", "c_1", { reaction: "like" });
+      return captured!;
+    },
+  },
+  {
+    name: "comments.removeReaction",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/posts/post_1/comments/c_1/reactions`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "comment_reaction_removed", comment_id: "c_1", reaction: "like" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).comments.removeReaction("post_1", "c_1", { reaction: "like" });
+      return captured!;
+    },
+  },
+
   // ─── Later chunks append their own account-scoped rows here (recruiter,
-  // jobs, comments). ─────────────────────────────────────────────────────────
+  // jobs). ─────────────────────────────────────────────────────────────────
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
