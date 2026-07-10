@@ -11,7 +11,7 @@ import type { RequestContext } from "../internal/context.js";
 import { AccountsResource } from "./accounts.js";
 import { AuthResource } from "./auth.js";
 import { MessagingResource } from "./messaging.js";
-import { ProfilesResource } from "./profiles.js";
+import { UsersResource } from "./users.js";
 import { InvitesResource } from "./invites.js";
 import { SearchResource } from "./search.js";
 import { PostsResource } from "./posts.js";
@@ -24,7 +24,7 @@ import { WebhooksResource } from "./webhooks.js";
 export { AccountsResource } from "./accounts.js";
 export { AuthResource } from "./auth.js";
 export { MessagingResource } from "./messaging.js";
-export { ProfilesResource } from "./profiles.js";
+export { UsersResource } from "./users.js";
 export { InvitesResource } from "./invites.js";
 export { SearchResource } from "./search.js";
 export { PostsResource } from "./posts.js";
@@ -39,7 +39,7 @@ export interface ResourceNamespaces {
   accounts: AccountsResource;
   auth: AuthResource;
   messaging: MessagingResource;
-  profiles: ProfilesResource;
+  users: UsersResource;
   invites: InvitesResource;
   search: SearchResource;
   posts: PostsResource;
@@ -56,7 +56,7 @@ export function buildNamespaces(ctx: RequestContext): ResourceNamespaces {
     accounts: new AccountsResource(ctx),
     auth: new AuthResource(ctx),
     messaging: new MessagingResource(ctx),
-    profiles: new ProfilesResource(ctx),
+    users: new UsersResource(ctx),
     invites: new InvitesResource(ctx),
     search: new SearchResource(ctx),
     posts: new PostsResource(ctx),

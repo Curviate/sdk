@@ -153,6 +153,152 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
+  // ─── Account-scoped: users (SDK-C1) ─────────────────────────────────────
+  {
+    name: "users.get",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/users/me`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "user_profile", id: "u_1", type: "individual", display_name: "Alice", specifics: {} });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.get("me");
+      return captured!;
+    },
+  },
+  {
+    name: "users.update",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.patch(`${BASE}/v1/${ACCOUNT_ID}/users/me`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "user_updated" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.update("me", { headline: "x" });
+      return captured!;
+    },
+  },
+  {
+    name: "users.listRelations",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profiles/relations`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "relation_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.listRelations();
+      return captured!;
+    },
+  },
+  {
+    name: "users.listFollowers",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/users/ACo1/followers`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "follower_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.listFollowers("ACo1");
+      return captured!;
+    },
+  },
+  {
+    name: "users.listFollowing",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/users/ACo1/following`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "following_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.listFollowing("ACo1");
+      return captured!;
+    },
+  },
+  {
+    name: "users.follow",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/users/ACo1/follow`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "user_followed" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.follow("ACo1");
+      return captured!;
+    },
+  },
+  {
+    name: "users.unfollow",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/users/ACo1/follow`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "user_unfollowed" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.unfollow("ACo1");
+      return captured!;
+    },
+  },
+  {
+    name: "users.getInMailCredits",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/inmail-credits`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "inmail_credits", credits: { classic: null, recruiter: null, sales_navigator: null } });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.getInMailCredits();
+      return captured!;
+    },
+  },
+  {
+    name: "users.endorseSkill",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/users/ACo1/endorse-skill`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "skill_endorsed" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).users.endorseSkill("ACo1", { endorsement_id: "e_1" });
+      return captured!;
+    },
+  },
+
   // ─── Later chunks append their own account-scoped rows here, e.g.:
   //
   //   {

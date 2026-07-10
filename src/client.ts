@@ -28,7 +28,7 @@ import {
   type AccountsResource,
   type AuthResource,
   type MessagingResource,
-  type ProfilesResource,
+  type UsersResource,
   type InvitesResource,
   type SearchResource,
   type PostsResource,
@@ -46,7 +46,7 @@ export class Curviate {
   readonly accounts: AccountsResource;
   readonly auth: AuthResource;
   readonly messaging: MessagingResource;
-  readonly profiles: ProfilesResource;
+  readonly users: UsersResource;
   readonly invites: InvitesResource;
   readonly search: SearchResource;
   readonly posts: PostsResource;
@@ -63,7 +63,7 @@ export class Curviate {
     this.accounts = ns.accounts;
     this.auth = ns.auth;
     this.messaging = ns.messaging;
-    this.profiles = ns.profiles;
+    this.users = ns.users;
     this.invites = ns.invites;
     this.search = ns.search;
     this.posts = ns.posts;
@@ -103,15 +103,15 @@ export class Curviate {
    * Calls `fn` repeatedly, injecting the `cursor` from each response into the
    * next call, yielding individual items until `cursor` is null.
    *
-   * @param fn     - a bound resource method (e.g. `profiles.listConnections.bind(profiles)`)
+   * @param fn     - a bound resource method (e.g. `users.listRelations.bind(users)`)
    * @param params - the initial params (minus cursor)
    *
    * @example
-   * for await (const profile of curviate.paginate(
-   *   curviate.account('acc_123').profiles.listConnections,
+   * for await (const relation of curviate.paginate(
+   *   curviate.account('acc_123').users.listRelations,
    *   { limit: 50 }
    * )) {
-   *   console.log(profile);
+   *   console.log(relation);
    * }
    */
   paginate<TParams extends Record<string, unknown>, TPage extends { items?: unknown[]; data?: unknown[]; cursor?: string | null }>(

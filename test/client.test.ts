@@ -139,7 +139,7 @@ describe("account-scoped accessor", () => {
     const scoped = new Curviate({ apiKey: "k", baseUrl: BASE }).account("acc_123");
     for (const ns of [
       "messaging",
-      "profiles",
+      "users",
       "invites",
       "search",
       "posts",
