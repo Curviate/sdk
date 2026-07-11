@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 import { server } from "./msw/server.js";
 import { execute } from "../src/transport.js";
-import { CurviateError, isCurviateError } from "../src/errors.js";
+import { CurviateError, isCurviateError, ERROR_CODES } from "../src/errors.js";
 
 const BASE = "https://app.curviate.test";
 
@@ -324,6 +324,39 @@ describe("retry logic", () => {
     expect((err as CurviateError).retryLikelyToSucceed).toBe(false);
     expect(calls).toBe(1);
   });
+
+  // 409 CONNECTION_REQUEST_CONFLICT (a connect-request to a recipient who already
+  // has a pending request from this account, or is already a first-degree
+  // connection) must decode to its own code, not fall back to INTERNAL — and must
+  // NOT be retried. Real callers see this from invites.send (a write, which never
+  // auto-retries); proven here on a GET so a retryable INTERNAL fallback would
+  // otherwise re-fire up to maxRetries times, isolating the code-mapping bug.
+  it("maps 409 CONNECTION_REQUEST_CONFLICT to its own code and does not retry it (1 fetch)", async () => {
+    let calls = 0;
+    server.use(
+      http.get(`${BASE}/v1/accounts/x`, () => {
+        calls += 1;
+        return HttpResponse.json(
+          {
+            code: "CONNECTION_REQUEST_CONFLICT",
+            message:
+              "A connect-request to this member already exists, or you are already connected. Do not re-send.",
+            user_fixable: true,
+            retry_likely_to_succeed: false,
+            retry_hint: { kind: "never" },
+          },
+          { status: 409 },
+        );
+      }),
+    );
+    const err = await execute("GET", "/v1/accounts/x", det()).catch((e) => e);
+    expect(isCurviateError(err)).toBe(true);
+    expect((err as CurviateError).code).toBe("CONNECTION_REQUEST_CONFLICT");
+    expect((err as CurviateError).httpStatus).toBe(409);
+    expect((err as CurviateError).userFixable).toBe(true);
+    expect((err as CurviateError).retryLikelyToSucceed).toBe(false);
+    expect(calls).toBe(1);
+  });
 });
 
 describe("backoff computation", () => {
@@ -423,6 +456,46 @@ describe("rate-limit surfacing", () => {
     );
     const err = await execute("GET", "/v1/accounts", det({ maxRetries: 0 })).catch((e) => e);
     expect((err as CurviateError).retryAfterMs).toBe(10_000);
+  });
+});
+
+describe("error-code decode coverage", () => {
+  // Every code the SDK's taxonomy knows must decode from the wire back to
+  // itself — never silently downgraded to INTERNAL. This is the coverage whose
+  // absence let a real server code (CONNECTION_REQUEST_CONFLICT) reach callers
+  // as INTERNAL: the decode round-trip had never been exercised per code.
+  // maxRetries:0 so even a retryable code throws after exactly one fetch,
+  // isolating the code-mapping from retry semantics.
+  it.each([...ERROR_CODES])("decodes wire code %s to itself, not INTERNAL", async (code) => {
+    let calls = 0;
+    server.use(
+      http.get(`${BASE}/v1/probe`, () => {
+        calls += 1;
+        return HttpResponse.json(
+          { code, message: "probe", user_fixable: false, retry_likely_to_succeed: false },
+          { status: 400 },
+        );
+      }),
+    );
+    const err = await execute("GET", "/v1/probe", det({ maxRetries: 0 })).catch((e) => e);
+    expect(isCurviateError(err)).toBe(true);
+    expect((err as CurviateError).code).toBe(code);
+    expect(calls).toBe(1);
+  });
+
+  // An unknown/unmapped wire code is the only thing that should ever become
+  // INTERNAL — the fallback still works for codes outside the taxonomy.
+  it("downgrades an unknown wire code to INTERNAL", async () => {
+    server.use(
+      http.get(`${BASE}/v1/probe`, () =>
+        HttpResponse.json(
+          { code: "SOME_FUTURE_UNMAPPED_CODE", message: "x", user_fixable: false, retry_likely_to_succeed: false },
+          { status: 400 },
+        ),
+      ),
+    );
+    const err = await execute("GET", "/v1/probe", det({ maxRetries: 0 })).catch((e) => e);
+    expect((err as CurviateError).code).toBe("INTERNAL");
   });
 });
 

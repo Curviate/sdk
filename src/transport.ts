@@ -13,6 +13,7 @@
  */
 import {
   CurviateError,
+  KNOWN_ERROR_CODES,
   type ErrorCode,
   type RequiredTier,
   type RetryHint,
@@ -70,20 +71,6 @@ const RETRYABLE_CODES: ReadonlySet<string> = new Set([
 
 const WRITE_METHODS: ReadonlySet<HttpMethod> = new Set(["POST", "PATCH", "PUT", "DELETE"]);
 
-const KNOWN_CODES: ReadonlySet<string> = new Set<ErrorCode>([
-  "UNAUTHORIZED", "INVALID_REQUEST", "UNSUPPORTED_MEDIA_TYPE", "PAYLOAD_TOO_LARGE",
-  "ACCOUNT_NOT_FOUND", "ACCOUNT_RESTRICTED", "ACCOUNT_ALREADY_LINKED", "RESOURCE_NOT_FOUND", "RESOURCE_ACCESS_RESTRICTED", "TIER_NOT_ACTIVE",
-  "LINKEDIN_FEATURE_NOT_SUBSCRIBED", "RATE_LIMIT_ACCOUNT", "RATE_LIMIT_TENANT",
-  "PLATFORM_RATE_LIMIT", "PLATFORM_ERROR", "PLATFORM_NOT_IMPLEMENTED",
-  "LINKEDIN_OPERATION_NOT_SUPPORTED",
-  "CHECKPOINT_NOT_FOUND", "CHECKPOINT_EXPIRED", "CHECKPOINT_INVALID_CODE",
-  "CHECKPOINT_MAX_ATTEMPTS", "CHECKPOINT_ALREADY_RESOLVED", "CHECKPOINT_UNSUPPORTED",
-  "CONNECTION_IN_PROGRESS", "LINKEDIN_AUTH_FAILED", "LINKEDIN_RATE_LIMITED",
-  "LINKEDIN_COOKIE_INVALID", "LINKEDIN_SERVICE_UNAVAILABLE", "MESSAGE_WINDOW_EXPIRED",
-  "RECIPIENT_UNREACHABLE", "PAYMENT_REQUIRED", "PAYMENT_FAILED", "SUBSCRIPTION_BUSY",
-  "SUBSCRIPTION_NOT_FOUND", "SEAT_NOT_FOUND", "SEAT_CANCELLED", "INTERNAL",
-]);
-
 const REQUIRED_TIERS: ReadonlySet<string> = new Set<RequiredTier>([
   "core", "sn", "sales_nav", "recruiter",
 ]);
@@ -109,7 +96,7 @@ function backoffDelay(n: number, jitter: number): number {
 
 /** Narrow an arbitrary wire `code` to a known {@link ErrorCode}, else INTERNAL. */
 function toErrorCode(code: string | undefined): ErrorCode {
-  return code && KNOWN_CODES.has(code) ? (code as ErrorCode) : "INTERNAL";
+  return code && KNOWN_ERROR_CODES.has(code) ? (code as ErrorCode) : "INTERNAL";
 }
 
 function toRetryHint(hint: WireErrorEnvelope["retry_hint"]): RetryHint | null {

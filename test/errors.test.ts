@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import {
   CurviateError,
   isCurviateError,
+  ERROR_CODES,
+  KNOWN_ERROR_CODES,
   type ErrorCode,
 } from "../src/errors.js";
 
@@ -118,51 +120,12 @@ describe("isCurviateError", () => {
 });
 
 describe("ErrorCode union", () => {
-  // exhaustive presence of every observable code, and absence
-  // of internal-only codes. A compile-time assignment proves the union accepts
-  // the in-scope codes; the runtime check below guards against accidental drift.
-  it("accepts every observable code (compile-time) and excludes internal codes", () => {
-    const observable: ErrorCode[] = [
-      "UNAUTHORIZED",
-      "INVALID_REQUEST",
-      "UNSUPPORTED_MEDIA_TYPE",
-      "PAYLOAD_TOO_LARGE",
-      "ACCOUNT_NOT_FOUND",
-      "ACCOUNT_RESTRICTED",
-      "ACCOUNT_ALREADY_LINKED",
-      "RESOURCE_NOT_FOUND",
-      "RESOURCE_ACCESS_RESTRICTED",
-      "TIER_NOT_ACTIVE",
-      "LINKEDIN_FEATURE_NOT_SUBSCRIBED",
-      "RATE_LIMIT_ACCOUNT",
-      "RATE_LIMIT_TENANT",
-      "PLATFORM_RATE_LIMIT",
-      "PLATFORM_ERROR",
-      "PLATFORM_NOT_IMPLEMENTED",
-      "LINKEDIN_OPERATION_NOT_SUPPORTED",
-      "CHECKPOINT_NOT_FOUND",
-      "CHECKPOINT_EXPIRED",
-      "CHECKPOINT_INVALID_CODE",
-      "CHECKPOINT_MAX_ATTEMPTS",
-      "CHECKPOINT_ALREADY_RESOLVED",
-      "CHECKPOINT_UNSUPPORTED",
-      "CONNECTION_IN_PROGRESS",
-      "LINKEDIN_AUTH_FAILED",
-      "LINKEDIN_RATE_LIMITED",
-      "LINKEDIN_COOKIE_INVALID",
-      "LINKEDIN_SERVICE_UNAVAILABLE",
-      "MESSAGE_WINDOW_EXPIRED",
-      "RECIPIENT_UNREACHABLE",
-      "PAYMENT_REQUIRED",
-      "PAYMENT_FAILED",
-      "SUBSCRIPTION_BUSY",
-      "SUBSCRIPTION_NOT_FOUND",
-      "SEAT_NOT_FOUND",
-      "SEAT_CANCELLED",
-      "INTERNAL",
-    ];
-    // Every entry is a valid ErrorCode and a CurviateError can carry it.
-    for (const code of observable) {
+  // Every code in the taxonomy is a valid ErrorCode a CurviateError can carry,
+  // and internal-only codes are excluded from the public union. Iterating
+  // ERROR_CODES (rather than a hand-copied list) means this test can never
+  // drift from the actual taxonomy.
+  it("carries every taxonomy code and excludes internal codes", () => {
+    for (const code of ERROR_CODES) {
       expect(new CurviateError({
         code,
         message: "x",
@@ -181,4 +144,38 @@ describe("ErrorCode union", () => {
     void banned2;
     void banned3;
   });
+
+  // The connect-request conflict code is part of the public taxonomy — a caller
+  // can narrow on it in an exhaustive switch.
+  it("includes CONNECTION_REQUEST_CONFLICT in the taxonomy", () => {
+    expect(ERROR_CODES).toContain("CONNECTION_REQUEST_CONFLICT");
+  });
 });
+
+describe("error-code single source of truth", () => {
+  // The runtime membership set and the ErrorCode type are BOTH derived from
+  // ERROR_CODES, so a code can never be recognized by the type but not the
+  // runtime decoder (the drift that downgraded CONNECTION_REQUEST_CONFLICT to
+  // INTERNAL). These assertions lock that derivation in place.
+  it("KNOWN_ERROR_CODES contains exactly the ERROR_CODES entries", () => {
+    expect(new Set(KNOWN_ERROR_CODES)).toEqual(new Set(ERROR_CODES));
+  });
+
+  it("has no duplicate entries in ERROR_CODES", () => {
+    expect(KNOWN_ERROR_CODES.size).toBe(ERROR_CODES.length);
+  });
+
+  it("recognizes every taxonomy code at runtime", () => {
+    for (const code of ERROR_CODES) {
+      expect(KNOWN_ERROR_CODES.has(code)).toBe(true);
+    }
+  });
+});
+
+// Compile-time lock: the ErrorCode type and the ERROR_CODES element type must
+// stay identical. The tuple wrappers defeat union distribution so this is a
+// strict equality — if a future change decouples the type from the array (e.g.
+// by reverting to a hand-listed union), this stops type-checking.
+type Same<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+const _errorCodeMatchesArray: Same<ErrorCode, (typeof ERROR_CODES)[number]> = true;
+void _errorCodeMatchesArray;

@@ -15,67 +15,99 @@
  */
 
 /**
- * The complete set of error codes observable by API callers.
+ * The complete set of error codes observable by API callers — the single
+ * source of truth for the SDK's error taxonomy.
  *
- * This union mirrors the server's error taxonomy (the customer-observable
- * subset). The string literals are copied here intentionally — the SDK has no
- * dependency on any private package. Internal-only codes that never reach a
- * caller (e.g. `BANNED_ENV_PREFIX`, `ADMIN_BYPASS`, protected-account and
- * substrate-internal codes) are deliberately excluded.
+ * Both the {@link ErrorCode} type (what a caller narrows on) and the runtime
+ * {@link KNOWN_ERROR_CODES} membership set (what the transport recognizes on the
+ * wire) are DERIVED from this one array. Adding a code here adds it to both, so
+ * the type and the runtime decoder can never drift apart — a wire code present
+ * in the type is guaranteed to be decoded to itself rather than downgraded to
+ * `INTERNAL`.
+ *
+ * This mirrors the server's error taxonomy (the customer-observable subset).
+ * The string literals are copied here intentionally — the SDK has no dependency
+ * on any private package. Internal-only codes that never reach a caller (e.g.
+ * `BANNED_ENV_PREFIX`, `ADMIN_BYPASS`, protected-account and substrate-internal
+ * codes) are deliberately excluded.
  *
  * The taxonomy is additive-only: new codes may be appended, existing ones are
  * never removed or renamed.
  */
-export type ErrorCode =
+export const ERROR_CODES = [
   // Authentication / authorization
-  | "UNAUTHORIZED"
-  | "INVALID_REQUEST"
-  | "UNSUPPORTED_MEDIA_TYPE"
-  | "PAYLOAD_TOO_LARGE"
+  "UNAUTHORIZED",
+  "INVALID_REQUEST",
+  "UNSUPPORTED_MEDIA_TYPE",
+  "PAYLOAD_TOO_LARGE",
   // Account state
-  | "ACCOUNT_NOT_FOUND"
-  | "ACCOUNT_RESTRICTED"
-  /** Duplicate connect — reconnect or adopt the existing account instead of linking again. Not retryable. */
-  | "ACCOUNT_ALREADY_LINKED"
-  | "RESOURCE_NOT_FOUND"
-  | "RESOURCE_ACCESS_RESTRICTED"
+  "ACCOUNT_NOT_FOUND",
+  "ACCOUNT_RESTRICTED",
+  // Duplicate connect — reconnect or adopt the existing account instead of
+  // linking again. Not retryable.
+  "ACCOUNT_ALREADY_LINKED",
+  "RESOURCE_NOT_FOUND",
+  "RESOURCE_ACCESS_RESTRICTED",
   // Tier / subscription gating
-  | "TIER_NOT_ACTIVE"
-  | "LINKEDIN_FEATURE_NOT_SUBSCRIBED"
+  "TIER_NOT_ACTIVE",
+  "LINKEDIN_FEATURE_NOT_SUBSCRIBED",
   // Rate limits
-  | "RATE_LIMIT_ACCOUNT"
-  | "RATE_LIMIT_TENANT"
-  | "PLATFORM_RATE_LIMIT"
+  "RATE_LIMIT_ACCOUNT",
+  "RATE_LIMIT_TENANT",
+  "PLATFORM_RATE_LIMIT",
   // Platform errors
-  | "PLATFORM_ERROR"
-  | "PLATFORM_NOT_IMPLEMENTED"
-  /** Permanent LinkedIn platform limitation for the attempted operation (e.g. listing a non-self user's following list). Not a transient failure — retrying will not help. */
-  | "LINKEDIN_OPERATION_NOT_SUPPORTED"
+  "PLATFORM_ERROR",
+  "PLATFORM_NOT_IMPLEMENTED",
+  // Permanent LinkedIn platform limitation for the attempted operation (e.g.
+  // listing a non-self user's following list). Not a transient failure —
+  // retrying will not help.
+  "LINKEDIN_OPERATION_NOT_SUPPORTED",
   // Checkpoint (account connect flow)
-  | "CHECKPOINT_NOT_FOUND"
-  | "CHECKPOINT_EXPIRED"
-  | "CHECKPOINT_INVALID_CODE"
-  | "CHECKPOINT_MAX_ATTEMPTS"
-  | "CHECKPOINT_ALREADY_RESOLVED"
-  | "CHECKPOINT_UNSUPPORTED"
-  | "CONNECTION_IN_PROGRESS"
+  "CHECKPOINT_NOT_FOUND",
+  "CHECKPOINT_EXPIRED",
+  "CHECKPOINT_INVALID_CODE",
+  "CHECKPOINT_MAX_ATTEMPTS",
+  "CHECKPOINT_ALREADY_RESOLVED",
+  "CHECKPOINT_UNSUPPORTED",
+  "CONNECTION_IN_PROGRESS",
   // LinkedIn-specific connect errors
-  | "LINKEDIN_AUTH_FAILED"
-  | "LINKEDIN_RATE_LIMITED"
-  | "LINKEDIN_COOKIE_INVALID"
-  | "LINKEDIN_SERVICE_UNAVAILABLE"
-  // Messaging mutation
-  | "MESSAGE_WINDOW_EXPIRED"
-  | "RECIPIENT_UNREACHABLE"
+  "LINKEDIN_AUTH_FAILED",
+  "LINKEDIN_RATE_LIMITED",
+  "LINKEDIN_COOKIE_INVALID",
+  "LINKEDIN_SERVICE_UNAVAILABLE",
+  // Messaging / connect-request mutation
+  "MESSAGE_WINDOW_EXPIRED",
+  "RECIPIENT_UNREACHABLE",
+  // Duplicate / already-connected connect-request conflict: a send to a
+  // recipient who already has a pending request from this account, or is already
+  // a first-degree connection. user_fixable, never retryable — do not re-send.
+  "CONNECTION_REQUEST_CONFLICT",
   // Billing (surface: tenant-management)
-  | "PAYMENT_REQUIRED"
-  | "PAYMENT_FAILED"
-  | "SUBSCRIPTION_BUSY"
-  | "SUBSCRIPTION_NOT_FOUND"
-  | "SEAT_NOT_FOUND"
-  | "SEAT_CANCELLED"
+  "PAYMENT_REQUIRED",
+  "PAYMENT_FAILED",
+  "SUBSCRIPTION_BUSY",
+  "SUBSCRIPTION_NOT_FOUND",
+  "SEAT_NOT_FOUND",
+  "SEAT_CANCELLED",
   // Generic
-  | "INTERNAL";
+  "INTERNAL",
+] as const;
+
+/**
+ * The complete set of error codes observable by API callers.
+ *
+ * Derived from {@link ERROR_CODES} — an agent builder can write an exhaustive
+ * `switch (error.code)` without fear of unknown codes.
+ */
+export type ErrorCode = (typeof ERROR_CODES)[number];
+
+/**
+ * Runtime membership set for {@link ERROR_CODES}. The transport uses it to
+ * recognize a wire `code` and decode it to itself instead of downgrading a
+ * known code to `INTERNAL`. Built from the same array as {@link ErrorCode}, so
+ * the recognized-at-runtime set and the type can never diverge.
+ */
+export const KNOWN_ERROR_CODES: ReadonlySet<string> = new Set(ERROR_CODES);
 
 /**
  * The product tier a caller needs, surfaced on `TIER_NOT_ACTIVE` so an agent
