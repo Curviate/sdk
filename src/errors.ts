@@ -115,11 +115,32 @@ export type ErrorCode = (typeof ERROR_CODES)[number];
 export const KNOWN_ERROR_CODES: ReadonlySet<string> = new Set(ERROR_CODES);
 
 /**
+ * The tiers a caller can be asked to upgrade to, surfaced on `TIER_NOT_ACTIVE`.
+ * `sn` and `sales_nav` are both emitted by the API (internal flag key vs.
+ * product-facing label).
+ *
+ * Single source of truth, mirroring {@link ERROR_CODES}: both the
+ * {@link RequiredTier} type and the runtime {@link KNOWN_REQUIRED_TIERS}
+ * membership set are derived from this one array, so the type a caller
+ * narrows on and the set the transport validates a wire value against can
+ * never drift apart.
+ */
+export const REQUIRED_TIERS = ["core", "sn", "sales_nav", "recruiter"] as const;
+
+/**
  * The product tier a caller needs, surfaced on `TIER_NOT_ACTIVE` so an agent
  * can route an upgrade without parsing the message. `sn` and `sales_nav` are
  * both emitted by the API (internal flag key vs. product-facing label).
  */
-export type RequiredTier = "core" | "sn" | "sales_nav" | "recruiter";
+export type RequiredTier = (typeof REQUIRED_TIERS)[number];
+
+/**
+ * Runtime membership set for {@link REQUIRED_TIERS}. The transport uses it to
+ * validate a wire `required_tier` value before narrowing it to
+ * {@link RequiredTier}, discarding anything unrecognized rather than
+ * surfacing a bogus tier.
+ */
+export const KNOWN_REQUIRED_TIERS: ReadonlySet<string> = new Set(REQUIRED_TIERS);
 
 /** Structured retry guidance attached to retryable errors. */
 export interface RetryHint {

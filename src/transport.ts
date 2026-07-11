@@ -14,6 +14,7 @@
 import {
   CurviateError,
   KNOWN_ERROR_CODES,
+  KNOWN_REQUIRED_TIERS,
   type ErrorCode,
   type RequiredTier,
   type RetryHint,
@@ -72,10 +73,6 @@ const RETRYABLE_CODES: ReadonlySet<string> = new Set([
 
 const WRITE_METHODS: ReadonlySet<HttpMethod> = new Set(["POST", "PATCH", "PUT", "DELETE"]);
 
-const REQUIRED_TIERS: ReadonlySet<string> = new Set<RequiredTier>([
-  "core", "sn", "sales_nav", "recruiter",
-]);
-
 function defaultSleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -119,7 +116,7 @@ async function errorFromResponse(res: Response): Promise<CurviateError> {
     env = undefined;
   }
   const requiredTier =
-    env?.required_tier && REQUIRED_TIERS.has(env.required_tier)
+    env?.required_tier && KNOWN_REQUIRED_TIERS.has(env.required_tier)
       ? (env.required_tier as RequiredTier)
       : undefined;
 

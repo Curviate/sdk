@@ -10,7 +10,10 @@ import {
   isCurviateError,
   ERROR_CODES,
   KNOWN_ERROR_CODES,
+  REQUIRED_TIERS,
+  KNOWN_REQUIRED_TIERS,
   type ErrorCode,
+  type RequiredTier,
 } from "../src/errors.js";
 
 describe("CurviateError", () => {
@@ -261,6 +264,26 @@ describe("fixture-documented codes (guard)", () => {
   });
 });
 
+describe("RequiredTier single source of truth", () => {
+  // Mirrors the ERROR_CODES / KNOWN_ERROR_CODES pattern: KNOWN_REQUIRED_TIERS
+  // and RequiredTier are both derived from REQUIRED_TIERS, so the type a
+  // caller narrows on and the set the transport validates a wire value
+  // against can never drift apart.
+  it("KNOWN_REQUIRED_TIERS contains exactly the REQUIRED_TIERS entries", () => {
+    expect(new Set(KNOWN_REQUIRED_TIERS)).toEqual(new Set(REQUIRED_TIERS));
+  });
+
+  it("has no duplicate entries in REQUIRED_TIERS", () => {
+    expect(KNOWN_REQUIRED_TIERS.size).toBe(REQUIRED_TIERS.length);
+  });
+
+  it("recognizes every tier at runtime", () => {
+    for (const tier of REQUIRED_TIERS) {
+      expect(KNOWN_REQUIRED_TIERS.has(tier)).toBe(true);
+    }
+  });
+});
+
 // Compile-time lock: the ErrorCode type and the ERROR_CODES element type must
 // stay identical. The tuple wrappers defeat union distribution so this is a
 // strict equality — if a future change decouples the type from the array (e.g.
@@ -268,3 +291,7 @@ describe("fixture-documented codes (guard)", () => {
 type Same<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 const _errorCodeMatchesArray: Same<ErrorCode, (typeof ERROR_CODES)[number]> = true;
 void _errorCodeMatchesArray;
+
+// Same lock for RequiredTier / REQUIRED_TIERS.
+const _requiredTierMatchesArray: Same<RequiredTier, (typeof REQUIRED_TIERS)[number]> = true;
+void _requiredTierMatchesArray;
