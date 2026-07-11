@@ -83,6 +83,10 @@ every break in one place.
 - **`users.get(userId)` accepts `'me'`** — `users.get('me')` reads the caller's own profile (folds in the old `getMe`).
 - **New `ErrorCode` value: `LINKEDIN_OPERATION_NOT_SUPPORTED`.** The `422` a permanent LinkedIn platform limitation for the attempted operation returns (e.g. listing a non-self user's following list) — `user_fixable: true`, `retry_likely_to_succeed: false` (not a transient failure; retrying will not help). Added to the `ErrorCode` union and the transport's known-code set — previously this narrowed to `INTERNAL`, which is retryable.
 
+### Fixed
+
+- **`CONNECTION_REQUEST_CONFLICT` was silently downgraded to `INTERNAL`.** The `409` the API returns when a connect-request to a member already exists (or you are already a first-degree connection) is a real, documented error code, but the transport's runtime known-code set omitted it — so callers received `code: "INTERNAL"` with the wrong semantics (`INTERNAL` is retryable, whereas this conflict is `user_fixable: true`, `retry_likely_to_succeed: false` and must never be re-sent). The transport now decodes `CONNECTION_REQUEST_CONFLICT` to itself. To eliminate the class of bug: the `ErrorCode` type and the transport's runtime known-code set are now both **derived from one source array**, so the code a caller narrows on and the code the transport recognizes can never drift apart again.
+
 ---
 
 ## [0.14.1] — 2026-07-07
