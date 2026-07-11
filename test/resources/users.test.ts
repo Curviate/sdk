@@ -94,7 +94,7 @@ describe("users.update", () => {
     expect(res.object).toBe("user_updated");
   });
 
-  it("never sends a description key, even if the caller tries to smuggle one in", async () => {
+  it("strips a smuggled description key at runtime, forwarding only the legitimate keys", async () => {
     let body: Record<string, unknown> | undefined;
     server.use(
       http.patch(`${BASE}/v1/acc_1/users/me`, async ({ request }) => {
@@ -102,10 +102,14 @@ describe("users.update", () => {
         return HttpResponse.json({ object: "user_updated" });
       }),
     );
-    // UserUpdateBody has no `description` key — TypeScript rejects it at the
-    // call site; the runtime assertion here documents the wire contract.
-    await acc.users.update("me", { headline: "x" });
+    // UserUpdateBody has no `description` key, so a typed caller is rejected
+    // at compile time. An untyped/JS caller isn't — simulate one with a bare
+    // object literal (no type annotation) that smuggles `description` in
+    // alongside legitimate keys, and prove it never reaches the wire.
+    const smuggled = { headline: "x", bio: "y", description: "smuggled" };
+    await acc.users.update("me", smuggled);
     expect(body).not.toHaveProperty("description");
+    expect(body).toEqual({ headline: "x", bio: "y" });
   });
 });
 

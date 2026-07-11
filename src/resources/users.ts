@@ -89,12 +89,18 @@ export class UsersResource {
    * Update the caller's own profile. `PATCH /v1/{account_id}/users/{user_id}`
    * Only `first_name`, `last_name`, `bio`, `headline`, `skills`, `picture`,
    * `background_picture` are accepted — there is no `description` key.
+   * `description` is not part of the update contract: TypeScript already
+   * rejects it at the call site, but an untyped/JS caller (or an `as`-cast)
+   * could still smuggle it onto the object, so it is also stripped
+   * defensively at runtime before the request goes out — the caller's
+   * object is never mutated.
    */
   update(userId: string, body: UserUpdateBody): Promise<UserUpdateResult> {
+    const { description: _description, ...safeBody } = body as Record<string, unknown>;
     return this.ctx.request<UserUpdateResult>({
       method: "PATCH",
       path: `/v1/{account_id}/users/${userId}`,
-      body,
+      body: safeBody,
     });
   }
 
