@@ -3,7 +3,7 @@
 The official TypeScript SDK for the [Curviate API](https://docs.curviate.com) — agent-native
 LinkedIn infrastructure for AI engineers and agent builders.
 
-> **Status:** `0.1.0` — pre-GA. The surface is public but not yet stability-promised.
+> **Status:** `0.15.0` — pre-1.0. Full v2 API parity; the surface is public but not yet stability-promised.
 
 ---
 
@@ -37,10 +37,10 @@ const curviate = new Curviate({
 
 ## Account-scoped accessor
 
-Every LinkedIn operation (messages, profiles, invites, posts) is tied to a **managed account** — a LinkedIn session you have connected via `curviate.accounts.link()`. The `curviate.account(id)` accessor fixes the `account_id` on every call so you do not have to thread it manually:
+Every LinkedIn operation (messages, member profiles, invites, posts) is tied to a **managed account** — a LinkedIn session you have connected via the connect flow (`curviate.auth.intent()`). The `curviate.account(id)` accessor fixes the `account_id` on every call so you do not have to thread it manually:
 
 ```ts
-// Root-level: tenant-wide operations
+// Root-level: tenant-wide operations (accounts, auth, webhooks)
 const { items: accounts } = await curviate.accounts.list();
 
 // Account-scoped: all LinkedIn ops under a specific account
@@ -48,7 +48,8 @@ const acc = curviate.account(accounts?.[0]?.account_id ?? "");
 
 // Now every resource call is scoped to that account:
 const { items: chats } = await acc.messaging.listChats();
-const profile = await acc.profiles.get("some-profile-id");
+const me = await acc.users.get("me");           // your own profile
+const profile = await acc.users.get("some-user-id"); // someone else's
 ```
 
 ---
@@ -131,7 +132,7 @@ Resources that return lists support cursor pagination. `curviate.paginate()` is 
 ```ts
 // Iterate over every chat across all pages
 for await (const chat of curviate.paginate(acc.messaging.listChats.bind(acc.messaging), {})) {
-  console.log(chat.id, chat.unread_count);
+  console.log(chat.id);
 }
 
 // With initial params
