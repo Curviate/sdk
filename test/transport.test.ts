@@ -411,6 +411,43 @@ describe("backoff computation", () => {
     expect(sleeps[0]).toBe(42_000);
   });
 
+  // RATE_LIMITED (LinkedIn-platform throttling on Recruiter / Sales Navigator
+  // reads; carries retry_likely_to_succeed: true and dedicated RateLimit /
+  // Retry-After headers in the served docs) must retry on GET like the other
+  // three rate-limit codes and honor Retry-After over the backoff formula.
+  // Before RETRYABLE_CODES learned this code, an unrecognized wire code
+  // downgraded to INTERNAL — which happened to retry by accident, but with
+  // the wrong (generic backoff) delay instead of the server's Retry-After.
+  it("retries a 429 RATE_LIMITED GET and honors Retry-After over backoff", async () => {
+    const sleeps: number[] = [];
+    let calls = 0;
+    server.use(
+      http.get(`${BASE}/v1/accounts`, () => {
+        calls += 1;
+        if (calls === 1) {
+          return HttpResponse.json(
+            {
+              code: "RATE_LIMITED",
+              message: "Too many requests. Please retry after a short delay.",
+              user_fixable: false,
+              retry_likely_to_succeed: true,
+            },
+            { status: 429, headers: { "Retry-After": "3" } },
+          );
+        }
+        return HttpResponse.json({ items: [] });
+      }),
+    );
+    await execute("GET", "/v1/accounts", det({
+      _jitterFn: () => 0,
+      _sleepFn: async (ms: number) => {
+        sleeps.push(ms);
+      },
+    }));
+    expect(calls).toBe(2); // retried once, then succeeded
+    expect(sleeps).toEqual([3_000]); // Retry-After honored, not generic backoff
+  });
+
   // retry_hint.delay_ms overrides backoff (but Retry-After beats it).
   it("retry_hint.delay_ms overrides the backoff delay", async () => {
     const sleeps: number[] = [];

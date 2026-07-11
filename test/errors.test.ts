@@ -1,6 +1,9 @@
 // CurviateError typed error model.
 // constructEvent / WebhookSignatureError / CurviateEvent are
 // covered in webhooks.constructEvent.test.ts.
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   CurviateError,
@@ -169,6 +172,92 @@ describe("error-code single source of truth", () => {
     for (const code of ERROR_CODES) {
       expect(KNOWN_ERROR_CODES.has(code)).toBe(true);
     }
+  });
+});
+
+describe("fixture-documented codes (guard)", () => {
+  // Extraction rule: the served OpenAPI's non-2xx responses commonly carry a
+  // generic, auto-populated example (key "error") whose `code` describes the
+  // HTTP status itself (e.g. "UNPROCESSABLE" for 422, "INTERNAL_ERROR" for
+  // 500) rather than a real business error code. This is proven, not assumed:
+  // (1) that exact placeholder text gets replaced verbatim once an endpoint's
+  // error docs are authored for real — observed directly in this release,
+  // where the `following` op's 422 dropped "UNPROCESSABLE" for
+  // ACCOUNT_RESTRICTED / LINKEDIN_OPERATION_NOT_SUPPORTED once its docs were
+  // written; and (2) the same generic string recurs byte-for-byte across
+  // dozens of response descriptions describing unrelated scenarios — 500's
+  // generic example alone flips between two different made-up strings,
+  // "INTERNAL_ERROR" and "UNEXPECTED_ERROR", for the identical description
+  // "Internal server error.". A code counts as genuinely documented only when
+  // the response's OWN description names that exact code verbatim — the same
+  // "CODE — explanation" convention used for every deliberately-authored
+  // error in this spec (ACCOUNT_RESTRICTED, LINKEDIN_OPERATION_NOT_SUPPORTED,
+  // RATE_LIMITED on the Recruiter / Sales Navigator surface, etc.). This
+  // self-reference check is what separates signal from boilerplate without a
+  // hand-maintained exclusion list.
+  interface FixtureResponse {
+    description?: string;
+    content?: {
+      "application/json"?: {
+        examples?: Record<string, { value?: { code?: string } }>;
+      };
+    };
+  }
+  interface FixtureOperation {
+    responses?: Record<string, FixtureResponse>;
+  }
+  interface FixtureDocument {
+    paths?: Record<string, Record<string, FixtureOperation | undefined>>;
+  }
+
+  const HTTP_METHODS = new Set(["get", "post", "put", "patch", "delete"]);
+
+  /** Deterministic, no-network extraction — see the rule above. */
+  function extractFixtureErrorCodes(doc: FixtureDocument): Set<string> {
+    const codes = new Set<string>();
+    for (const methods of Object.values(doc.paths ?? {})) {
+      for (const [method, op] of Object.entries(methods)) {
+        if (!HTTP_METHODS.has(method)) continue;
+        for (const [status, resp] of Object.entries(op?.responses ?? {})) {
+          const statusNum = Number(status);
+          if (!(statusNum >= 300 && statusNum < 600)) continue;
+          const description = typeof resp.description === "string" ? resp.description : "";
+          const examples = resp.content?.["application/json"]?.examples;
+          if (!examples) continue;
+          for (const ex of Object.values(examples)) {
+            const code = ex.value?.code;
+            if (typeof code === "string" && description.includes(code)) {
+              codes.add(code);
+            }
+          }
+        }
+      }
+    }
+    return codes;
+  }
+
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const FIXTURE_PATH = resolve(__dirname, "../fixtures/openapi.json");
+  const fixtureDoc = JSON.parse(readFileSync(FIXTURE_PATH, "utf8")) as FixtureDocument;
+  const fixtureCodes = extractFixtureErrorCodes(fixtureDoc);
+  const knownCodes = new Set<string>(ERROR_CODES);
+
+  // Sanity check the extractor itself is live — not vacuously passing because
+  // a path or shape typo silently made it match nothing.
+  it("finds a non-trivial, known-real set in the current fixture", () => {
+    expect(fixtureCodes.size).toBeGreaterThan(5);
+    expect(fixtureCodes.has("ACCOUNT_RESTRICTED")).toBe(true);
+    expect(fixtureCodes.has("LINKEDIN_OPERATION_NOT_SUPPORTED")).toBe(true);
+  });
+
+  // The actual guard: every code the public API reference documents (per the
+  // extraction rule above) must be in the SDK's taxonomy. A future server
+  // change that reaches the public docs with a new code fails this test until
+  // ERROR_CODES learns it — the same class of gap that silently downgraded
+  // CONNECTION_REQUEST_CONFLICT (and, this release, RATE_LIMITED) to INTERNAL.
+  it("ERROR_CODES is a superset of every fixture-documented code", () => {
+    const missing = [...fixtureCodes].filter((c) => !knownCodes.has(c)).sort();
+    expect(missing).toEqual([]);
   });
 });
 

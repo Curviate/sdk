@@ -55,6 +55,11 @@ export const ERROR_CODES = [
   "RATE_LIMIT_ACCOUNT",
   "RATE_LIMIT_TENANT",
   "PLATFORM_RATE_LIMIT",
+  // LinkedIn-platform-level throttling on the Recruiter / Sales Navigator read
+  // surface (carries dedicated RateLimit-Policy / RateLimit / Retry-After
+  // response headers). Distinct from the account/tenant/platform trio above.
+  // Always retry-safe (retry_likely_to_succeed: true) — see RETRYABLE_CODES.
+  "RATE_LIMITED",
   // Platform errors
   "PLATFORM_ERROR",
   "PLATFORM_NOT_IMPLEMENTED",

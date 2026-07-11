@@ -67,6 +67,7 @@ const RETRYABLE_CODES: ReadonlySet<string> = new Set([
   "PLATFORM_RATE_LIMIT",
   "RATE_LIMIT_ACCOUNT",
   "RATE_LIMIT_TENANT",
+  "RATE_LIMITED",
 ]);
 
 const WRITE_METHODS: ReadonlySet<HttpMethod> = new Set(["POST", "PATCH", "PUT", "DELETE"]);
