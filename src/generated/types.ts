@@ -75,7 +75,7 @@ export interface paths {
         };
         /**
          * List who a user follows
-         * @description Returns a paginated list of LinkedIn accounts this user follows. Use user_id="me" for the caller's own account.
+         * @description Returns a paginated list of LinkedIn accounts this user follows. LinkedIn only allows listing the connected account's OWN following list — user_id MUST be "me"; any other value returns a non-retryable error (this is a permanent LinkedIn platform limitation, not a gap in this endpoint). To list another user's followers instead, use GET /v1/{account_id}/users/{user_id}/followers, which does accept an explicit user_id.
          */
         get: operations["getV1AccountIdUsersUserIdFollowing"];
         put?: never;
@@ -141,7 +141,7 @@ export interface paths {
         put?: never;
         /**
          * Endorse a member's skill
-         * @description Endorses one specific skill on a target member's profile. To obtain the endorsement_id: (1) GET /v1/{account_id}/users/{user_id}?linkedin_sections=linkedin_skills, (2) read the target skill's endorsement_id from the skills section, (3) call this endpoint with that value. user_id must be the LinkedIn member ID (ACo… format) — a public identifier does not resolve on this endpoint.
+         * @description Endorses one specific skill on a target member's profile. You can only endorse the skills of your 1st-degree connections. To obtain the endorsement_id: (1) GET /v1/{account_id}/users/{user_id}?linkedin_sections=linkedin_skills, (2) read the target skill's endorsement_id from the skills section — this field is present ONLY for connections you are eligible to endorse (it is omitted for users outside your network and on your own profile, so this workflow requires the target to be a 1st-degree connection), (3) call this endpoint with that value. user_id must be the LinkedIn member ID (ACo… format) — a public identifier does not resolve on this endpoint.
          */
         post: operations["postV1AccountIdUsersUserIdEndorseSkill"];
         delete?: never;
@@ -1963,7 +1963,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description "me" for the caller's own account, or another LinkedIn user's public identifier, member ID, or profile URL. Prefer the public identifier (vanity handle): some profile sections return a richer view for handle lookups — notably the skills section's `endorsement_id`, which may be omitted on member-ID lookups. */
+                /** @description "me" for the caller's own account, or another LinkedIn user's public identifier, member ID, or profile URL. Note on the skills section: a skill's `endorsement_id` (the value needed to endorse that skill) is returned only for users you are eligible to endorse — i.e. your 1st-degree connections. For users outside your network, and on your own profile, the skills section still lists each skill (name, endorsement_count, endorsed, insights) but omits `endorsement_id`. This depends on the connection, not on the identifier form used to look the user up. */
                 user_id: string;
             };
             cookie?: never;
@@ -2056,10 +2056,21 @@ export interface operations {
                             is_hiring?: boolean;
                             /** @description Whether the member has Open to Work enabled. */
                             is_open_to_work?: boolean;
-                            /** @description Skills entries. Present only when requested via linkedin_sections. */
-                            skills?: {
+                            /** @description Skill entries. Present only when linkedin_skills is requested via linkedin_sections. */
+                            skills?: ({
+                                /** @description The skill name. */
+                                name?: string;
+                                /** @description How many people have endorsed this skill. */
+                                endorsement_count?: number;
+                                /** @description Whether the operator account has already endorsed this skill. */
+                                endorsed?: boolean;
+                                /** @description LinkedIn-provided insight strings about the skill. */
+                                insights?: string[];
+                                /** @description The value passed to POST /v1/{account_id}/users/{user_id}/endorse-skill to endorse this skill. Present ONLY for skills you are eligible to endorse — i.e. those of your 1st-degree connections. Omitted for users outside your network and on your own profile (the skill still lists name, endorsement_count, endorsed, and insights). */
+                                endorsement_id?: number;
+                            } & {
                                 [key: string]: unknown;
-                            }[];
+                            })[];
                             /** @description Work experience entries. Present only when requested via linkedin_sections. */
                             experience?: {
                                 [key: string]: unknown;
@@ -2675,7 +2686,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description "me" for the caller's own account, or another LinkedIn user's identifier. */
+                /** @description Must be "me" — LinkedIn does not allow listing who another user follows. */
                 user_id: string;
             };
             cookie?: never;
@@ -2757,7 +2768,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description The account is restricted and cannot be queried. */
+            /** @description ACCOUNT_RESTRICTED — the account is restricted and cannot be queried; or LINKEDIN_OPERATION_NOT_SUPPORTED — user_id was not "me" (LinkedIn only allows listing the connected account's own following list, a permanent platform limitation). */
             422: {
                 headers: {
                     [name: string]: unknown;

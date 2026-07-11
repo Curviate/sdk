@@ -328,7 +328,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "\"me\" for the caller's own account, or another LinkedIn user's public identifier, member ID, or profile URL. Prefer the public identifier (vanity handle): some profile sections return a richer view for handle lookups — notably the skills section's `endorsement_id`, which may be omitted on member-ID lookups."
+            "description": "\"me\" for the caller's own account, or another LinkedIn user's public identifier, member ID, or profile URL. Note on the skills section: a skill's `endorsement_id` (the value needed to endorse that skill) is returned only for users you are eligible to endorse — i.e. your 1st-degree connections. For users outside your network, and on your own profile, the skills section still lists each skill (name, endorsement_count, endorsed, insights) but omits `endorsement_id`. This depends on the connection, not on the identifier form used to look the user up."
           },
           {
             "name": "linkedin_sections",
@@ -514,10 +514,35 @@
                         },
                         "skills": {
                           "type": "array",
-                          "description": "Skills entries. Present only when requested via linkedin_sections.",
+                          "description": "Skill entries. Present only when linkedin_skills is requested via linkedin_sections.",
                           "items": {
                             "type": "object",
-                            "additionalProperties": true
+                            "additionalProperties": true,
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "description": "The skill name."
+                              },
+                              "endorsement_count": {
+                                "type": "number",
+                                "description": "How many people have endorsed this skill."
+                              },
+                              "endorsed": {
+                                "type": "boolean",
+                                "description": "Whether the operator account has already endorsed this skill."
+                              },
+                              "insights": {
+                                "type": "array",
+                                "description": "LinkedIn-provided insight strings about the skill.",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "endorsement_id": {
+                                "type": "number",
+                                "description": "The value passed to POST /v1/{account_id}/users/{user_id}/endorse-skill to endorse this skill. Present ONLY for skills you are eligible to endorse — i.e. those of your 1st-degree connections. Omitted for users outside your network and on your own profile (the skill still lists name, endorsement_count, endorsed, and insights)."
+                              }
+                            }
                           }
                         },
                         "experience": {
@@ -2094,7 +2119,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "\"me\" for the caller's own account, or another LinkedIn user's identifier."
+            "description": "Must be \"me\" — LinkedIn does not allow listing who another user follows."
           },
           {
             "name": "cursor",
@@ -2300,20 +2325,32 @@
             }
           },
           "422": {
-            "description": "The account is restricted and cannot be queried.",
+            "description": "ACCOUNT_RESTRICTED — the account is restricted and cannot be queried; or LINKEDIN_OPERATION_NOT_SUPPORTED — user_id was not \"me\" (LinkedIn only allows listing the connected account's own following list, a permanent platform limitation).",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
-                  "error": {
-                    "summary": "422 error",
+                  "account_restricted": {
+                    "summary": "Account restricted",
                     "value": {
-                      "code": "UNPROCESSABLE",
-                      "message": "The request was well-formed but cannot be completed as asked.",
-                      "user_fixable": true,
+                      "code": "ACCOUNT_RESTRICTED",
+                      "message": "This account cannot perform the requested action.",
+                      "user_fixable": false,
                       "retry_likely_to_succeed": false
+                    }
+                  },
+                  "non_self_user_id": {
+                    "summary": "Non-self user_id (permanent LinkedIn limitation)",
+                    "value": {
+                      "code": "LINKEDIN_OPERATION_NOT_SUPPORTED",
+                      "message": "This operation is not supported by LinkedIn for the given parameters.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false,
+                      "retry_hint": {
+                        "kind": "never"
+                      }
                     }
                   }
                 }
@@ -2445,7 +2482,7 @@
             "color": "#A1A1AA"
           }
         ],
-        "description": "Returns a paginated list of LinkedIn accounts this user follows. Use user_id=\"me\" for the caller's own account.",
+        "description": "Returns a paginated list of LinkedIn accounts this user follows. LinkedIn only allows listing the connected account's OWN following list — user_id MUST be \"me\"; any other value returns a non-retryable error (this is a permanent LinkedIn platform limitation, not a gap in this endpoint). To list another user's followers instead, use GET /v1/{account_id}/users/{user_id}/followers, which does accept an explicit user_id.",
         "x-order": 5
       }
     },
@@ -3733,7 +3770,7 @@
             "color": "#A1A1AA"
           }
         ],
-        "description": "Endorses one specific skill on a target member's profile. To obtain the endorsement_id: (1) GET /v1/{account_id}/users/{user_id}?linkedin_sections=linkedin_skills, (2) read the target skill's endorsement_id from the skills section, (3) call this endpoint with that value. user_id must be the LinkedIn member ID (ACo… format) — a public identifier does not resolve on this endpoint.",
+        "description": "Endorses one specific skill on a target member's profile. You can only endorse the skills of your 1st-degree connections. To obtain the endorsement_id: (1) GET /v1/{account_id}/users/{user_id}?linkedin_sections=linkedin_skills, (2) read the target skill's endorsement_id from the skills section — this field is present ONLY for connections you are eligible to endorse (it is omitted for users outside your network and on your own profile, so this workflow requires the target to be a 1st-degree connection), (3) call this endpoint with that value. user_id must be the LinkedIn member ID (ACo… format) — a public identifier does not resolve on this endpoint.",
         "requestBody": {
           "required": true,
           "content": {
