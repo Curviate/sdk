@@ -7,6 +7,83 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [0.15.0] — 2026-07-11
+
+Full v2 parity. The SDK is re-aligned 1:1 to the served API surface: every
+operation is now exactly one method at the exact wire encoding, the entire
+account-scoped surface moves to the account-first path grammar, and three
+namespaces are reorganized. This is a **breaking** release touching nearly
+every namespace. The five breaking categories below — removals, namespace
+reorganization, method renames/relocations, request/response shape changes, and
+the account-first path-grammar migration — are the complete set of breaks a
+`0.14.1` → `0.15.0` upgrade must reconcile, gathered here so a consumer finds
+every break in one place.
+
+### Removed (BREAKING)
+
+- **14 methods that map to no served operation are removed, with no alias:**
+  - `accounts.createConnectLink()`, `accounts.createReconnectLink()`, `accounts.reconnect()` — hosted connect/reconnect link minting and in-place reconnect are no longer part of the API surface.
+  - `messaging.syncChat()`, `messaging.syncMessages()`, `recruiter.syncMessages()`, `salesNavigator.syncMessages()` — explicit sync operations are gone; accounts sync continuously and deliver via webhooks.
+  - `posts.list()` — the standalone feed list has no served operation (use `posts.listUserPosts(userId)` for a member's posts).
+  - `companies.followers()` — no served operation.
+  - `recruiter.addApplicant()`, `recruiter.rejectApplicant()`, `recruiter.solveJobCheckpoint()` — superseded by the project-centric pipeline surface.
+  - `webhooks.getStateDiff()` — no served operation.
+- **`invites.respond()` is removed** — split into two dedicated bodyless methods, `invites.accept(invitationId)` and `invites.decline(invitationId)` (see below).
+- **`profiles.getCompany()` stays removed** — dropped ahead of this release with no return; company reads live on the `companies` namespace.
+
+### Changed (BREAKING) — namespaces reorganized
+
+- **`profiles` namespace renamed to `users`.** Every `curviate.account(id).profiles.*` call becomes `…users.*`; the served group is "Users" and every path is `/users/{user_id}`.
+- **New root-scoped `auth` namespace, split out of `accounts`.** The connect/checkpoint operations move off `accounts`: `accounts.link` → `auth.intent`, `accounts.solveCheckpoint` → `auth.solveCheckpoint`, plus `auth.requestCheckpoint`, `auth.pollCheckpoint`, and `accounts.getConnectSession` → `auth.getSession(sessionId)`. `accounts` now carries only `list` / `get` / `update` / `disconnect`.
+- **New account-scoped `comments` namespace.** The comment-thread surface (create / edit / delete / reply / list replies / reactions) plus the relocated `listUserComments` live here rather than on `posts`.
+- **Root and account surfaces are now strictly disjoint.** The root client exposes only `accounts`, `auth`, `webhooks`. Every other namespace is reachable exclusively through `curviate.account(id)` — the account-scoped namespaces are no longer mounted on the root client (they cannot build a valid path without a bound `account_id`).
+
+### Changed (BREAKING) — methods renamed / relocated
+
+- `profiles.endorse(userId, { skill_endorsement_id })` → **`users.endorseSkill(userId, { endorsement_id })`** — renamed, and the body key changed from `skill_endorsement_id` to `endorsement_id`.
+- `profiles.listConnections()` → **`users.listRelations()`**.
+- `messaging.getInMailBalance()` → **`users.getInMailCredits()`** (relocated onto `users`).
+- `posts.comment(postId, …)` → **`comments.create(postId, …)`**.
+- `profiles.listComments(userId)` → **`comments.listUserComments(userId)`**.
+- `profiles.listPosts(userId)` → **`posts.listUserPosts(userId)`**.
+- `profiles.listReactions(userId)` → **`posts.listUserReactions(userId)`**.
+- `invites.respond(...)` → **`invites.accept(invitationId)` / `invites.decline(invitationId)`** (split; both bodyless).
+- `recruiter.addCandidate(...)` → **`recruiter.saveCandidate(projectId, { stage_id, candidate_id })`**.
+- `recruiter.getParameters(...)` (GET) → **`recruiter.searchParameters(body)` (POST)** — the HTTP verb changed GET→POST, with a `source`-discriminated body.
+- `recruiter.listProjectJobs(projectId)` → **`recruiter.getProjectJob(projectId)`** — the operation returns the single attached job posting, not a list.
+
+### Changed (BREAKING) — request / response shapes
+
+- **`users.update(userId, body)`** never sends `description`; accepted keys are `{ first_name, last_name, headline, bio, skills, picture, background_picture }`.
+- **`users.endorseSkill`** body key is `endorsement_id` (was `skill_endorsement_id`).
+- **`jobs.publish` / `recruiter.publishJob`** take a `mode`-discriminated body (`FREE` | `PROMOTED` | `PROMOTED_PLUS`; the `PROMOTED*` modes require a `budget { currency, amount, scope }`) and respond `{ object, job_state }`.
+- **`jobs.close` / `recruiter.closeJob`** are bodyless POSTs responding `{ object }`.
+- **`invites.cancel`** withdrawal now discriminates on `invitation_withdrawn`.
+- **Message operations are re-homed under the chat.** `getMessage` / `editMessage` / `deleteMessage` / `addReaction` / `getAttachment` now path under `/chats/{chat_id}/messages/…` and take `chatId` as the leading argument.
+- **`messaging.sendInMail`** body drops the `surface` field.
+- **Media-bearing writes moved from multipart to JSON + base64** where the surface retired multipart (recruiter, sales-navigator, posts, messaging); read each operation's declared content-type — some remain multipart.
+- **Sales Navigator `saveAccount` / `saveLead` bodies shrank** to the minimal saved-entity shape.
+- **`recruiter.startChat`** now requires a `signature` (alongside `attendees_ids`, `text`, `subject`).
+- **`recruiter.createJob`** now requires `project_name` and responds `{ job_id, object, project_id }` (was a full job object).
+- **`recruiter.saveCandidate`** body is `{ stage_id, candidate_id }`.
+
+### Changed (BREAKING) — account-first path grammar
+
+- **Every account-scoped method now carries `account_id` as the leading path segment** (`/v1/{account_id}/…`), never as a query parameter, body field, or omitted. Bind it once with `curviate.account(id)` and it is injected on every call. Companies and relations, which previously carried `account_id` as a query argument, drop it entirely.
+
+### Added
+
+- **`comments` namespace (9 methods):** `listUserComments`, `create`, `edit`, `delete`, `reply`, `listReplies`, `listReactions`, `addReaction`, `removeReaction` — `removeReaction` is a DELETE that carries a `{ reaction }` body.
+- **`jobs` write surface (9 new methods):** `list`, `create`, `update`, `getBudget`, `publish`, `close`, `listApplicants`, `getApplicant`, `downloadResume` (binary `ArrayBuffer`). `jobs.create` takes object-shaped `job_title` / `company` and a `method`-discriminated `apply_method`.
+- **Project-centric `recruiter` surface (9 new methods):** `searchTalentPool`, `searchFromUrl`, `updateProject`, `listPipeline`, `getProjectJob`, `createProjectJob`, `getProjectJobBudget`, `updateProjectJob`, `closeJob`, with `getApplicant` / `downloadResume` re-homed under the project scope.
+- **`users.follow` / `users.unfollow`** (bodyless POST / DELETE), **`users.listFollowing`**, **`users.update`**.
+- **`messaging.markChatRead(chatId, { read })`**.
+- **`search.fromUrl({ url })`** and **`salesNavigator.searchFromUrl({ url })`** — resolve a LinkedIn search-results URL into a search.
+- **`posts.delete`** (bodyless, 204) and **`posts.unreact(postId, { reaction })`** (DELETE with body).
+- **`users.get(userId)` accepts `'me'`** — `users.get('me')` reads the caller's own profile (folds in the old `getMe`).
+
+---
+
 ## [0.14.1] — 2026-07-07
 
 ### Fixed
