@@ -294,6 +294,36 @@ describe("retry logic", () => {
     expect((err as CurviateError).retryLikelyToSucceed).toBe(false);
     expect(calls).toBe(1);
   });
+
+  // 422 LINKEDIN_OPERATION_NOT_SUPPORTED (permanent LinkedIn platform limitation,
+  // e.g. listing a non-self user's following list) must decode to its own code,
+  // not fall back to INTERNAL — and must NOT be retried. Proven on a GET so a
+  // retryable INTERNAL fallback would otherwise re-fire up to maxRetries times.
+  it("maps 422 LINKEDIN_OPERATION_NOT_SUPPORTED to its own code and does not retry it (1 fetch)", async () => {
+    let calls = 0;
+    server.use(
+      http.get(`${BASE}/v1/accounts/x`, () => {
+        calls += 1;
+        return HttpResponse.json(
+          {
+            code: "LINKEDIN_OPERATION_NOT_SUPPORTED",
+            message: "LinkedIn does not support this operation for the target user.",
+            user_fixable: true,
+            retry_likely_to_succeed: false,
+            retry_hint: { kind: "never" },
+          },
+          { status: 422 },
+        );
+      }),
+    );
+    const err = await execute("GET", "/v1/accounts/x", det()).catch((e) => e);
+    expect(isCurviateError(err)).toBe(true);
+    expect((err as CurviateError).code).toBe("LINKEDIN_OPERATION_NOT_SUPPORTED");
+    expect((err as CurviateError).httpStatus).toBe(422);
+    expect((err as CurviateError).userFixable).toBe(true);
+    expect((err as CurviateError).retryLikelyToSucceed).toBe(false);
+    expect(calls).toBe(1);
+  });
 });
 
 describe("backoff computation", () => {

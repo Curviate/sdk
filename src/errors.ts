@@ -49,6 +49,8 @@ export type ErrorCode =
   // Platform errors
   | "PLATFORM_ERROR"
   | "PLATFORM_NOT_IMPLEMENTED"
+  /** Permanent LinkedIn platform limitation for the attempted operation (e.g. listing a non-self user's following list). Not a transient failure — retrying will not help. */
+  | "LINKEDIN_OPERATION_NOT_SUPPORTED"
   // Checkpoint (account connect flow)
   | "CHECKPOINT_NOT_FOUND"
   | "CHECKPOINT_EXPIRED"

@@ -81,6 +81,7 @@ every break in one place.
 - **`search.fromUrl({ url })`** and **`salesNavigator.searchFromUrl({ url })`** — resolve a LinkedIn search-results URL into a search.
 - **`posts.delete`** (bodyless, 204) and **`posts.unreact(postId, { reaction })`** (DELETE with body).
 - **`users.get(userId)` accepts `'me'`** — `users.get('me')` reads the caller's own profile (folds in the old `getMe`).
+- **New `ErrorCode` value: `LINKEDIN_OPERATION_NOT_SUPPORTED`.** The `422` a permanent LinkedIn platform limitation for the attempted operation returns (e.g. listing a non-self user's following list) — `user_fixable: true`, `retry_likely_to_succeed: false` (not a transient failure; retrying will not help). Added to the `ErrorCode` union and the transport's known-code set — previously this narrowed to `INTERNAL`, which is retryable.
 
 ---
 
