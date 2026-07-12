@@ -55,6 +55,10 @@ export const ERROR_CODES = [
   "RATE_LIMIT_ACCOUNT",
   "RATE_LIMIT_TENANT",
   "PLATFORM_RATE_LIMIT",
+  // Global ingress-wide breach — pre-auth, no per-client key to scope the
+  // limit to (distinct from the account/tenant/platform trio above, which are
+  // all scoped past authentication).
+  "RATE_LIMIT_INGRESS",
   // LinkedIn-platform-level throttling on the Recruiter / Sales Navigator read
   // surface (carries dedicated RateLimit-Policy / RateLimit / Retry-After
   // response headers). Distinct from the account/tenant/platform trio above.
