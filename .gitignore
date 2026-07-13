@@ -6,4 +6,5 @@ dist/
 coverage/
 
 # NOTE: src/generated/ is intentionally NOT ignored — the generated types
-# are committed so consumers get types without running a server (sdk/005 FR-002).
+# are committed so consumers get full type safety straight from install,
+# with no codegen step or running server required to build against the SDK.
