@@ -7,6 +7,26 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [Unreleased]
+
+Additive, non-breaking — three new account-scoped read namespaces. Nothing
+removed, renamed, or reshaped; existing code is unaffected. All three mount on
+`client.account(id)` only, never the root client.
+
+### Added
+
+- **New account-scoped `profile` namespace (4 methods)** — the connected
+  account's own insight surface: `profile.subscription()`, `profile.analytics()`,
+  `profile.visitors(query?)`, `profile.ssi()`. Distinct from the retired
+  `profiles` namespace (renamed to `users` in 0.15.0).
+- **New account-scoped `groups` namespace (3 methods)** — `groups.list(query?)`
+  (own groups by default, or another member's via `{ profile }`),
+  `groups.get(group)`, and `groups.members(group, query?)` (with the folded-in
+  `{ name }` member search).
+- **New account-scoped `feed` namespace (1 method)** — `feed.home(query?)` reads
+  the connected account's home feed as agent-actionable posts, with `relevant`
+  or `recent` sort orders.
+
 ## [0.15.0] — 2026-07-11
 
 Full v2 parity. The SDK is re-aligned 1:1 to the served API surface: every
