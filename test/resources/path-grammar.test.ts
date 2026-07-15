@@ -1686,6 +1686,24 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: feed (M2 / F1) ─────────────────────────────────────
+  {
+    name: "feed.home",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/feed/home`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "feed_post_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).feed.home({ sort: "recent" });
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
