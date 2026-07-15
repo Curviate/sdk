@@ -55,6 +55,16 @@ is unaffected.
   and `posts.unsave(postId)` add/remove a bookmark, both idempotent and
   accepting either `urn:li:activity:<id>` or a bare numeric id. `posts` is now
   12 methods (was 9).
+- **New account-scoped `notifications` namespace (3 methods)** — the connected
+  account's own notification centre: `notifications.list(query?)` (cards +
+  the account-level `unread_count`/`latest_published_at`);
+  `notifications.delete(cardUrn)` and `notifications.showLess(cardUrn)`, two
+  self-action writes on the account's own cards. Both writes are idempotent
+  and take effect within a few seconds — a list read immediately after may
+  still show the card for a moment, which is not a failure signal. The SDK
+  percent-encodes `cardUrn` (which embeds `(`, `)`, `:`, `,`) into the path.
+- **Parity pin: 141 methods across 17 namespaces** (was 135 / 16) — the
+  campaign-final SDK surface.
 
 ## [0.15.0] — 2026-07-11
 

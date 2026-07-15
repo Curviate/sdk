@@ -1952,6 +1952,65 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: notifications (NEW namespace) ──────────────────────
+  {
+    name: "notifications.list",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/notifications`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({
+            object: "notification_list",
+            items: [],
+            cursor: null,
+            unread_count: 0,
+            latest_published_at: null,
+          });
+        }),
+      );
+      await client.account(ACCOUNT_ID).notifications.list();
+      return captured!;
+    },
+  },
+  {
+    name: "notifications.delete",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/notifications/:cardUrn`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "notification_deleted", card_urn: "urn:li:fsd_notificationCard:(x)" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).notifications.delete("urn:li:fsd_notificationCard:(x)");
+      return captured!;
+    },
+  },
+  {
+    name: "notifications.showLess",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/notifications/:cardUrn/show-less`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({
+            object: "notification_show_less_applied",
+            card_urn: "urn:li:fsd_notificationCard:(x)",
+          });
+        }),
+      );
+      await client.account(ACCOUNT_ID).notifications.showLess("urn:li:fsd_notificationCard:(x)");
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
