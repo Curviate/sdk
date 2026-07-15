@@ -1,5 +1,5 @@
 /**
- * Messaging resource — 12 methods.
+ * Messaging resource — 13 methods.
  *
  * Account-scoped: the bound context injects `account_id` as the leading
  * `/v1/` path segment on every request (account-first grammar).
@@ -14,6 +14,10 @@
  *
  * `getInMailBalance` relocated to `users.getInMailCredits`; `syncChat` and
  * `syncMessages` have no served equivalent and are removed.
+ *
+ * `searchChats` free-text searches the account's own inbox (participant
+ * names and message content) — distinct from `companies.searchChats`, which
+ * searches a company page's admin inbox.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -70,6 +74,10 @@ export type SendInMailBody =
   paths["/v1/{account_id}/messages/inmail"]["post"]["requestBody"]["content"]["application/json"];
 export type SendInMailResult =
   paths["/v1/{account_id}/messages/inmail"]["post"]["responses"]["201"]["content"]["application/json"];
+
+export type ChatSearchQuery = paths["/v1/{account_id}/chats/search"]["get"]["parameters"]["query"];
+export type ChatSearchPage =
+  paths["/v1/{account_id}/chats/search"]["get"]["responses"]["200"]["content"]["application/json"];
 
 // ─── Resource class ───────────────────────────────────────────────────────────
 
@@ -208,6 +216,21 @@ export class MessagingResource {
       method: "POST",
       path: "/v1/{account_id}/messages/inmail",
       body,
+    });
+  }
+
+  /**
+   * Free-text search the account's own inbox — matches participant names
+   * and message content. `GET /v1/{account_id}/chats/search`
+   *
+   * @param params - `query` (required free-text term) plus `limit` and an
+   *   opaque `cursor` for pagination.
+   */
+  searchChats(params: ChatSearchQuery): Promise<ChatSearchPage> {
+    return this.ctx.request<ChatSearchPage>({
+      method: "GET",
+      path: "/v1/{account_id}/chats/search",
+      query: params as Record<string, string | number | boolean | string[] | undefined | null>,
     });
   }
 }

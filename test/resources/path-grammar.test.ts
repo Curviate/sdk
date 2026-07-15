@@ -1884,6 +1884,24 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: messaging extension (M2 / F2, api/020) ────────────
+  {
+    name: "messaging.searchChats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/chats/search`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.searchChats({ query: "sophie" });
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {

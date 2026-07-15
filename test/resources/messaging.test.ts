@@ -265,6 +265,38 @@ describe("messaging.sendInMail", () => {
   });
 });
 
+describe("messaging.searchChats", () => {
+  it("GET /v1/{account_id}/chats/search forwards query/limit/cursor", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_1/chats/search`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({
+          object: "chat_list",
+          items: [{ object: "chat", id: "chat_x", name: "Ada Lovelace" }],
+          cursor: null,
+        });
+      }),
+    );
+    const res = await acc.messaging.searchChats({ query: "sophie", limit: 10 });
+    const params = new URL(url!).searchParams;
+    expect(new URL(url!).pathname).toBe("/v1/acc_1/chats/search");
+    expect(params.get("query")).toBe("sophie");
+    expect(params.get("limit")).toBe("10");
+    expect(res.items?.[0]?.id).toBe("chat_x");
+  });
+
+  it("no matching chats is a valid, non-error empty result", async () => {
+    server.use(
+      http.get(`${BASE}/v1/acc_1/chats/search`, () =>
+        HttpResponse.json({ object: "chat_list", items: [], cursor: null }),
+      ),
+    );
+    const res = await acc.messaging.searchChats({ query: "zzz-no-match" });
+    expect(res.items).toEqual([]);
+  });
+});
+
 describe("messaging removed methods", () => {
   it("syncChat is absent — no served equivalent", () => {
     expect((acc.messaging as unknown as Record<string, unknown>)["syncChat"]).toBeUndefined();
