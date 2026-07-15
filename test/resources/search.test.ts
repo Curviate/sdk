@@ -3,7 +3,7 @@
 // TOP-LEVEL query param on every structured op — never in the body.
 // fromUrl is the sole home of URL-mode search: POST /v1/{account_id}/search
 // body {url}. groups/services/getServiceParameters are additive discovery
-// endpoints (api/020).
+// endpoints (discovery additions).
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../msw/server.js";

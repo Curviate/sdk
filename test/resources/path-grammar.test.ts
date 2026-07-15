@@ -1705,7 +1705,7 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
-  // ─── Account-scoped: companies extension (M2 / F2, api/018 + api/021) ──
+  // ─── Account-scoped: companies extension (insights + company inbox) ────
   {
     name: "companies.managed",
     scope: "account",
@@ -1835,7 +1835,7 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
-  // ─── Account-scoped: search extension (M2 / F2, api/020) ───────────────
+  // ─── Account-scoped: search extension (groups, services, parameters) ───
   {
     name: "search.groups",
     scope: "account",
@@ -1885,7 +1885,7 @@ const CASES: PathGrammarCase[] = [
     },
   },
 
-  // ─── Account-scoped: messaging extension (M2 / F2, api/020) ────────────
+  // ─── Account-scoped: messaging extension (inbox search) ────────────────
   {
     name: "messaging.searchChats",
     scope: "account",
