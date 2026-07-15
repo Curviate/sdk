@@ -9,9 +9,8 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ## [Unreleased]
 
-Additive, non-breaking — three new account-scoped read namespaces. Nothing
-removed, renamed, or reshaped; existing code is unaffected. All three mount on
-`client.account(id)` only, never the root client.
+Additive, non-breaking. Nothing removed, renamed, or reshaped; existing code
+is unaffected.
 
 ### Added
 
@@ -26,6 +25,30 @@ removed, renamed, or reshaped; existing code is unaffected. All three mount on
 - **New account-scoped `feed` namespace (1 method)** — `feed.home(query?)` reads
   the connected account's home feed as agent-actionable posts, with `relevant`
   or `recent` sort orders.
+- **`companies` gains 3 company-insights methods** — `companies.managed(query?)`
+  lists the pages the connected account administers; `companies.followers(identifier,
+  query?)` lists a page's followers (**re-added** under a different item shape —
+  `company_follower`, carrying `degree`/`followed_at` — than the pre-0.15.0
+  method of the same name); `companies.invitableFollowers(identifier, query?)`
+  lists connections invitable to follow the page. All three require the
+  connected account to administer the target page.
+- **`companies` gains 5 Beta company-inbox methods** — `companies.chats(identifier,
+  query?)`, `companies.chat(identifier, chatId)`, `companies.messages(identifier,
+  chatId, query?)`, `companies.message(identifier, chatId, messageId)`, and
+  `companies.searchChats(identifier, query?)` (exactly one of `query`/`topic`/
+  `unread` per call). A distinct conversation surface from the account's own
+  `messaging` namespace, scoped to one administered company page. **Beta:**
+  single-page listing and termination are verified; deep pagination (many
+  pages / large cursor round-trips) is still being validated against a busier
+  inbox. `companies` is now 12 methods (was 4).
+- **`search` gains 3 methods** — `search.groups(query)` searches LinkedIn
+  groups by keyword; `search.services(body & query)` searches Services
+  Marketplace providers with structured filters; `search.getServiceParameters(query)`
+  resolves human-readable service-category/location terms into the opaque
+  filter ids `services()` accepts. `search` is now 9 methods (was 6).
+- **`messaging` gains 1 method** — `messaging.searchChats(params)` free-text
+  searches the account's own inbox (participant names and message content).
+  `messaging` is now 13 methods (was 12).
 
 ## [0.15.0] — 2026-07-11
 
