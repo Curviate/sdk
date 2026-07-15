@@ -5,7 +5,7 @@
 // table (namespace -> exact method set), enumerates the real prototype methods
 // on a constructed client, and asserts set-equality per namespace. A phantom
 // (extra) public method fails by name; a missing method fails by name; the
-// total must be 131 methods across 16 namespaces. A separate compile-time block
+// total must be 134 methods across 16 namespaces. A separate compile-time block
 // proves every removed method is gone at the type level.
 import { describe, expect, it } from "vitest";
 import { Curviate } from "../src/index.js";
@@ -53,7 +53,17 @@ const ACCOUNT_SURFACE: Record<string, readonly string[]> = {
     "message",
     "searchChats",
   ],
-  search: ["getParameters", "people", "companies", "posts", "jobs", "fromUrl"],
+  search: [
+    "getParameters",
+    "people",
+    "companies",
+    "posts",
+    "jobs",
+    "fromUrl",
+    "groups",
+    "services",
+    "getServiceParameters",
+  ],
   messaging: [
     "listChats",
     "startChat",
@@ -217,17 +227,17 @@ describe("per-namespace method bijection", () => {
 });
 
 describe("total mapped surface", () => {
-  it("the intended table sums to 131 methods across 16 namespaces", () => {
+  it("the intended table sums to 134 methods across 16 namespaces", () => {
     const namespaces = [
       ...Object.values(ROOT_SURFACE),
       ...Object.values(ACCOUNT_SURFACE),
     ];
     expect(namespaces.length).toBe(16);
     const total = namespaces.reduce((n, methods) => n + methods.length, 0);
-    expect(total).toBe(131);
+    expect(total).toBe(134);
   });
 
-  it("the real runtime surface also sums to exactly 131", () => {
+  it("the real runtime surface also sums to exactly 134", () => {
     const roots = Object.values(rootInstances).reduce(
       (n, inst) => n + ownMethods(inst).size,
       0,
@@ -236,7 +246,7 @@ describe("total mapped surface", () => {
       (n, inst) => n + ownMethods(inst).size,
       0,
     );
-    expect(roots + accounts).toBe(131);
+    expect(roots + accounts).toBe(134);
   });
 });
 

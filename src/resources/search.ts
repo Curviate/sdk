@@ -1,5 +1,5 @@
 /**
- * Search resource — 6 methods.
+ * Search resource — 9 methods.
  *
  * Account-scoped: the bound context injects `account_id` as the leading
  * `/v1/` path segment on every request (account-first grammar).
@@ -11,6 +11,12 @@
  *
  * `fromUrl` is the sole home of URL-mode search — the structured
  * people/companies/posts/jobs endpoints no longer accept a `url` field.
+ *
+ * `groups()` and `services()` are additional structured searches (LinkedIn
+ * groups and Services Marketplace providers, respectively); `getServiceParameters()`
+ * resolves human-readable service-category/location terms into the opaque
+ * filter ids `services()` accepts, mirroring `getParameters()` for the
+ * classic search filters.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -61,6 +67,23 @@ export type SearchFromUrlQuery = NonNullable<
 >;
 export type SearchFromUrlResult =
   paths["/v1/{account_id}/search"]["post"]["responses"]["200"]["content"]["application/json"];
+
+export type SearchGroupsQuery = paths["/v1/{account_id}/search/groups"]["get"]["parameters"]["query"];
+export type SearchGroupsResult =
+  paths["/v1/{account_id}/search/groups"]["get"]["responses"]["200"]["content"]["application/json"];
+
+export type SearchServicesBody =
+  paths["/v1/{account_id}/search/services"]["post"]["requestBody"]["content"]["application/json"];
+export type SearchServicesQuery = NonNullable<
+  paths["/v1/{account_id}/search/services"]["post"]["parameters"]["query"]
+>;
+export type SearchServicesResult =
+  paths["/v1/{account_id}/search/services"]["post"]["responses"]["200"]["content"]["application/json"];
+
+export type SearchServiceParametersQuery =
+  paths["/v1/{account_id}/search/services/parameters"]["get"]["parameters"]["query"];
+export type SearchServiceParametersResult =
+  paths["/v1/{account_id}/search/services/parameters"]["get"]["responses"]["200"]["content"]["application/json"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -184,6 +207,51 @@ export class SearchResource {
             },
           }
         : {}),
+    });
+  }
+
+  /**
+   * Search LinkedIn groups by keyword.
+   * `GET /v1/{account_id}/search/groups`
+   */
+  groups(query: SearchGroupsQuery): Promise<SearchGroupsResult> {
+    return this.ctx.request<SearchGroupsResult>({
+      method: "GET",
+      path: "/v1/{account_id}/search/groups",
+      query: query as Record<string, string | number | boolean | string[] | undefined | null>,
+    });
+  }
+
+  /**
+   * Search Services Marketplace providers with structured filters.
+   * `POST /v1/{account_id}/search/services`
+   * `limit`/`cursor` are top-level query params, never in the body. Resolve
+   * `service_category`/`location` filter values with `getServiceParameters()`
+   * first — both take opaque ids, not free text.
+   */
+  services(body: SearchServicesBody & SearchServicesQuery): Promise<SearchServicesResult> {
+    const split = splitPagination(body);
+    return this.ctx.request<SearchServicesResult>({
+      method: "POST",
+      path: "/v1/{account_id}/search/services",
+      body: split.body,
+      ...(split.query ? { query: split.query } : {}),
+    });
+  }
+
+  /**
+   * Resolve human-readable service-filter terms into the opaque ids
+   * `services()` accepts.
+   * `GET /v1/{account_id}/search/services/parameters`
+   *
+   * @param query - `type` selects `service_category` (default) or `location`;
+   *   `keywords` is the free-text term to resolve.
+   */
+  getServiceParameters(query: SearchServiceParametersQuery): Promise<SearchServiceParametersResult> {
+    return this.ctx.request<SearchServiceParametersResult>({
+      method: "GET",
+      path: "/v1/{account_id}/search/services/parameters",
+      query: query as Record<string, string | number | boolean | string[] | undefined | null>,
     });
   }
 }

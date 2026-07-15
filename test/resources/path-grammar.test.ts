@@ -1834,6 +1834,56 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: search extension (M2 / F2, api/020) ───────────────
+  {
+    name: "search.groups",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/search/groups`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "group_search_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).search.groups({ keywords: "gtm" });
+      return captured!;
+    },
+  },
+  {
+    name: "search.services",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/search/services`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "service_search_result", items: [], paging: { total_count: 0 }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).search.services({ keywords: "marketing" });
+      return captured!;
+    },
+  },
+  {
+    name: "search.getServiceParameters",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/search/services/parameters`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "search_parameter_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).search.getServiceParameters({ type: "service_category", keywords: "marke" });
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
