@@ -1636,6 +1636,56 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: groups (M2 / F1) ───────────────────────────────────
+  {
+    name: "groups.list",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/groups`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "group_list", items: [], paging: { total_count: null }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).groups.list();
+      return captured!;
+    },
+  },
+  {
+    name: "groups.get",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/groups/grp_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "group", id: "grp_1", name: "AI Engineers" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).groups.get("grp_1");
+      return captured!;
+    },
+  },
+  {
+    name: "groups.members",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/groups/grp_1/members`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "group_member_list", items: [], paging: { total_count: 0 }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).groups.members("grp_1", { name: "dana" });
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {

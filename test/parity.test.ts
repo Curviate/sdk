@@ -5,7 +5,7 @@
 // table (namespace -> exact method set), enumerates the real prototype methods
 // on a constructed client, and asserts set-equality per namespace. A phantom
 // (extra) public method fails by name; a missing method fails by name; the
-// total must be 119 methods across 14 namespaces. A separate compile-time block
+// total must be 122 methods across 15 namespaces. A separate compile-time block
 // proves every removed method is gone at the type level.
 import { describe, expect, it } from "vitest";
 import { Curviate } from "../src/index.js";
@@ -67,6 +67,7 @@ const ACCOUNT_SURFACE: Record<string, readonly string[]> = {
     "removeReaction",
   ],
   profile: ["subscription", "analytics", "visitors", "ssi"],
+  groups: ["list", "get", "members"],
   posts: [
     "listComments",
     "get",
@@ -157,6 +158,7 @@ const accountInstances: Record<string, object> = {
   messaging: acc.messaging,
   comments: acc.comments,
   profile: acc.profile,
+  groups: acc.groups,
   posts: acc.posts,
   invites: acc.invites,
   jobs: acc.jobs,
@@ -177,7 +179,7 @@ describe("namespace mounting", () => {
     expect(client).not.toHaveProperty("profiles");
   });
 
-  it("account(id) exposes exactly the 11 account-scoped namespaces", () => {
+  it("account(id) exposes exactly the 12 account-scoped namespaces", () => {
     expect(new Set(Object.keys(acc))).toEqual(new Set(Object.keys(ACCOUNT_SURFACE)));
     // Root-only namespaces and the retired profiles name are absent.
     for (const ns of ["accounts", "auth", "webhooks", "profiles"]) {
@@ -200,17 +202,17 @@ describe("per-namespace method bijection", () => {
 });
 
 describe("total mapped surface", () => {
-  it("the intended table sums to 119 methods across 14 namespaces", () => {
+  it("the intended table sums to 122 methods across 15 namespaces", () => {
     const namespaces = [
       ...Object.values(ROOT_SURFACE),
       ...Object.values(ACCOUNT_SURFACE),
     ];
-    expect(namespaces.length).toBe(14);
+    expect(namespaces.length).toBe(15);
     const total = namespaces.reduce((n, methods) => n + methods.length, 0);
-    expect(total).toBe(119);
+    expect(total).toBe(122);
   });
 
-  it("the real runtime surface also sums to exactly 119", () => {
+  it("the real runtime surface also sums to exactly 122", () => {
     const roots = Object.values(rootInstances).reduce(
       (n, inst) => n + ownMethods(inst).size,
       0,
@@ -219,7 +221,7 @@ describe("total mapped surface", () => {
       (n, inst) => n + ownMethods(inst).size,
       0,
     );
-    expect(roots + accounts).toBe(119);
+    expect(roots + accounts).toBe(122);
   });
 });
 
