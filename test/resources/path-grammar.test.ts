@@ -1704,6 +1704,136 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: companies extension (M2 / F2, api/018 + api/021) ──
+  {
+    name: "companies.managed",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/managed`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "managed_company_list", items: [], paging: { total_count: 0 }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.managed();
+      return captured!;
+    },
+  },
+  {
+    name: "companies.followers",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/followers`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_follower_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.followers("1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.invitableFollowers",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/invitable-followers`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "invitable_connection_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.invitableFollowers("1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.chats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.chats("1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.chat",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/chat_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat", id: "chat_1", is_group_chat: false, unread_count: 0 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.chat("1", "chat_1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.messages",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/chat_1/messages`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat_message_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.messages("1", "chat_1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.message",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/chat_1/messages/msg_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat_message", id: "msg_1", conversation_id: "chat_1", sender: { id: "ACo1" }, sent_at: 1 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.message("1", "chat_1", "msg_1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.searchChats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/search`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.searchChats("1", { topic: "1" });
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {

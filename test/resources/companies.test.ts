@@ -1,7 +1,10 @@
-// companies namespace (4 methods, account-scoped)
+// companies namespace (12 methods, account-scoped)
 // Account-first path grammar: account_id is the leading /v1/ path segment,
 // never a query param (fixes the pre-existing companies.get query-param
-// injection failure). `followers` has no served equivalent — removed.
+// injection failure). `managed`/`followers`/`invitableFollowers` are the
+// company-insights trio; `followers` is re-added under a different item
+// shape than the pre-0.15.0 method of the same name. `chats`/`chat`/
+// `messages`/`message`/`searchChats` are the Beta company-inbox surface.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../msw/server.js";
@@ -190,8 +193,205 @@ describe("companies.jobs", () => {
   });
 });
 
-describe("companies.followers removal", () => {
-  it("is absent from the companies resource surface — get()'s follower_count replaces it", () => {
-    expect((companies() as unknown as Record<string, unknown>)["followers"]).toBeUndefined();
+describe("companies.managed", () => {
+  it("GET /v1/{account_id}/companies/managed lists administered pages", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/managed`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({
+          object: "managed_company_list",
+          items: [
+            {
+              object: "managed_company",
+              type: "organization",
+              id: "112013061",
+              is_admin: true,
+              can_invite_to_follow: true,
+              capabilities: ["canCreateOrganicShare"],
+              permissions: { update_profile: true, create_share: true, manage_admins: true, read_analytics: true },
+            },
+          ],
+          paging: { total_count: 1 },
+          cursor: null,
+        });
+      }),
+    );
+    const res = await companies().managed({ limit: 10 });
+    expect(new URL(url!).pathname).toBe("/v1/acc_co1/companies/managed");
+    expect(new URL(url!).searchParams.get("limit")).toBe("10");
+    expect(res.object).toBe("managed_company_list");
+    expect(res.items[0]?.id).toBe("112013061");
+  });
+
+  it("an empty administered set is a valid, non-error result", async () => {
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/managed`, () =>
+        HttpResponse.json({ object: "managed_company_list", items: [], paging: { total_count: 0 }, cursor: null }),
+      ),
+    );
+    const res = await companies().managed();
+    expect(res.items).toEqual([]);
+  });
+});
+
+describe("companies.followers", () => {
+  it("GET /v1/{account_id}/companies/{identifier}/followers is present again — company_follower item shape", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/followers`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({
+          object: "company_follower_list",
+          items: [
+            {
+              object: "company_follower",
+              id: "ACoAAExampleFollower0001",
+              name: "Dana Ellison",
+              headline: "VP of Engineering",
+              degree: "2nd",
+              followed_at: "June 2026",
+            },
+          ],
+          cursor: null,
+        });
+      }),
+    );
+    const res = await companies().followers("112013061", { limit: 10 });
+    expect(new URL(url!).pathname).toBe("/v1/acc_co1/companies/112013061/followers");
+    expect(new URL(url!).searchParams.get("limit")).toBe("10");
+    expect(res.object).toBe("company_follower_list");
+    expect(res.items[0]?.degree).toBe("2nd");
+  });
+});
+
+describe("companies.invitableFollowers", () => {
+  it("GET /v1/{account_id}/companies/{identifier}/invitable-followers lists invitable connections", async () => {
+    let capturedUrl: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/invitable-followers`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json({
+          object: "invitable_connection_list",
+          items: [
+            { object: "invitable_connection", id: "ACoAAExampleInvitee0001", profile_urn: "urn:li:fsd_profile:ACoAAExampleInvitee0001" },
+          ],
+          cursor: null,
+        });
+      }),
+    );
+    const res = await companies().invitableFollowers("112013061");
+    expect(new URL(capturedUrl!).pathname).toBe("/v1/acc_co1/companies/112013061/invitable-followers");
+    expect(res.object).toBe("invitable_connection_list");
+    expect(res.items[0]?.id).toBe("ACoAAExampleInvitee0001");
+  });
+
+  it("nobody invitable is a valid, non-error empty result", async () => {
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/invitable-followers`, () =>
+        HttpResponse.json({ object: "invitable_connection_list", items: [], cursor: null }),
+      ),
+    );
+    const res = await companies().invitableFollowers("112013061");
+    expect(res.items).toEqual([]);
+  });
+});
+
+describe("companies.chats (Beta company inbox)", () => {
+  it("GET /v1/{account_id}/companies/{identifier}/chats lists admin conversations", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/chats`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({
+          object: "company_chat_list",
+          items: [{ object: "company_chat", id: "chat_a1", is_group_chat: false, unread_count: 0 }],
+          cursor: null,
+        });
+      }),
+    );
+    const res = await companies().chats("112013061", { limit: 20 });
+    expect(new URL(url!).pathname).toBe("/v1/acc_co1/companies/112013061/chats");
+    expect(new URL(url!).searchParams.get("limit")).toBe("20");
+    expect(res.object).toBe("company_chat_list");
+    expect(res.items[0]?.id).toBe("chat_a1");
+  });
+});
+
+describe("companies.chat (Beta company inbox)", () => {
+  it("GET /v1/{account_id}/companies/{identifier}/chats/{chat_id} retrieves one conversation", async () => {
+    let capturedUrl: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/chats/chat_a1`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json({ object: "company_chat", id: "chat_a1", is_group_chat: false, unread_count: 0 });
+      }),
+    );
+    const res = await companies().chat("112013061", "chat_a1");
+    expect(new URL(capturedUrl!).pathname).toBe("/v1/acc_co1/companies/112013061/chats/chat_a1");
+    expect(res.id).toBe("chat_a1");
+  });
+});
+
+describe("companies.messages (Beta company inbox)", () => {
+  it("GET /v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages lists thread messages, content verbatim", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/chats/chat_a1/messages`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({
+          object: "company_chat_message_list",
+          items: [{ object: "company_chat_message", id: "msg_1", conversation_id: "chat_a1", sender: { id: "ACoA1" }, sent_at: 1783415709326, text: "Following up" }],
+          cursor: null,
+        });
+      }),
+    );
+    const res = await companies().messages("112013061", "chat_a1", { limit: 10 });
+    expect(new URL(url!).pathname).toBe("/v1/acc_co1/companies/112013061/chats/chat_a1/messages");
+    expect(res.items[0]?.text).toBe("Following up");
+  });
+});
+
+describe("companies.message (Beta company inbox)", () => {
+  it("GET .../chats/{chat_id}/messages/{message_id} retrieves one message", async () => {
+    let capturedUrl: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/chats/chat_a1/messages/msg_1`, ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json({ object: "company_chat_message", id: "msg_1", conversation_id: "chat_a1", sender: { id: "ACoA1" }, sent_at: 1783415709326, text: "Following up" });
+      }),
+    );
+    const res = await companies().message("112013061", "chat_a1", "msg_1");
+    expect(new URL(capturedUrl!).pathname).toBe("/v1/acc_co1/companies/112013061/chats/chat_a1/messages/msg_1");
+    expect(res.id).toBe("msg_1");
+  });
+});
+
+describe("companies.searchChats (Beta company inbox)", () => {
+  it("GET .../chats/search forwards topic/unread/query/limit/cursor as query params", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/chats/search`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({ object: "company_chat_list", items: [], cursor: null, filter_effective: true });
+      }),
+    );
+    const res = await companies().searchChats("112013061", { topic: "1" });
+    const params = new URL(url!).searchParams;
+    expect(new URL(url!).pathname).toBe("/v1/acc_co1/companies/112013061/chats/search");
+    expect(params.get("topic")).toBe("1");
+    expect(res.filter_effective).toBe(true);
+  });
+
+  it("free-text query mode", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_co1/companies/112013061/chats/search`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({ object: "company_chat_list", items: [], cursor: null });
+      }),
+    );
+    await companies().searchChats("112013061", { query: "sophie" });
+    expect(new URL(url!).searchParams.get("query")).toBe("sophie");
   });
 });

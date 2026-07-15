@@ -5,7 +5,7 @@
 // table (namespace -> exact method set), enumerates the real prototype methods
 // on a constructed client, and asserts set-equality per namespace. A phantom
 // (extra) public method fails by name; a missing method fails by name; the
-// total must be 123 methods across 16 namespaces. A separate compile-time block
+// total must be 131 methods across 16 namespaces. A separate compile-time block
 // proves every removed method is gone at the type level.
 import { describe, expect, it } from "vitest";
 import { Curviate } from "../src/index.js";
@@ -39,7 +39,20 @@ const ACCOUNT_SURFACE: Record<string, readonly string[]> = {
     "getInMailCredits",
     "endorseSkill",
   ],
-  companies: ["get", "employees", "posts", "jobs"],
+  companies: [
+    "get",
+    "employees",
+    "posts",
+    "jobs",
+    "managed",
+    "followers",
+    "invitableFollowers",
+    "chats",
+    "chat",
+    "messages",
+    "message",
+    "searchChats",
+  ],
   search: ["getParameters", "people", "companies", "posts", "jobs", "fromUrl"],
   messaging: [
     "listChats",
@@ -204,17 +217,17 @@ describe("per-namespace method bijection", () => {
 });
 
 describe("total mapped surface", () => {
-  it("the intended table sums to 123 methods across 16 namespaces", () => {
+  it("the intended table sums to 131 methods across 16 namespaces", () => {
     const namespaces = [
       ...Object.values(ROOT_SURFACE),
       ...Object.values(ACCOUNT_SURFACE),
     ];
     expect(namespaces.length).toBe(16);
     const total = namespaces.reduce((n, methods) => n + methods.length, 0);
-    expect(total).toBe(123);
+    expect(total).toBe(131);
   });
 
-  it("the real runtime surface also sums to exactly 123", () => {
+  it("the real runtime surface also sums to exactly 131", () => {
     const roots = Object.values(rootInstances).reduce(
       (n, inst) => n + ownMethods(inst).size,
       0,
@@ -223,12 +236,12 @@ describe("total mapped surface", () => {
       (n, inst) => n + ownMethods(inst).size,
       0,
     );
-    expect(roots + accounts).toBe(123);
+    expect(roots + accounts).toBe(131);
   });
 });
 
 describe("removed methods are gone", () => {
-  it("the 14 reverse-orphans (plus the split respond) do not exist at runtime", () => {
+  it("the 13 reverse-orphans (plus the split respond) do not exist at runtime", () => {
     const absent: Array<[object, string]> = [
       [client.accounts, "createConnectLink"],
       [client.accounts, "createReconnectLink"],
@@ -237,7 +250,6 @@ describe("removed methods are gone", () => {
       [acc.messaging, "syncChat"],
       [acc.messaging, "syncMessages"],
       [acc.posts, "list"],
-      [acc.companies, "followers"],
       [acc.recruiter, "syncMessages"],
       [acc.recruiter, "addApplicant"],
       [acc.recruiter, "rejectApplicant"],
@@ -269,8 +281,6 @@ describe("removed methods are gone", () => {
     void acc.messaging.syncMessages;
     // @ts-expect-error the orphaned post list has no served operation
     void acc.posts.list;
-    // @ts-expect-error company followers has no served operation
-    void acc.companies.followers;
     // @ts-expect-error recruiter message sync has no served operation
     void acc.recruiter.syncMessages;
     // @ts-expect-error recruiter add-applicant has no served operation
