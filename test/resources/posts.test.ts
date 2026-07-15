@@ -1,9 +1,11 @@
-// posts namespace (9 methods, account-scoped) — path realign to the
+// posts namespace (12 methods, account-scoped) — path realign to the
 // account-first grammar; `create` drops multipart entirely (JSON + base64
 // attachments — the served surface has zero multipart ops); new `delete`
 // (bodyless, 204) and `unreact` (DELETE-with-body); `listUserPosts` /
 // `listUserReactions` relocate from the old `profiles.listPosts` /
 // `profiles.listReactions`. The orphaned `list()` (no served op) is gone.
+// `listSaved` / `save` / `unsave` are the saved-posts extension — self
+// resource, preview-only list, idempotent writes.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../msw/server.js";
@@ -208,6 +210,104 @@ describe("posts.listUserReactions", () => {
     const res = await acc.posts.listUserReactions("me");
     expect(new URL(capturedUrl!).pathname).toBe("/v1/acc_1/users/me/reactions");
     expect(res.items?.[0]?.value).toBe("celebrate");
+  });
+});
+
+describe("posts.listSaved", () => {
+  it("GET /v1/{account_id}/saved-posts — default (no query)", async () => {
+    let capturedPath: string | undefined;
+    let search: URLSearchParams | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_1/saved-posts`, ({ request }) => {
+        const url = new URL(request.url);
+        capturedPath = url.pathname;
+        search = url.searchParams;
+        return HttpResponse.json({
+          object: "saved_post_list",
+          items: [{ object: "saved_post_preview", id: "1", snippet: "hi", saved_at: null }],
+          cursor: "cur_next",
+        });
+      }),
+    );
+    const res = await acc.posts.listSaved();
+    expect(capturedPath).toBe("/v1/acc_1/saved-posts");
+    expect(search?.has("limit")).toBe(false);
+    expect(search?.has("cursor")).toBe(false);
+    expect(res.object).toBe("saved_post_list");
+    expect(res.cursor).toBe("cur_next");
+    expect(res.items?.length).toBe(1);
+  });
+
+  it("forwards limit/cursor query params", async () => {
+    let search: URLSearchParams | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_1/saved-posts`, ({ request }) => {
+        search = new URL(request.url).searchParams;
+        return HttpResponse.json({ object: "saved_post_list", items: [], cursor: null });
+      }),
+    );
+    await acc.posts.listSaved({ limit: 5, cursor: "cur_1" });
+    expect(search?.get("limit")).toBe("5");
+    expect(search?.get("cursor")).toBe("cur_1");
+  });
+});
+
+describe("posts.save", () => {
+  it("POST /v1/{account_id}/saved-posts sends {post_id} — full urn form", async () => {
+    let seenMethod: string | undefined;
+    let seenPath: string | undefined;
+    let body: unknown;
+    server.use(
+      http.post(`${BASE}/v1/acc_1/saved-posts`, async ({ request }) => {
+        seenMethod = request.method;
+        seenPath = new URL(request.url).pathname;
+        body = await request.json();
+        return HttpResponse.json({ object: "save_result", saved: true, post_id: "7459869580333576193" });
+      }),
+    );
+    const res = await acc.posts.save("urn:li:activity:7459869580333576193");
+    expect(seenMethod).toBe("POST");
+    expect(seenPath).toBe("/v1/acc_1/saved-posts");
+    expect(body).toEqual({ post_id: "urn:li:activity:7459869580333576193" });
+    expect(res).toEqual({ object: "save_result", saved: true, post_id: "7459869580333576193" });
+  });
+
+  it("forwards a bare numeric post id verbatim in the body", async () => {
+    let body: unknown;
+    server.use(
+      http.post(`${BASE}/v1/acc_1/saved-posts`, async ({ request }) => {
+        body = await request.json();
+        return HttpResponse.json({ object: "save_result", saved: true, post_id: "123" });
+      }),
+    );
+    await acc.posts.save("123");
+    expect(body).toEqual({ post_id: "123" });
+  });
+});
+
+describe("posts.unsave", () => {
+  it("DELETE /v1/{account_id}/saved-posts/{post_id} — the same call as save, no body", async () => {
+    // The full-urn id form (`urn:li:activity:…`) embeds colons — MSW's own
+    // path-to-regexp matcher treats a literal `:` in a handler URL template
+    // as a param marker, so this uses a `:postId` capture segment (not a
+    // literal-colon template) purely to register the mock; it asserts the
+    // exact raw path the client sent via `request.url`, unaffected by that.
+    let seenMethod: string | undefined;
+    let seenPath: string | undefined;
+    let seenBody: string | null = null;
+    server.use(
+      http.delete(`${BASE}/v1/acc_1/saved-posts/:postId`, async ({ request }) => {
+        seenMethod = request.method;
+        seenPath = new URL(request.url).pathname;
+        seenBody = await request.text();
+        return HttpResponse.json({ object: "save_result", saved: false, post_id: "7459869580333576193" });
+      }),
+    );
+    const res = await acc.posts.unsave("urn:li:activity:7459869580333576193");
+    expect(seenMethod).toBe("DELETE");
+    expect(seenPath).toBe("/v1/acc_1/saved-posts/urn:li:activity:7459869580333576193");
+    expect(seenBody).toBe("");
+    expect(res).toEqual({ object: "save_result", saved: false, post_id: "7459869580333576193" });
   });
 });
 

@@ -49,6 +49,12 @@ is unaffected.
 - **`messaging` gains 1 method** — `messaging.searchChats(params)` free-text
   searches the account's own inbox (participant names and message content).
   `messaging` is now 13 methods (was 12).
+- **`posts` gains 3 saved-posts methods** — `posts.listSaved(query?)` lists the
+  connected account's own saved posts (a self resource — previews only,
+  `snippet` capped at ≤140 chars, never the full body); `posts.save(postId)`
+  and `posts.unsave(postId)` add/remove a bookmark, both idempotent and
+  accepting either `urn:li:activity:<id>` or a bare numeric id. `posts` is now
+  12 methods (was 9).
 
 ## [0.15.0] — 2026-07-11
 

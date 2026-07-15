@@ -1902,6 +1902,56 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: posts extension — saved posts ──────────────────────
+  {
+    name: "posts.listSaved",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/saved-posts`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "saved_post_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).posts.listSaved();
+      return captured!;
+    },
+  },
+  {
+    name: "posts.save",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/saved-posts`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "save_result", saved: true, post_id: "1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).posts.save("1");
+      return captured!;
+    },
+  },
+  {
+    name: "posts.unsave",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/saved-posts/1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "save_result", saved: false, post_id: "1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).posts.unsave("1");
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {

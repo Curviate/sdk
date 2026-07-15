@@ -5,7 +5,7 @@
 // table (namespace -> exact method set), enumerates the real prototype methods
 // on a constructed client, and asserts set-equality per namespace. A phantom
 // (extra) public method fails by name; a missing method fails by name; the
-// total must be 135 methods across 16 namespaces. A separate compile-time block
+// total must be 138 methods across 16 namespaces. A separate compile-time block
 // proves every removed method is gone at the type level.
 import { describe, expect, it } from "vitest";
 import { Curviate } from "../src/index.js";
@@ -103,6 +103,9 @@ const ACCOUNT_SURFACE: Record<string, readonly string[]> = {
     "react",
     "unreact",
     "listUserReactions",
+    "listSaved",
+    "save",
+    "unsave",
   ],
   invites: ["send", "listSent", "listReceived", "accept", "decline", "cancel"],
   jobs: [
@@ -228,17 +231,17 @@ describe("per-namespace method bijection", () => {
 });
 
 describe("total mapped surface", () => {
-  it("the intended table sums to 135 methods across 16 namespaces", () => {
+  it("the intended table sums to 138 methods across 16 namespaces", () => {
     const namespaces = [
       ...Object.values(ROOT_SURFACE),
       ...Object.values(ACCOUNT_SURFACE),
     ];
     expect(namespaces.length).toBe(16);
     const total = namespaces.reduce((n, methods) => n + methods.length, 0);
-    expect(total).toBe(135);
+    expect(total).toBe(138);
   });
 
-  it("the real runtime surface also sums to exactly 135", () => {
+  it("the real runtime surface also sums to exactly 138", () => {
     const roots = Object.values(rootInstances).reduce(
       (n, inst) => n + ownMethods(inst).size,
       0,
@@ -247,7 +250,7 @@ describe("total mapped surface", () => {
       (n, inst) => n + ownMethods(inst).size,
       0,
     );
-    expect(roots + accounts).toBe(135);
+    expect(roots + accounts).toBe(138);
   });
 });
 
