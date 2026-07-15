@@ -1570,6 +1570,72 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: profile (M2 / F1) ──────────────────────────────────
+  {
+    name: "profile.subscription",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/subscription`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile_subscription", has_premium: false, plan_title: null, subscriptions: [], actions: {} });
+        }),
+      );
+      await client.account(ACCOUNT_ID).profile.subscription();
+      return captured!;
+    },
+  },
+  {
+    name: "profile.analytics",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/analytics`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile_analytics", profile_viewers: { count: 0 }, followers: { count: 0 }, post_impressions: { count: 0 }, search_appearances: { count: 0 } });
+        }),
+      );
+      await client.account(ACCOUNT_ID).profile.analytics();
+      return captured!;
+    },
+  },
+  {
+    name: "profile.visitors",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/visitors`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile_visitor_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).profile.visitors({ limit: 20 });
+      return captured!;
+    },
+  },
+  {
+    name: "profile.ssi",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/ssi`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile_ssi", overall: null, pillars: {}, active_seat: false });
+        }),
+      );
+      await client.account(ACCOUNT_ID).profile.ssi();
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {

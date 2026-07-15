@@ -144,6 +144,7 @@ describe("account-scoped accessor", () => {
       "search",
       "messaging",
       "comments",
+      "profile",
       "posts",
       "invites",
       "jobs",
