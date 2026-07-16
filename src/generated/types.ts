@@ -725,7 +725,7 @@ export interface paths {
         put?: never;
         /**
          * Start a chat
-         * @description Starts a new chat with one or more members from a connected account. Send application/json; attach files as base64-encoded attachments (max 5 MiB per file). Message content passes through to the platform and is never stored.
+         * @description Starts a new chat with one or more members from a connected account. Send application/json; attach files as base64-encoded attachments (max 5 MiB per file). Message content passes through to the platform and is never stored. Company pages are reply-only and cannot start a conversation — reply using a `COMPANY_` chat id from GET /v1/{account_id}/inboxes/{inbox_id}/chats instead.
          */
         post: operations["postV1AccountIdChats"];
         delete?: never;
@@ -884,6 +884,46 @@ export interface paths {
          * @description Sends a LinkedIn InMail from the account's own premium InMail credits to a member who is not a direct connection.
          */
         post: operations["postV1AccountIdMessagesInmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/inboxes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List inboxes
+         * @description Returns the account's personal inbox plus, when the company product is attached, one entry per company page × folder (id like 'COMPANY_83734124_PRIMARY'). Company inboxes carry reply_only:true — company pages can only reply to existing conversations, never start one. company_id is resolved by correlating the page name against the account's managed pages; an uncorrelatable page returns company_id:null, never a fabricated id. When no company inbox exists, hint names the Company Pages reconnect requirement instead of returning silently empty.
+         */
+        get: operations["getV1AccountIdInboxes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/inboxes/{inbox_id}/chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List an inbox's conversations
+         * @description Returns a paginated list of an inbox's conversations, newest-activity-first. Each chat's id is send-ready: pass it directly to the send-message endpoint to reply — a company inbox's chat id (e.g. 'COMPANY_83734124_2-…') replies AS THE PAGE, no separate parameter needed. Works identically for personal (CLASSIC_) inboxes. Company pages are reply-only (reply_only:true on the inbox, from GET /inboxes) — they cannot start a new conversation. Unknown inbox id returns 404.
+         */
+        get: operations["getV1AccountIdInboxesInboxIdChats"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2245,7 +2285,7 @@ export interface paths {
         put?: never;
         /**
          * Start a credential/cookie authentication
-         * @description Authenticate a LinkedIn account directly with credentials or a session cookie. Omit `account_id` to connect a NEW account (into the given empty `seat_id`); include `account_id` (in the body) to re-authenticate an EXISTING account in place. Returns the account on success (201 new / 200 reconnect), or a checkpoint challenge (202) carrying the account_id when LinkedIn requires verification. Complete the challenge with POST /v1/auth/checkpoint/solve (codes) or POST /v1/auth/checkpoint/poll (mobile-app approval).
+         * @description Authenticate a LinkedIn account directly with credentials or a session cookie. Omit `account_id` to connect a NEW account (into the given empty `seat_id`); include `account_id` (in the body) to re-authenticate an EXISTING account in place. Returns the account on success (201 new / 200 reconnect), or a checkpoint challenge (202) carrying the account_id when LinkedIn requires verification. Complete the challenge with POST /v1/auth/checkpoint/solve (codes) or POST /v1/auth/checkpoint/poll (mobile-app approval). Connection scope (which LinkedIn products are enabled) is derived from the account's seat — there is no products input; the recorded scope is readable as `requested_products` on the account. A reconnect that changes scope must use credentials (a saved cookie cannot change scope). Pin a managed proxy with the optional `country`/`ip` or supply a `proxy` to override it.
          */
         post: operations["postV1AuthIntent"];
         delete?: never;
@@ -9589,7 +9629,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Message sent. Returns the new message_id. */
+            /** @description Message sent. Returns the new message_id and sent_as — the acting identity. A COMPANY_ chat id (e.g. `COMPANY_83734124_2-…`) sends AS THE PAGE and echoes sent_as:{kind:'company',company_id,name} (company_id may be null when the page could not be correlated to a managed page); any other chat id sends as the connected member and echoes sent_as:{kind:'personal'}. Never infer the acting identity from the message's sender field. */
             201: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -9605,6 +9645,18 @@ export interface operations {
                         object?: "message_sent";
                         /** @description The sent message's identifier. */
                         message_id?: string;
+                        /** @description The identity this message was actually sent as. */
+                        sent_as?: {
+                            /**
+                             * @description Which identity sent the message.
+                             * @enum {string}
+                             */
+                            kind?: "personal" | "company";
+                            /** @description Company inboxes only — null when uncorrelatable. */
+                            company_id?: string | null;
+                            /** @description Company inboxes only — the page's display name. */
+                            name?: string;
+                        };
                     };
                 };
             };
@@ -10584,6 +10636,259 @@ export interface operations {
             };
             /** @description The recipient is unreachable via InMail. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdInboxes: {
+        parameters: {
+            query?: {
+                /** @description Filter to only personal (CLASSIC_) or only company (COMPANY_) inboxes. Omit to list both. */
+                kind?: "personal" | "company";
+                /** @description Filter to the one company inbox correlated to this managed-company id (e.g. '112013061'). */
+                company_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) whose inboxes to list. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's inboxes — personal plus, when the company product is attached, one entry per company page × folder (e.g. id='COMPANY_83734124_PRIMARY'). When no company inbox exists, hint names the Company Pages reconnect requirement instead of returning silently empty. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object?: "inbox_list";
+                        items?: {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "inbox";
+                            /** @description Inbox identifier — pass to the inbox-chats endpoint. */
+                            id?: string;
+                            /**
+                             * @description Whether this is the account's own inbox or a company page's.
+                             * @enum {string}
+                             */
+                            kind?: "personal" | "company";
+                            /** @description Folder within the inbox, e.g. 'primary', 'archived', 'spam'. */
+                            folder?: string;
+                            /** @description Personal: the folder's display name. Company: the page's display name. */
+                            name?: string | null;
+                            /** @description Company inboxes only — the managed-company id this mailbox was correlated to, or null when it could not be correlated (never a fabricated id). */
+                            company_id?: string | null;
+                            /** @description Company inboxes only — the substrate's internal mailbox id (distinct from company_id). */
+                            mailbox_id?: string | null;
+                            /** @description true for company inboxes — company pages can only reply to existing conversations, never start one. */
+                            reply_only?: boolean;
+                        }[];
+                        /** @description Present only when no company inbox exists — names the reconnect requirement. */
+                        hint?: string;
+                    };
+                };
+            };
+            /** @description Invalid kind or company_id filter value. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdInboxesInboxIdChats: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page (1–25, default 20). */
+                limit?: number;
+                /** @description An opaque cursor for pagination. Pass the `cursor` from the preceding response to fetch the next page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) whose inbox to list. */
+                account_id: string;
+                /** @description The inbox ID (e.g. 'CLASSIC_PRIMARY' or 'COMPANY_83734124_PRIMARY') from GET /inboxes. */
+                inbox_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the inbox's conversations, newest-activity-first. Each chat's id is send-ready — pass it directly to POST .../chats/{chat_id}/messages to reply (a company inbox's chats carry ids like 'COMPANY_83734124_2-YTQ3ODU3Njgt'; replying with that id sends AS THE PAGE, no separate parameter needed). Works identically for personal (CLASSIC_) inboxes. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object?: "inbox_chat_list";
+                        items?: Record<string, never>[];
+                        /** @description Next-page cursor; follow until items is empty. */
+                        cursor?: string | null;
+                    };
+                };
+            };
+            /** @description limit out of range (1–25) or malformed cursor. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected account is not an admin of this page. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The inbox does not exist for this account. */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -24334,6 +24639,8 @@ export interface operations {
                             seat_id?: string | null;
                             /** @description ISO-8601 UTC connection timestamp. */
                             connected_at?: string | null;
+                            /** @description The seat-derived connection scope this account was last connected with (e.g. ["classic","company","sales_navigator"]). Scope is derived from the account's seat — there is no products input. Null for accounts connected before this was recorded; not attachment truth for Company Pages. */
+                            requested_products?: ("classic" | "company" | "sales_navigator" | "recruiter")[] | null;
                             /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until the first background enrichment lands. */
                             substrate_created_at?: string | null;
                         }[];
@@ -24439,6 +24746,8 @@ export interface operations {
                         last_checked_at?: string;
                         /** @description The seat this account occupies (null for an admin seatless account). */
                         seat_id?: string | null;
+                        /** @description The seat-derived connection scope this account was last connected with (e.g. ["classic","company","sales_navigator"]). Scope is derived from the account's seat — there is no products input. Null for accounts connected before this was recorded; not attachment truth for Company Pages. */
+                        requested_products?: ("classic" | "company" | "sales_navigator" | "recruiter")[] | null;
                         /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until the first background enrichment lands. */
                         substrate_created_at?: string | null;
                         /** @description Usage-safety recommendations for this account — one entry per tracked family (messages.daily, connection_requests.daily, profile_views.daily, inmail.daily, profile.endorse, account.per_minute). These are advisory only: Curviate never rejects a request because a daily recommendation is exceeded; only account.per_minute is a binding limit enforced with HTTP 429. */
@@ -24804,8 +25113,6 @@ export interface operations {
                     };
                     /** @description Exact browser User-Agent to pin for this account, if it hits disconnection issues. */
                     user_agent?: string;
-                    /** @description Optional features to leave un-synced for this account. Allowed: recruiter, sales_navigator, organization_mailboxes. */
-                    disabled_features?: ("recruiter" | "sales_navigator" | "organization_mailboxes")[];
                     /** @description Optional caps on how much history is synced for this account. */
                     sync_limit?: {
                         /** @description Maximum number of chats to sync. */

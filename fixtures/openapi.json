@@ -51,6 +51,11 @@
       "description": "Send messages, manage conversations, track message threads with connections, and search your inbox."
     },
     {
+      "name": "Messaging: Inboxes",
+      "x-displayName": "Inboxes",
+      "description": "Discover the account's personal and company-page inboxes (with a send-ready chat id per conversation) and list an inbox's conversations. Replying as a page reuses the ordinary send-message endpoint."
+    },
+    {
       "name": "Feed",
       "description": "Read the connected account's home feed as agent-actionable posts — ranked or reverse-chronological."
     },
@@ -167,7 +172,8 @@
     {
       "name": "Messaging",
       "tags": [
-        "Messaging"
+        "Messaging",
+        "Messaging: Inboxes"
       ]
     },
     {
@@ -18081,7 +18087,7 @@
             "color": "#A1A1AA"
           }
         ],
-        "description": "Starts a new chat with one or more members from a connected account. Send application/json; attach files as base64-encoded attachments (max 5 MiB per file). Message content passes through to the platform and is never stored.",
+        "description": "Starts a new chat with one or more members from a connected account. Send application/json; attach files as base64-encoded attachments (max 5 MiB per file). Message content passes through to the platform and is never stored. Company pages are reply-only and cannot start a conversation — reply using a `COMPANY_` chat id from GET /v1/{account_id}/inboxes/{inbox_id}/chats instead.",
         "requestBody": {
           "required": true,
           "content": {
@@ -19492,7 +19498,7 @@
         ],
         "responses": {
           "201": {
-            "description": "Message sent. Returns the new message_id.",
+            "description": "Message sent. Returns the new message_id and sent_as — the acting identity. A COMPANY_ chat id (e.g. `COMPANY_83734124_2-…`) sends AS THE PAGE and echoes sent_as:{kind:'company',company_id,name} (company_id may be null when the page could not be correlated to a managed page); any other chat id sends as the connected member and echoes sent_as:{kind:'personal'}. Never infer the acting identity from the message's sender field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -19508,15 +19514,55 @@
                     "message_id": {
                       "type": "string",
                       "description": "The sent message's identifier."
+                    },
+                    "sent_as": {
+                      "type": "object",
+                      "description": "The identity this message was actually sent as.",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "personal",
+                            "company"
+                          ],
+                          "description": "Which identity sent the message."
+                        },
+                        "company_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Company inboxes only — null when uncorrelatable."
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Company inboxes only — the page's display name."
+                        }
+                      }
                     }
                   }
                 },
                 "examples": {
                   "sent": {
-                    "summary": "Message sent",
+                    "summary": "Message sent (personal)",
                     "value": {
                       "object": "message_sent",
-                      "message_id": "CLASSIC_1-GGGG7777HHHH8888IIII"
+                      "message_id": "CLASSIC_1-GGGG7777HHHH8888IIII",
+                      "sent_as": {
+                        "kind": "personal"
+                      }
+                    }
+                  },
+                  "sentAsCompany": {
+                    "summary": "Message sent as a company page",
+                    "value": {
+                      "object": "message_sent",
+                      "message_id": "COMPANY_83734124_1-GGGG7777HHHH8888IIII",
+                      "sent_as": {
+                        "kind": "company",
+                        "company_id": "112013061",
+                        "name": "RedHire"
+                      }
                     }
                   }
                 }
@@ -22199,6 +22245,688 @@
           }
         },
         "x-order": 12
+      }
+    },
+    "/v1/{account_id}/inboxes": {
+      "get": {
+        "operationId": "getV1AccountIdInboxes",
+        "tags": [
+          "Messaging: Inboxes"
+        ],
+        "summary": "List inboxes",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The account ID (`acc_…`) whose inboxes to list."
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "personal",
+                "company"
+              ]
+            },
+            "description": "Filter to only personal (CLASSIC_) or only company (COMPANY_) inboxes. Omit to list both."
+          },
+          {
+            "name": "company_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter to the one company inbox correlated to this managed-company id (e.g. '112013061')."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The account's inboxes — personal plus, when the company product is attached, one entry per company page × folder (e.g. id='COMPANY_83734124_PRIMARY'). When no company inbox exists, hint names the Company Pages reconnect requirement instead of returning silently empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "inbox_list"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "object": {
+                            "type": "string",
+                            "enum": [
+                              "inbox"
+                            ],
+                            "description": "Response type discriminator."
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "Inbox identifier — pass to the inbox-chats endpoint."
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "personal",
+                              "company"
+                            ],
+                            "description": "Whether this is the account's own inbox or a company page's."
+                          },
+                          "folder": {
+                            "type": "string",
+                            "description": "Folder within the inbox, e.g. 'primary', 'archived', 'spam'."
+                          },
+                          "name": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Personal: the folder's display name. Company: the page's display name."
+                          },
+                          "company_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Company inboxes only — the managed-company id this mailbox was correlated to, or null when it could not be correlated (never a fabricated id)."
+                          },
+                          "mailbox_id": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "description": "Company inboxes only — the substrate's internal mailbox id (distinct from company_id)."
+                          },
+                          "reply_only": {
+                            "type": "boolean",
+                            "description": "true for company inboxes — company pages can only reply to existing conversations, never start one."
+                          }
+                        }
+                      }
+                    },
+                    "hint": {
+                      "type": "string",
+                      "description": "Present only when no company inbox exists — names the reconnect requirement."
+                    }
+                  }
+                },
+                "examples": {
+                  "withCompany": {
+                    "summary": "Personal + one company inbox",
+                    "value": {
+                      "object": "inbox_list",
+                      "items": [
+                        {
+                          "object": "inbox",
+                          "id": "CLASSIC_PRIMARY",
+                          "kind": "personal",
+                          "folder": "primary",
+                          "name": "Primary",
+                          "company_id": null,
+                          "mailbox_id": null,
+                          "reply_only": false
+                        },
+                        {
+                          "object": "inbox",
+                          "id": "COMPANY_83734124_PRIMARY",
+                          "kind": "company",
+                          "folder": "primary",
+                          "name": "RedHire",
+                          "company_id": "112013061",
+                          "mailbox_id": "83734124",
+                          "reply_only": true
+                        }
+                      ]
+                    }
+                  },
+                  "noCompanyAttached": {
+                    "summary": "No company product attached — actionable hint, not silent emptiness",
+                    "value": {
+                      "object": "inbox_list",
+                      "items": [
+                        {
+                          "object": "inbox",
+                          "id": "CLASSIC_PRIMARY",
+                          "kind": "personal",
+                          "folder": "primary",
+                          "name": "Primary",
+                          "company_id": null,
+                          "mailbox_id": null,
+                          "reply_only": false
+                        }
+                      ],
+                      "hint": "No company inboxes found. Reconnect this account with the Company Pages scope to attach one."
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid kind or company_id filter value.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMIT_ACCOUNT",
+                      "message": "The per-account request rate limit was exceeded; retry after the delay in retry_hint. Per-workspace breaches carry RATE_LIMIT_TENANT; ingress-wide breaches (pre-auth, no per-client key) and upstream saturation both carry PLATFORM_RATE_LIMIT.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          },
+          {
+            "name": "Beta",
+            "position": "after",
+            "color": "#60A5FA"
+          }
+        ],
+        "x-curviate-stability": "beta",
+        "description": "Returns the account's personal inbox plus, when the company product is attached, one entry per company page × folder (id like 'COMPANY_83734124_PRIMARY'). Company inboxes carry reply_only:true — company pages can only reply to existing conversations, never start one. company_id is resolved by correlating the page name against the account's managed pages; an uncorrelatable page returns company_id:null, never a fabricated id. When no company inbox exists, hint names the Company Pages reconnect requirement instead of returning silently empty.",
+        "x-order": 13
+      }
+    },
+    "/v1/{account_id}/inboxes/{inbox_id}/chats": {
+      "get": {
+        "operationId": "getV1AccountIdInboxesInboxIdChats",
+        "tags": [
+          "Messaging: Inboxes"
+        ],
+        "summary": "List an inbox's conversations",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The account ID (`acc_…`) whose inbox to list."
+          },
+          {
+            "name": "inbox_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The inbox ID (e.g. 'CLASSIC_PRIMARY' or 'COMPANY_83734124_PRIMARY') from GET /inboxes."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25,
+              "default": 20
+            },
+            "description": "Number of items to return per page (1–25, default 20)."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An opaque cursor for pagination. Pass the `cursor` from the preceding response to fetch the next page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of the inbox's conversations, newest-activity-first. Each chat's id is send-ready — pass it directly to POST .../chats/{chat_id}/messages to reply (a company inbox's chats carry ids like 'COMPANY_83734124_2-YTQ3ODU3Njgt'; replying with that id sends AS THE PAGE, no separate parameter needed). Works identically for personal (CLASSIC_) inboxes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "inbox_chat_list"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "description": "Next-page cursor; follow until items is empty."
+                    }
+                  }
+                },
+                "examples": {
+                  "page": {
+                    "summary": "First page of a company inbox's chats",
+                    "value": {
+                      "object": "inbox_chat_list",
+                      "items": [],
+                      "cursor": null
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "limit out of range (1–25) or malformed cursor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The connected account is not an admin of this page.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "RESOURCE_ACCESS_RESTRICTED",
+                      "message": "The connected account is not an admin of this page.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The inbox does not exist for this account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMIT_ACCOUNT",
+                      "message": "The per-account request rate limit was exceeded; retry after the delay in retry_hint. Per-workspace breaches carry RATE_LIMIT_TENANT; ingress-wide breaches (pre-auth, no per-client key) and upstream saturation both carry PLATFORM_RATE_LIMIT.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          },
+          {
+            "name": "Beta",
+            "position": "after",
+            "color": "#60A5FA"
+          }
+        ],
+        "x-curviate-stability": "beta",
+        "description": "Returns a paginated list of an inbox's conversations, newest-activity-first. Each chat's id is send-ready: pass it directly to the send-message endpoint to reply — a company inbox's chat id (e.g. 'COMPANY_83734124_2-…') replies AS THE PAGE, no separate parameter needed. Works identically for personal (CLASSIC_) inboxes. Company pages are reply-only (reply_only:true on the inbox, from GET /inboxes) — they cannot start a new conversation. Unknown inbox id returns 404.",
+        "x-order": 14
       }
     },
     "/v1/{account_id}/feed/home": {
@@ -59672,6 +60400,22 @@
                             ],
                             "description": "ISO-8601 UTC connection timestamp."
                           },
+                          "requested_products": {
+                            "type": [
+                              "array",
+                              "null"
+                            ],
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "classic",
+                                "company",
+                                "sales_navigator",
+                                "recruiter"
+                              ]
+                            },
+                            "description": "The seat-derived connection scope this account was last connected with (e.g. [\"classic\",\"company\",\"sales_navigator\"]). Scope is derived from the account's seat — there is no products input. Null for accounts connected before this was recorded; not attachment truth for Company Pages."
+                          },
                           "substrate_created_at": {
                             "type": [
                               "string",
@@ -59949,6 +60693,22 @@
                       ],
                       "description": "The seat this account occupies (null for an admin seatless account)."
                     },
+                    "requested_products": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "classic",
+                          "company",
+                          "sales_navigator",
+                          "recruiter"
+                        ]
+                      },
+                      "description": "The seat-derived connection scope this account was last connected with (e.g. [\"classic\",\"company\",\"sales_navigator\"]). Scope is derived from the account's seat — there is no products input. Null for accounts connected before this was recorded; not attachment truth for Company Pages."
+                    },
                     "substrate_created_at": {
                       "type": [
                         "string",
@@ -60007,6 +60767,11 @@
                       "last_checked_at": "2026-06-08T09:00:00.000Z",
                       "seat_id": "seat_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
                       "substrate_created_at": "2025-01-15T09:30:00.000Z",
+                      "requested_products": [
+                        "classic",
+                        "company",
+                        "sales_navigator"
+                      ],
                       "quotas": [
                         {
                           "quota_name": "messages.daily",
@@ -61244,7 +62009,7 @@
             }
           }
         },
-        "description": "Authenticate a LinkedIn account directly with credentials or a session cookie. Omit `account_id` to connect a NEW account (into the given empty `seat_id`); include `account_id` (in the body) to re-authenticate an EXISTING account in place. Returns the account on success (201 new / 200 reconnect), or a checkpoint challenge (202) carrying the account_id when LinkedIn requires verification. Complete the challenge with POST /v1/auth/checkpoint/solve (codes) or POST /v1/auth/checkpoint/poll (mobile-app approval).",
+        "description": "Authenticate a LinkedIn account directly with credentials or a session cookie. Omit `account_id` to connect a NEW account (into the given empty `seat_id`); include `account_id` (in the body) to re-authenticate an EXISTING account in place. Returns the account on success (201 new / 200 reconnect), or a checkpoint challenge (202) carrying the account_id when LinkedIn requires verification. Complete the challenge with POST /v1/auth/checkpoint/solve (codes) or POST /v1/auth/checkpoint/poll (mobile-app approval). Connection scope (which LinkedIn products are enabled) is derived from the account's seat — there is no products input; the recorded scope is readable as `requested_products` on the account. A reconnect that changes scope must use credentials (a saved cookie cannot change scope). Pin a managed proxy with the optional `country`/`ip` or supply a `proxy` to override it.",
         "requestBody": {
           "required": true,
           "content": {
@@ -61352,18 +62117,6 @@
                   "user_agent": {
                     "type": "string",
                     "description": "Exact browser User-Agent to pin for this account, if it hits disconnection issues."
-                  },
-                  "disabled_features": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "enum": [
-                        "recruiter",
-                        "sales_navigator",
-                        "organization_mailboxes"
-                      ]
-                    },
-                    "description": "Optional features to leave un-synced for this account. Allowed: recruiter, sales_navigator, organization_mailboxes."
                   },
                   "sync_limit": {
                     "type": "object",
