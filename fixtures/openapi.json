@@ -21491,10 +21491,9 @@
                             "type": "string",
                             "enum": [
                               "1to1",
-                              "group",
-                              "channel"
+                              "group"
                             ],
-                            "description": "Conversation type."
+                            "description": "Conversation type (search results are never channels)."
                           },
                           "is_group": {
                             "type": "boolean"
@@ -21502,52 +21501,16 @@
                           "is_1to1": {
                             "type": "boolean"
                           },
-                          "is_channel": {
-                            "type": "boolean"
-                          },
-                          "is_pinned": {
-                            "type": "boolean"
-                          },
-                          "is_readonly": {
-                            "type": "boolean"
-                          },
-                          "is_archived": {
-                            "type": "boolean",
-                            "description": "True if the chat is archived."
-                          },
-                          "muted_until": {
-                            "type": "boolean",
-                            "description": "True if notifications for this chat are muted."
-                          },
                           "unread_count": {
                             "type": "number",
                             "description": "Number of unread messages in this chat."
                           },
-                          "folders": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            },
-                            "description": "Folder labels assigned to this chat."
-                          },
-                          "provider": {
-                            "type": "string",
-                            "description": "The platform this chat originates from."
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "description": "ISO-8601 UTC creation timestamp."
-                          },
-                          "last_message_timestamp": {
-                            "type": "string",
-                            "description": "ISO-8601 UTC timestamp of the last message."
-                          },
                           "user_id": {
                             "type": "string",
-                            "description": "Identifier of the 1:1 counterpart."
+                            "description": "Identifier of the 1:1 counterpart, when the match is a 1:1 chat."
                           },
                           "last_message": {
-                            "description": "The most recent message in the chat.",
+                            "description": "The most recent message in the chat, when the search carrier returned one.",
                             "type": "object",
                             "properties": {
                               "object": {
@@ -21565,14 +21528,6 @@
                                 "type": "string",
                                 "description": "Account id that owns this message."
                               },
-                              "chat_id": {
-                                "type": "string",
-                                "description": "Chat this message belongs to."
-                              },
-                              "sender_id": {
-                                "type": "string",
-                                "description": "Identifier of the sender."
-                              },
                               "text": {
                                 "type": [
                                   "string",
@@ -21580,9 +21535,13 @@
                                 ],
                                 "description": "Full message text (content pass-through — never stored)."
                               },
+                              "sender_id": {
+                                "type": "string",
+                                "description": "Identifier of the sender."
+                              },
                               "attachments": {
                                 "type": "array",
-                                "description": "Attachment descriptors (no bytes — use the attachment endpoint to download).",
+                                "description": "Always empty — the search carrier does not surface attachment descriptors.",
                                 "items": {
                                   "type": "object",
                                   "properties": {
@@ -21615,73 +21574,6 @@
                                     }
                                   }
                                 }
-                              },
-                              "timestamp": {
-                                "type": "string",
-                                "description": "ISO-8601 UTC send timestamp."
-                              },
-                              "is_sender": {
-                                "type": "boolean",
-                                "description": "True if the connected account sent this message."
-                              },
-                              "is_seen": {
-                                "type": "boolean"
-                              },
-                              "is_delivered": {
-                                "type": "boolean"
-                              },
-                              "is_edited": {
-                                "type": "boolean"
-                              },
-                              "is_mentionned": {
-                                "type": "boolean",
-                                "description": "True if the account is mentioned in this message."
-                              },
-                              "reactions": {
-                                "type": "array",
-                                "description": "Per-type reaction breakdown on the message.",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "type": {
-                                      "type": "string"
-                                    },
-                                    "count": {
-                                      "type": "number"
-                                    }
-                                  }
-                                }
-                              },
-                              "reaction_count": {
-                                "type": "number",
-                                "description": "Total reaction count across all types (derived)."
-                              },
-                              "provider": {
-                                "type": "string",
-                                "description": "The platform this message originates from."
-                              }
-                            }
-                          },
-                          "user": {
-                            "description": "The 1:1 counterpart's profile.",
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "description": "Identifier of the counterpart."
-                              },
-                              "type": {
-                                "type": "string",
-                                "description": "individual | organization."
-                              },
-                              "display_name": {
-                                "type": "string"
-                              },
-                              "profile_url": {
-                                "type": "string"
-                              },
-                              "public_picture_url": {
-                                "type": "string"
                               }
                             }
                           }
@@ -21711,43 +21603,15 @@
                           "type": "1to1",
                           "is_group": false,
                           "is_1to1": true,
-                          "is_channel": false,
-                          "is_pinned": false,
-                          "is_readonly": false,
-                          "is_archived": false,
-                          "muted_until": false,
                           "unread_count": 2,
-                          "folders": [
-                            "INBOX"
-                          ],
-                          "provider": "linkedin",
-                          "created_at": "2026-06-01T09:00:00.000Z",
-                          "last_message_timestamp": "2026-06-09T14:00:00.000Z",
                           "user_id": "ACoAAByyyyyyyyyyyyyyyyyy",
                           "last_message": {
                             "object": "message",
                             "id": "CLASSIC_1-GGGG7777HHHH8888IIII",
                             "account_id": "acc_01J8Z3K9P0Q1R2S3T4V5W6X7Y8",
-                            "chat_id": "CLASSIC_2-AAAA1111BBBB2222CCCC",
-                            "sender_id": "ACoAAByyyyyyyyyyyyyyyyyy",
                             "text": "Hi Ada — great to connect!",
-                            "attachments": [],
-                            "timestamp": "2026-06-09T14:00:00.000Z",
-                            "is_sender": false,
-                            "is_seen": true,
-                            "is_delivered": true,
-                            "is_edited": false,
-                            "is_mentionned": false,
-                            "reactions": [],
-                            "reaction_count": 0,
-                            "provider": "linkedin"
-                          },
-                          "user": {
-                            "id": "ACoAAByyyyyyyyyyyyyyyyyy",
-                            "type": "individual",
-                            "display_name": "Ada Lovelace",
-                            "profile_url": "https://www.linkedin.com/in/ada",
-                            "public_picture_url": "https://media.licdn.com/dms/image/ada"
+                            "sender_id": "ACoAAByyyyyyyyyyyyyyyyyy",
+                            "attachments": []
                           }
                         }
                       ],

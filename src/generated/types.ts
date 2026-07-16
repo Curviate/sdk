@@ -10369,32 +10369,17 @@ export interface operations {
                             /** @description Chat display name, or null. */
                             name?: string | null;
                             /**
-                             * @description Conversation type.
+                             * @description Conversation type (search results are never channels).
                              * @enum {string}
                              */
-                            type?: "1to1" | "group" | "channel";
+                            type?: "1to1" | "group";
                             is_group?: boolean;
                             is_1to1?: boolean;
-                            is_channel?: boolean;
-                            is_pinned?: boolean;
-                            is_readonly?: boolean;
-                            /** @description True if the chat is archived. */
-                            is_archived?: boolean;
-                            /** @description True if notifications for this chat are muted. */
-                            muted_until?: boolean;
                             /** @description Number of unread messages in this chat. */
                             unread_count?: number;
-                            /** @description Folder labels assigned to this chat. */
-                            folders?: string[];
-                            /** @description The platform this chat originates from. */
-                            provider?: string;
-                            /** @description ISO-8601 UTC creation timestamp. */
-                            created_at?: string;
-                            /** @description ISO-8601 UTC timestamp of the last message. */
-                            last_message_timestamp?: string;
-                            /** @description Identifier of the 1:1 counterpart. */
+                            /** @description Identifier of the 1:1 counterpart, when the match is a 1:1 chat. */
                             user_id?: string;
-                            /** @description The most recent message in the chat. */
+                            /** @description The most recent message in the chat, when the search carrier returned one. */
                             last_message?: {
                                 /**
                                  * @description Response type discriminator.
@@ -10405,13 +10390,11 @@ export interface operations {
                                 id?: string;
                                 /** @description Account id that owns this message. */
                                 account_id?: string;
-                                /** @description Chat this message belongs to. */
-                                chat_id?: string;
-                                /** @description Identifier of the sender. */
-                                sender_id?: string;
                                 /** @description Full message text (content pass-through — never stored). */
                                 text?: string | null;
-                                /** @description Attachment descriptors (no bytes — use the attachment endpoint to download). */
+                                /** @description Identifier of the sender. */
+                                sender_id?: string;
+                                /** @description Always empty — the search carrier does not surface attachment descriptors. */
                                 attachments?: {
                                     /** @description Attachment identifier. */
                                     id?: string;
@@ -10426,34 +10409,6 @@ export interface operations {
                                     /** @description True when the attachment is no longer available. */
                                     unavailable?: boolean | null;
                                 }[];
-                                /** @description ISO-8601 UTC send timestamp. */
-                                timestamp?: string;
-                                /** @description True if the connected account sent this message. */
-                                is_sender?: boolean;
-                                is_seen?: boolean;
-                                is_delivered?: boolean;
-                                is_edited?: boolean;
-                                /** @description True if the account is mentioned in this message. */
-                                is_mentionned?: boolean;
-                                /** @description Per-type reaction breakdown on the message. */
-                                reactions?: {
-                                    type?: string;
-                                    count?: number;
-                                }[];
-                                /** @description Total reaction count across all types (derived). */
-                                reaction_count?: number;
-                                /** @description The platform this message originates from. */
-                                provider?: string;
-                            };
-                            /** @description The 1:1 counterpart's profile. */
-                            user?: {
-                                /** @description Identifier of the counterpart. */
-                                id?: string;
-                                /** @description individual | organization. */
-                                type?: string;
-                                display_name?: string;
-                                profile_url?: string;
-                                public_picture_url?: string;
                             };
                         }[];
                         /** @description Opaque next-page cursor; null on the last page. */
