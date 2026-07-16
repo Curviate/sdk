@@ -25,6 +25,7 @@ import { CommentsResource } from "./comments.js";
 import { ProfileResource } from "./profile.js";
 import { GroupsResource } from "./groups.js";
 import { FeedResource } from "./feed.js";
+import { InboxesResource } from "./inboxes.js";
 import { NotificationsResource } from "./notifications.js";
 import { SalesNavigatorResource } from "./sales-navigator.js";
 import { RecruiterResource } from "./recruiter.js";
@@ -43,6 +44,7 @@ export { CommentsResource } from "./comments.js";
 export { ProfileResource } from "./profile.js";
 export { GroupsResource } from "./groups.js";
 export { FeedResource } from "./feed.js";
+export { InboxesResource } from "./inboxes.js";
 export { NotificationsResource } from "./notifications.js";
 export { SalesNavigatorResource } from "./sales-navigator.js";
 export { RecruiterResource } from "./recruiter.js";
@@ -63,6 +65,7 @@ export interface ResourceNamespaces {
   profile: ProfileResource;
   groups: GroupsResource;
   feed: FeedResource;
+  inboxes: InboxesResource;
   notifications: NotificationsResource;
   salesNavigator: SalesNavigatorResource;
   recruiter: RecruiterResource;
@@ -85,6 +88,7 @@ export function buildNamespaces(ctx: RequestContext): ResourceNamespaces {
     profile: new ProfileResource(ctx),
     groups: new GroupsResource(ctx),
     feed: new FeedResource(ctx),
+    inboxes: new InboxesResource(ctx),
     notifications: new NotificationsResource(ctx),
     salesNavigator: new SalesNavigatorResource(ctx),
     recruiter: new RecruiterResource(ctx),

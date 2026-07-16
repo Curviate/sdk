@@ -75,6 +75,18 @@ export const ERROR_CODES = [
   "CHECKPOINT_ALREADY_RESOLVED",
   "CHECKPOINT_UNSUPPORTED",
   "CONNECTION_IN_PROGRESS",
+  // One-premium boundary rejection — LinkedIn permits only one individual
+  // Premium subscription per profile. Surfaces on connect/reconnect (a seat
+  // resolving to both premiums) and on the billing seat/tier endpoints (a
+  // "naked enable" of one premium while the seat already holds the other).
+  // user_fixable, never retryable — the remedy is two seats, or pairing
+  // enable with disable of the current premium in one call.
+  "PREMIUM_CONFLICT",
+  // A reconnect whose seat-derived scope differs from the account's recorded
+  // scope was attempted with cookie auth — a cookie replay cannot change
+  // scope, so a full credentials re-authentication is required. user_fixable,
+  // never retryable.
+  "REAUTH_REQUIRED",
   // LinkedIn-specific connect errors
   "LINKEDIN_AUTH_FAILED",
   "LINKEDIN_RATE_LIMITED",

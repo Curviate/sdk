@@ -3,7 +3,7 @@
 The official TypeScript SDK for the [Curviate API](https://docs.curviate.com) — agent-native
 LinkedIn infrastructure for AI engineers and agent builders.
 
-> **Status:** `0.15.0` — pre-1.0. Full v2 API parity; the surface is public but not yet stability-promised.
+> **Status:** `0.16.0` — pre-1.0. Full v2 API parity; the surface is public but not yet stability-promised.
 
 ---
 

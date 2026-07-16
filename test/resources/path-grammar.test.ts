@@ -2011,6 +2011,40 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: inboxes (Beta) ─────────────────────────────────────
+  {
+    name: "inboxes.list",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/inboxes`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "inbox_list", items: [] });
+        }),
+      );
+      await client.account(ACCOUNT_ID).inboxes.list();
+      return captured!;
+    },
+  },
+  {
+    name: "inboxes.listChats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/inboxes/CLASSIC_PRIMARY/chats`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "inbox_chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).inboxes.listChats("CLASSIC_PRIMARY");
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
