@@ -7737,13 +7737,13 @@ export interface operations {
                      * @enum {string}
                      */
                     sort_by?: "relevance" | "date";
-                    /** @description Filter to jobs posted within N days (e.g. 7 for last week). */
+                    /** @description Filter to jobs posted within N days (positive integer). Snapped UP to the nearest supported window: 1 = past day, 2-7 = past week, 8+ = past month (clamped — no window beyond 30 days is available). */
                     date_posted?: number;
                     /** @description Opaque region ID. */
                     region?: string;
                     /** @description Opaque location IDs from GET .../search/parameters?type=LOCATION. */
                     location?: string[];
-                    /** @description Search radius around the location, in miles (positive number). */
+                    /** @description Search radius around the location, in kilometers. Snapped to the nearest supported bucket: 0, 8, 16, 40, 80, or 160 km (ties round up). */
                     location_within_area?: number;
                     /** @description Opaque industry IDs from GET .../search/parameters?type=INDUSTRY. */
                     industry?: string[];
@@ -11412,7 +11412,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -11580,7 +11580,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to comment as. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -11783,7 +11783,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to reply as. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The parent comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -11988,7 +11988,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) that authored the comment. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -12101,7 +12101,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) that authored the comment. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -12282,7 +12282,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The parent comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -12459,7 +12459,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -12597,7 +12597,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to react from. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -12735,7 +12735,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) whose reaction to remove. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -13739,8 +13739,8 @@ export interface operations {
                             /** @description Job location, when set. */
                             location?: string;
                         }[];
-                        /** @description Opaque pagination cursor for the next page. Present only when a full page was returned — omit on the first request, pass back verbatim to page forward. */
-                        cursor?: string;
+                        /** @description Opaque pagination cursor for the next page; null when no next page. A string only when a full page was returned — pass it back verbatim to page forward. */
+                        cursor: string | null;
                     };
                 };
             };
@@ -16180,7 +16180,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -16323,7 +16323,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to react from. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -16457,7 +16457,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) whose reaction to remove. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;

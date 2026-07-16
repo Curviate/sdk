@@ -7,12 +7,12 @@
   },
   "servers": [
     {
-      "url": "https://api.staging.curviate.com",
-      "description": "Staging"
-    },
-    {
       "url": "https://api.curviate.com",
       "description": "Production"
+    },
+    {
+      "url": "https://api.staging.curviate.com",
+      "description": "Staging"
     },
     {
       "url": "http://api.localhost:3000",
@@ -14896,7 +14896,7 @@
                   "date_posted": {
                     "type": "integer",
                     "minimum": 0,
-                    "description": "Filter to jobs posted within N days (e.g. 7 for last week)."
+                    "description": "Filter to jobs posted within N days (positive integer). Snapped UP to the nearest supported window: 1 = past day, 2-7 = past week, 8+ = past month (clamped — no window beyond 30 days is available)."
                   },
                   "region": {
                     "type": "string",
@@ -14912,7 +14912,7 @@
                   "location_within_area": {
                     "type": "number",
                     "minimum": 0,
-                    "description": "Search radius around the location, in miles (positive number)."
+                    "description": "Search radius around the location, in kilometers. Snapped to the nearest supported bucket: 0, 8, 16, 40, 80, or 160 km (ties round up)."
                   },
                   "industry": {
                     "type": "array",
@@ -24288,7 +24288,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           }
         ],
         "responses": {
@@ -24817,7 +24817,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "limit",
@@ -25278,7 +25278,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "comment_id",
@@ -25731,7 +25731,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "comment_id",
@@ -26002,7 +26002,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "comment_id",
@@ -26524,7 +26524,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "comment_id",
@@ -26981,7 +26981,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "comment_id",
@@ -27345,7 +27345,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "comment_id",
@@ -27690,7 +27690,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "comment_id",
@@ -30103,7 +30103,8 @@
                   "type": "object",
                   "required": [
                     "object",
-                    "items"
+                    "items",
+                    "cursor"
                   ],
                   "properties": {
                     "object": {
@@ -30170,7 +30171,8 @@
                     },
                     "cursor": {
                       "type": "string",
-                      "description": "Opaque pagination cursor for the next page. Present only when a full page was returned — omit on the first request, pass back verbatim to page forward."
+                      "nullable": true,
+                      "description": "Opaque pagination cursor for the next page; null when no next page. A string only when a full page was returned — pass it back verbatim to page forward."
                     }
                   }
                 },
@@ -30189,7 +30191,8 @@
                           "applications_count": 10,
                           "location": "Berlin, Germany"
                         }
-                      ]
+                      ],
+                      "cursor": null
                     }
                   }
                 }
@@ -36530,7 +36533,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           },
           {
             "name": "limit",
@@ -36911,7 +36914,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           }
         ],
         "responses": {
@@ -37252,7 +37255,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`."
+            "description": "The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim."
           }
         ],
         "responses": {
