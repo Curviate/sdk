@@ -7,6 +7,107 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ---
 
+## [Unreleased]
+
+## [0.16.0] — 2026-07-17
+
+Mostly additive, plus one breaking removal on the connect/reconnect body.
+
+### Breaking
+
+- **`disabled_features` is removed from `auth.intent()`'s request body**
+  (`AuthIntentBody`). The negative-list model could not express the `company`
+  product or the one-Premium-per-profile XOR. Connection scope (which
+  LinkedIn products get synced) is now **seat-derived**: there is no products
+  input on connect/reconnect at all. Drop any `disabled_features` you were
+  passing: a body still carrying it is now rejected 400 by the server. The
+  scope actually recorded for an account reads back as the new
+  `requested_products` field (see Added, below). A reconnect that changes
+  scope must use `auth_method: "credentials"`, since a cookie replay cannot
+  change scope and now throws `CurviateError(code: "REAUTH_REQUIRED")`.
+
+### Added
+
+- **New account-scoped `inboxes` namespace (2 methods, Beta), the reply-as-a-page
+  surface.** `inboxes.list(query?)` discovers the account's personal inbox
+  plus, when the company product is attached, one entry per company page (id
+  like `"COMPANY_83734124_PRIMARY"`). `inboxes.listChats(inboxId, query?)`
+  lists a single inbox's conversations, cursor-paginated. Every returned chat
+  `id` is send-ready: pass it straight to the existing `messaging.sendMessage()`
+  to reply, no separate start/send endpoint. Company pages are reply-only
+  (`reply_only: true`) and cannot start a new conversation. **Beta:**
+  single-page listing is verified; deep pagination against a busier inbox is
+  still being validated.
+- **`sendMessage()` echoes the acting identity as `sent_as`,** additive on
+  the existing send-message response. A `COMPANY_` chat id (from
+  `inboxes.listChats()`) sends AS THE PAGE and echoes
+  `sent_as: { kind: "company", company_id, name }` (`company_id` is `null`
+  when the page could not be correlated to a managed page). Any other chat id
+  sends as the connected member and echoes `sent_as: { kind: "personal" }`.
+  Never infer the acting identity from a message's `sender` field, only from
+  `sent_as`.
+- **`accounts.list()` / `accounts.get()` gain `requested_products`,** the
+  seat-derived connection scope (e.g. `["classic", "company",
+  "sales_navigator"]`) the account was last connected with. `null` for
+  accounts connected before this was recorded, and not attachment truth for
+  Company Pages (that is decidable only via `inboxes.list()`).
+- **Two new error codes:** `PREMIUM_CONFLICT` (a seat resolving to both
+  individual-Premium tiers at once, since LinkedIn permits only one per
+  profile; `user_fixable`, never retryable) and `REAUTH_REQUIRED` (a
+  scope-changing reconnect attempted with a cookie instead of credentials;
+  `user_fixable`, never retryable).
+- **New account-scoped `profile` namespace (4 methods)** — the connected
+  account's own insight surface: `profile.subscription()`, `profile.analytics()`,
+  `profile.visitors(query?)`, `profile.ssi()`. Distinct from the retired
+  `profiles` namespace (renamed to `users` in 0.15.0).
+- **New account-scoped `groups` namespace (3 methods)** — `groups.list(query?)`
+  (own groups by default, or another member's via `{ profile }`),
+  `groups.get(group)`, and `groups.members(group, query?)` (with the folded-in
+  `{ name }` member search).
+- **New account-scoped `feed` namespace (1 method)** — `feed.home(query?)` reads
+  the connected account's home feed as agent-actionable posts, with `relevant`
+  or `recent` sort orders.
+- **`companies` gains 3 company-insights methods** — `companies.managed(query?)`
+  lists the pages the connected account administers; `companies.followers(identifier,
+  query?)` lists a page's followers (**re-added** under a different item shape —
+  `company_follower`, carrying `degree`/`followed_at` — than the pre-0.15.0
+  method of the same name); `companies.invitableFollowers(identifier, query?)`
+  lists connections invitable to follow the page. All three require the
+  connected account to administer the target page.
+- **`companies` gains 5 Beta company-inbox methods** — `companies.chats(identifier,
+  query?)`, `companies.chat(identifier, chatId)`, `companies.messages(identifier,
+  chatId, query?)`, `companies.message(identifier, chatId, messageId)`, and
+  `companies.searchChats(identifier, query?)` (exactly one of `query`/`topic`/
+  `unread` per call). A distinct conversation surface from the account's own
+  `messaging` namespace, scoped to one administered company page. **Beta:**
+  single-page listing and termination are verified; deep pagination (many
+  pages / large cursor round-trips) is still being validated against a busier
+  inbox. `companies` is now 12 methods (was 4).
+- **`search` gains 3 methods** — `search.groups(query)` searches LinkedIn
+  groups by keyword; `search.services(body & query)` searches Services
+  Marketplace providers with structured filters; `search.getServiceParameters(query)`
+  resolves human-readable service-category/location terms into the opaque
+  filter ids `services()` accepts. `search` is now 9 methods (was 6).
+- **`messaging` gains 1 method** — `messaging.searchChats(params)` free-text
+  searches the account's own inbox (participant names and message content).
+  `messaging` is now 13 methods (was 12).
+- **`posts` gains 3 saved-posts methods** — `posts.listSaved(query?)` lists the
+  connected account's own saved posts (a self resource — previews only,
+  `snippet` capped at ≤140 chars, never the full body); `posts.save(postId)`
+  and `posts.unsave(postId)` add/remove a bookmark, both idempotent and
+  accepting either `urn:li:activity:<id>` or a bare numeric id. `posts` is now
+  12 methods (was 9).
+- **New account-scoped `notifications` namespace (3 methods)** — the connected
+  account's own notification centre: `notifications.list(query?)` (cards +
+  the account-level `unread_count`/`latest_published_at`);
+  `notifications.delete(cardUrn)` and `notifications.showLess(cardUrn)`, two
+  self-action writes on the account's own cards. Both writes are idempotent
+  and take effect within a few seconds — a list read immediately after may
+  still show the card for a moment, which is not a failure signal. The SDK
+  percent-encodes `cardUrn` (which embeds `(`, `)`, `:`, `,`) into the path.
+- **Parity pin: 143 methods across 18 namespaces** (was 135 / 16 at the start
+  of this release cycle). The `inboxes` namespace is the final addition.
+
 ## [0.15.0] — 2026-07-11
 
 Full v2 parity. The SDK is re-aligned 1:1 to the served API surface: every

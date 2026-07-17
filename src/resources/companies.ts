@@ -1,5 +1,5 @@
 /**
- * Companies resource — 4 methods.
+ * Companies resource — 12 methods.
  *
  * Account-scoped: the bound context injects `account_id` as the leading
  * `/v1/` path segment on every request (account-first grammar) — the 0.14.1
@@ -9,8 +9,21 @@
  * contract). `employees()` / `posts()` / `jobs()` require the company's
  * numeric provider_id only — the same `id` field `get()` returns.
  *
- * `followers` has no served equivalent — REMOVED; `get()`'s `follower_count`
- * field is the audience-size signal that replaces it.
+ * `managed()` lists the pages the connected account administers.
+ * `followers()` — re-added under a different item shape (`company_follower`,
+ * carrying `degree`/`followed_at`) than the pre-0.15.0 method of the same
+ * name. `invitableFollowers()` lists connections the account can invite to
+ * follow the page. All three require the account to administer the target
+ * page (`managed()` for the caller's own set; `followers`/`invitableFollowers`
+ * take the target company's numeric provider_id, same as `employees`/`posts`/
+ * `jobs`).
+ *
+ * `chats()` / `chat()` / `messages()` / `message()` / `searchChats()` are the
+ * company page's admin message inbox — a distinct conversation surface from
+ * the account's own `messaging` namespace, scoped to one administered page.
+ * **Beta:** single-page listing and termination are verified; deep pagination
+ * (many pages / large cursor round-trips) is still being validated against a
+ * busier inbox.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -36,6 +49,48 @@ export type CompanyJobListPage =
   paths["/v1/{account_id}/companies/{identifier}/jobs"]["get"]["responses"]["200"]["content"]["application/json"];
 export type CompanyJobListQuery = NonNullable<
   paths["/v1/{account_id}/companies/{identifier}/jobs"]["get"]["parameters"]["query"]
+>;
+
+export type ManagedCompanyListPage =
+  paths["/v1/{account_id}/companies/managed"]["get"]["responses"]["200"]["content"]["application/json"];
+export type ManagedCompanyListQuery = NonNullable<
+  paths["/v1/{account_id}/companies/managed"]["get"]["parameters"]["query"]
+>;
+
+export type CompanyFollowerListPage =
+  paths["/v1/{account_id}/companies/{identifier}/followers"]["get"]["responses"]["200"]["content"]["application/json"];
+export type CompanyFollowerListQuery = NonNullable<
+  paths["/v1/{account_id}/companies/{identifier}/followers"]["get"]["parameters"]["query"]
+>;
+
+export type CompanyInvitableFollowerListPage =
+  paths["/v1/{account_id}/companies/{identifier}/invitable-followers"]["get"]["responses"]["200"]["content"]["application/json"];
+export type CompanyInvitableFollowerListQuery = NonNullable<
+  paths["/v1/{account_id}/companies/{identifier}/invitable-followers"]["get"]["parameters"]["query"]
+>;
+
+export type CompanyChatListPage =
+  paths["/v1/{account_id}/companies/{identifier}/chats"]["get"]["responses"]["200"]["content"]["application/json"];
+export type CompanyChatListQuery = NonNullable<
+  paths["/v1/{account_id}/companies/{identifier}/chats"]["get"]["parameters"]["query"]
+>;
+
+export type CompanyChat =
+  paths["/v1/{account_id}/companies/{identifier}/chats/{chat_id}"]["get"]["responses"]["200"]["content"]["application/json"];
+
+export type CompanyChatMessageListPage =
+  paths["/v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages"]["get"]["responses"]["200"]["content"]["application/json"];
+export type CompanyChatMessageListQuery = NonNullable<
+  paths["/v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages"]["get"]["parameters"]["query"]
+>;
+
+export type CompanyChatMessage =
+  paths["/v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages/{message_id}"]["get"]["responses"]["200"]["content"]["application/json"];
+
+export type CompanyChatSearchPage =
+  paths["/v1/{account_id}/companies/{identifier}/chats/search"]["get"]["responses"]["200"]["content"]["application/json"];
+export type CompanyChatSearchQuery = NonNullable<
+  paths["/v1/{account_id}/companies/{identifier}/chats/search"]["get"]["parameters"]["query"]
 >;
 
 // ─── Resource class ───────────────────────────────────────────────────────────
@@ -102,6 +157,137 @@ export class CompaniesResource {
     return this.ctx.request<CompanyJobListPage>({
       method: "GET",
       path: `/v1/{account_id}/companies/${identifier}/jobs`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * List the pages the connected account administers.
+   * `GET /v1/{account_id}/companies/managed`
+   *
+   * The `id` on each returned page is the numeric provider_id `followers()`,
+   * `invitableFollowers()`, `employees()`, `posts()`, and `jobs()` consume.
+   * An empty `items[]` is valid — the account administers no pages.
+   */
+  managed(params?: ManagedCompanyListQuery): Promise<ManagedCompanyListPage> {
+    return this.ctx.request<ManagedCompanyListPage>({
+      method: "GET",
+      path: `/v1/{account_id}/companies/managed`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * List a company page's followers, newest first.
+   * `GET /v1/{account_id}/companies/{identifier}/followers`
+   *
+   * The connected account must administer the page (see `managed()`).
+   * `identifier` must be the company's numeric provider_id.
+   */
+  followers(identifier: string, params?: CompanyFollowerListQuery): Promise<CompanyFollowerListPage> {
+    return this.ctx.request<CompanyFollowerListPage>({
+      method: "GET",
+      path: `/v1/{account_id}/companies/${identifier}/followers`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * List the connected account's connections who are invitable to follow the
+   * company page. `GET /v1/{account_id}/companies/{identifier}/invitable-followers`
+   *
+   * The connected account must administer the page. `identifier` must be the
+   * company's numeric provider_id. An empty `items[]` is valid — nobody is
+   * currently invitable.
+   */
+  invitableFollowers(
+    identifier: string,
+    params?: CompanyInvitableFollowerListQuery,
+  ): Promise<CompanyInvitableFollowerListPage> {
+    return this.ctx.request<CompanyInvitableFollowerListPage>({
+      method: "GET",
+      path: `/v1/{account_id}/companies/${identifier}/invitable-followers`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * List the conversations in a company page's admin message inbox,
+   * newest-activity-first.
+   * `GET /v1/{account_id}/companies/{identifier}/chats`
+   *
+   * The connected account must administer the page. `identifier` must be the
+   * company's numeric provider_id. Content passes through verbatim and is
+   * never stored. Beta — single-page listing and termination are verified;
+   * deep pagination (many pages / large cursor round-trips) is provisional
+   * until validated against a busier inbox.
+   */
+  chats(identifier: string, params?: CompanyChatListQuery): Promise<CompanyChatListPage> {
+    return this.ctx.request<CompanyChatListPage>({
+      method: "GET",
+      path: `/v1/{account_id}/companies/${identifier}/chats`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * Retrieve one conversation from a company page's admin inbox.
+   * `GET /v1/{account_id}/companies/{identifier}/chats/{chat_id}`
+   *
+   * The connected account must administer the page. Beta — see `chats()`.
+   */
+  chat(identifier: string, chatId: string): Promise<CompanyChat> {
+    return this.ctx.request<CompanyChat>({
+      method: "GET",
+      path: `/v1/{account_id}/companies/${identifier}/chats/${chatId}`,
+    });
+  }
+
+  /**
+   * List a company-inbox conversation's messages, newest first.
+   * `GET /v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages`
+   *
+   * The connected account must administer the page. Content passes through
+   * verbatim and is never stored. Beta — see `chats()`.
+   */
+  messages(
+    identifier: string,
+    chatId: string,
+    params?: CompanyChatMessageListQuery,
+  ): Promise<CompanyChatMessageListPage> {
+    return this.ctx.request<CompanyChatMessageListPage>({
+      method: "GET",
+      path: `/v1/{account_id}/companies/${identifier}/chats/${chatId}/messages`,
+      ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * Retrieve one message from a company-inbox conversation.
+   * `GET /v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages/{message_id}`
+   *
+   * The connected account must administer the page. Beta — see `chats()`.
+   */
+  message(identifier: string, chatId: string, messageId: string): Promise<CompanyChatMessage> {
+    return this.ctx.request<CompanyChatMessage>({
+      method: "GET",
+      path: `/v1/{account_id}/companies/${identifier}/chats/${chatId}/messages/${messageId}`,
+    });
+  }
+
+  /**
+   * Search or filter a company page's admin inbox.
+   * `GET /v1/{account_id}/companies/{identifier}/chats/search`
+   *
+   * Exactly one mode per call: free-text `query` (matches participant names
+   * and message content), a `topic` card, or `unread`-only — the three are
+   * mutually exclusive and enforced server-side. The connected account must
+   * administer the page. Beta — see `chats()`.
+   */
+  searchChats(identifier: string, params?: CompanyChatSearchQuery): Promise<CompanyChatSearchPage> {
+    return this.ctx.request<CompanyChatSearchPage>({
+      method: "GET",
+      path: `/v1/{account_id}/companies/${identifier}/chats/search`,
       ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
     });
   }

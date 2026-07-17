@@ -1,8 +1,9 @@
-// search namespace (6 methods, account-scoped)
+// search namespace (9 methods, account-scoped)
 // Account-first path grammar. Pagination (offset/limit/cursor) stays a
 // TOP-LEVEL query param on every structured op — never in the body.
 // fromUrl is the sole home of URL-mode search: POST /v1/{account_id}/search
-// body {url}.
+// body {url}. groups/services/getServiceParameters are additive discovery
+// endpoints (discovery additions).
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../msw/server.js";
@@ -153,5 +154,97 @@ describe("search.fromUrl", () => {
     await search().fromUrl({ url: "https://www.linkedin.com/search/results/people/", cursor: "cur_9" });
     expect(new URL(capturedUrl!).searchParams.get("cursor")).toBe("cur_9");
     expect(body).toEqual({ url: "https://www.linkedin.com/search/results/people/" });
+  });
+});
+
+describe("search.groups", () => {
+  it("GET /v1/{account_id}/search/groups forwards keywords/limit/cursor", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_se1/search/groups`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({
+          object: "group_search_result",
+          items: [{ object: "group", id: "13019519", name: "AI GTM Engineering", member_count: 42, type: "public" }],
+          cursor: null,
+        });
+      }),
+    );
+    const res = await search().groups({ keywords: "gtm engineering", limit: 5 });
+    const params = new URL(url!).searchParams;
+    expect(new URL(url!).pathname).toBe("/v1/acc_se1/search/groups");
+    expect(params.get("keywords")).toBe("gtm engineering");
+    expect(params.get("limit")).toBe("5");
+    expect(res.items[0]?.id).toBe("13019519");
+  });
+
+  it("no matches is a valid, non-error empty result", async () => {
+    server.use(
+      http.get(`${BASE}/v1/acc_se1/search/groups`, () =>
+        HttpResponse.json({ object: "group_search_result", items: [], cursor: null }),
+      ),
+    );
+    const res = await search().groups({ keywords: "zzz-no-match" });
+    expect(res.items).toEqual([]);
+  });
+});
+
+describe("search.services", () => {
+  it("POST /v1/{account_id}/search/services — filters in the body, limit/cursor in the query", async () => {
+    let capturedUrl: string | undefined;
+    let body: Record<string, unknown> | undefined;
+    server.use(
+      http.post(`${BASE}/v1/acc_se1/search/services`, async ({ request }) => {
+        capturedUrl = request.url;
+        body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json({
+          object: "service_search_result",
+          items: [{ object: "service_provider", id: "ACoA1", name: "Alex Marketer" }],
+          paging: { total_count: 1 },
+          cursor: null,
+        });
+      }),
+    );
+    const res = await search().services({ service_category: ["296"], connections: [2], limit: 10 });
+    const parsed = new URL(capturedUrl!);
+    expect(parsed.pathname).toBe("/v1/acc_se1/search/services");
+    expect(parsed.searchParams.get("limit")).toBe("10");
+    expect(body).toEqual({ service_category: ["296"], connections: [2] });
+    expect(body).not.toHaveProperty("limit");
+    expect(res.items[0]?.id).toBe("ACoA1");
+  });
+
+  it("omitting limit/cursor sends no query string", async () => {
+    let capturedUrl: string | undefined;
+    server.use(
+      http.post(`${BASE}/v1/acc_se1/search/services`, async ({ request }) => {
+        capturedUrl = request.url;
+        return HttpResponse.json({ object: "service_search_result", items: [], paging: { total_count: 0 }, cursor: null });
+      }),
+    );
+    await search().services({ keywords: "marketing" });
+    expect(new URL(capturedUrl!).search).toBe("");
+  });
+});
+
+describe("search.getServiceParameters", () => {
+  it("GET /v1/{account_id}/search/services/parameters forwards type/keywords/limit", async () => {
+    let url: string | undefined;
+    server.use(
+      http.get(`${BASE}/v1/acc_se1/search/services/parameters`, ({ request }) => {
+        url = request.url;
+        return HttpResponse.json({
+          object: "search_parameter_list",
+          items: [{ id: "296", name: "Marketing Strategy", type: "service_category" }],
+          cursor: null,
+        });
+      }),
+    );
+    const res = await search().getServiceParameters({ type: "service_category", keywords: "marke", limit: 5 });
+    const params = new URL(url!).searchParams;
+    expect(new URL(url!).pathname).toBe("/v1/acc_se1/search/services/parameters");
+    expect(params.get("type")).toBe("service_category");
+    expect(params.get("keywords")).toBe("marke");
+    expect(res.items[0]?.id).toBe("296");
   });
 });

@@ -46,6 +46,146 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{account_id}/inmail-credits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get InMail credit balance
+         * @description Retrieve the remaining InMail credits across the account's subscribed LinkedIn premium products. Each product's balance is null when that product is not subscribed.
+         */
+        get: operations["getV1AccountIdInmailCredits"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/users/{user_id}/endorse-skill": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Endorse a member's skill
+         * @description Endorses one specific skill on a target member's profile. You can only endorse the skills of your 1st-degree connections. To obtain the endorsement_id: (1) GET /v1/{account_id}/users/{user_id}?linkedin_sections=linkedin_skills, (2) read the target skill's endorsement_id from the skills section — this field is present ONLY for connections you are eligible to endorse (it is omitted for users outside your network and on your own profile, so this workflow requires the target to be a 1st-degree connection), (3) call this endpoint with that value. user_id must be the LinkedIn member ID (ACo… format) — a public identifier does not resolve on this endpoint.
+         */
+        post: operations["postV1AccountIdUsersUserIdEndorseSkill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/companies/managed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the pages the account administers
+         * @description Returns the company pages the connected account administers, each with its per-page capability matrix (post, sponsor, analytics, admin management) and the can_invite_to_follow gate. An account that administers no pages returns an empty list — a valid result, not an error.
+         */
+        get: operations["getV1AccountIdCompaniesManaged"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/profile/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the account's premium subscription
+         * @description Returns the connected account's LinkedIn premium entitlement inventory — whether it holds Premium, the plan title, and the external manage/cancel/switch links, plus the complete set when the account holds more than one plan. A free account is a valid 200 empty state, not an error.
+         */
+        get: operations["getV1AccountIdProfileSubscription"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/profile/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the account's performance analytics
+         * @description Returns the connected account's performance dashboard as one composite — four headline metrics (profile viewers, followers, post impressions, search appearances), each with its reporting window and trend magnitude. The reporting windows are fixed by LinkedIn.
+         */
+        get: operations["getV1AccountIdProfileAnalytics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/profile/visitors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the account's profile viewers
+         * @description Returns a cursor-paginated list of the account's recent profile viewers, each classified by disclosure fidelity (identified, semi-anonymous, or an aggregate rollup). A Premium account can see identified viewers; a free account is capped at semi-anonymous fidelity — an in-band result, never an error. Page until cursor is null.
+         */
+        get: operations["getV1AccountIdProfileVisitors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/profile/ssi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the account's Social Selling Index
+         * @description Returns the connected account's Social Selling Index — the overall score out of 100, the four pillar sub-scores, and the industry/network percentile ranks. A free/low-activity account returns a valid low score (a 200, not an error).
+         */
+        get: operations["getV1AccountIdProfileSsi"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{account_id}/users/{user_id}/followers": {
         parameters: {
             query?: never;
@@ -105,46 +245,6 @@ export interface paths {
          * @description Unfollows a LinkedIn user. Idempotent — unfollowing a user this account does not currently follow still returns 200.
          */
         delete: operations["deleteV1AccountIdUsersUserIdFollow"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{account_id}/inmail-credits": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get InMail credit balance
-         * @description Retrieve the remaining InMail credits across the account's subscribed LinkedIn premium products. Each product's balance is null when that product is not subscribed.
-         */
-        get: operations["getV1AccountIdInmailCredits"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{account_id}/users/{user_id}/endorse-skill": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Endorse a member's skill
-         * @description Endorses one specific skill on a target member's profile. You can only endorse the skills of your 1st-degree connections. To obtain the endorsement_id: (1) GET /v1/{account_id}/users/{user_id}?linkedin_sections=linkedin_skills, (2) read the target skill's endorsement_id from the skills section — this field is present ONLY for connections you are eligible to endorse (it is omitted for users outside your network and on your own profile, so this workflow requires the target to be a 1st-degree connection), (3) call this endpoint with that value. user_id must be the LinkedIn member ID (ACo… format) — a public identifier does not resolve on this endpoint.
-         */
-        post: operations["postV1AccountIdUsersUserIdEndorseSkill"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -222,6 +322,206 @@ export interface paths {
          * @description Returns a paginated list of the company's open job postings. A facade over job search with the company filter applied — filter further with keywords. An empty list is a valid result when the company currently has no open postings.
          */
         get: operations["getV1AccountIdCompaniesIdentifierJobs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/companies/{identifier}/followers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List company followers
+         * @description Returns a page of a company page's followers — the admin analytics follower list. The connected account must administer the page with follower-analytics rights. Each follower carries their network degree relative to the acting account and follow month. Page until cursor is null.
+         */
+        get: operations["getV1AccountIdCompaniesIdentifierFollowers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/companies/{identifier}/invitable-followers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List connections invitable to follow a page
+         * @description Returns a page of the connected account's connections who can be invited to follow a company page it administers. The account must administer the page with the invite-to-follow entitlement. This is the read that seeds a follow-invite campaign. Page until cursor is null.
+         */
+        get: operations["getV1AccountIdCompaniesIdentifierInvitableFollowers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/companies/{identifier}/chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a company page's admin conversations
+         * @description Returns the conversations in a company page's admin message inbox, newest-activity-first. The connected account must administer the page. Content passes through and is never stored. Beta — deep pagination is being validated at scale. Single-page listing and termination are verified; deep pagination (many pages / large cursor round-trips) is provisional until validated against a busier inbox.
+         */
+        get: operations["getV1AccountIdCompaniesIdentifierChats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/companies/{identifier}/chats/{chat_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve one admin conversation
+         * @description Returns a single conversation from a company page's admin inbox by id — the same shape as a list item. The connected account must administer the page. Beta — deep pagination is being validated at scale. Single-page listing and termination are verified; deep pagination (many pages / large cursor round-trips) is provisional until validated against a busier inbox.
+         */
+        get: operations["getV1AccountIdCompaniesIdentifierChatsChatId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a conversation's messages
+         * @description Returns a page of one conversation's messages, newest-first. Message text passes through and is never stored. An unknown conversation returns 404 (the empty page is not trusted at face value); a genuinely empty existing thread returns an empty list. The connected account must administer the page. Beta — deep pagination is being validated at scale. Single-page listing and termination are verified; deep pagination (many pages / large cursor round-trips) is provisional until validated against a busier inbox.
+         */
+        get: operations["getV1AccountIdCompaniesIdentifierChatsChatIdMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages/{message_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve one message from a conversation
+         * @description Returns a single message from a company page's admin inbox, scoped to its conversation — the same shape as a messages-list item. Both chat_id and message_id are required. The connected account must administer the page. Beta — deep pagination is being validated at scale. Single-page listing and termination are verified; deep pagination (many pages / large cursor round-trips) is provisional until validated against a busier inbox.
+         */
+        get: operations["getV1AccountIdCompaniesIdentifierChatsChatIdMessagesMessageId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/companies/{identifier}/chats/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search or filter a company page's admin inbox
+         * @description Free-text search (query) OR one topic/unread filter over the admin inbox — exactly one mode per call. topic accepts 1–5 or a name (Service request, Request a demo, Support, Careers, Other). filter_effective is present only in topic/unread mode. The connected account must administer the page. Beta — deep pagination is being validated at scale. Single-page listing and termination are verified; deep pagination (many pages / large cursor round-trips) is provisional until validated against a busier inbox.
+         */
+        get: operations["getV1AccountIdCompaniesIdentifierChatsSearch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/profile/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the groups a member belongs to
+         * @description Lists the groups the connected account belongs to, each enriched to full group detail. Omit `profile` to enumerate the acting account's own groups (a complete read). Pass `profile` to target any other LinkedIn user instead — a documented partial read of that target's interests-groups section only.
+         */
+        get: operations["getV1AccountIdProfileGroups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/groups/{group}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get group detail
+         * @description Returns one group's full detail — name, member count, description, admin contact, and write-feasibility gates. Returned directly (no envelope, no cursor, no paging).
+         */
+        get: operations["getV1AccountIdGroupsGroup"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/groups/{group}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List (or search) a group's members
+         * @description Lists a group's members — id, profile URL, name, headline, and relationship signal. Requires the connected account be a member of the group. Pass `name` to filter by member name — the SAME endpoint folds in member search; it is not a separate operation.
+         */
+        get: operations["getV1AccountIdGroupsGroupMembers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -350,6 +650,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{account_id}/search/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search groups
+         * @description Keyword search for LinkedIn groups. Keyword-only — no filter-id resolution step (the simplest member of the search family). A no-match search returns an empty list, not an error.
+         */
+        get: operations["getV1AccountIdSearchGroups"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/search/services": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Search services
+         * @description Searches people who offer services (the LinkedIn Services vertical), filtered by service category, location, connection degree, and profile language. At least one of keywords, service_category, or location is required.
+         */
+        post: operations["postV1AccountIdSearchServices"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/search/services/parameters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolve service-filter values
+         * @description Resolves a typed term into service-filter option ids — the 'Add a service category / Add a location' typeahead of the Services filters. type defaults to service_category.
+         */
+        get: operations["getV1AccountIdSearchServicesParameters"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{account_id}/chats": {
         parameters: {
             query?: never;
@@ -365,7 +725,7 @@ export interface paths {
         put?: never;
         /**
          * Start a chat
-         * @description Starts a new chat with one or more members from a connected account. Send application/json; attach files as base64-encoded attachments (max 5 MiB per file). Message content passes through to the platform and is never stored.
+         * @description Starts a new chat with one or more members from a connected account. Send application/json; attach files as base64-encoded attachments (max 5 MiB per file). Message content passes through to the platform and is never stored. Company pages are reply-only and cannot start a conversation — reply using a `COMPANY_` chat id from GET /v1/{account_id}/inboxes/{inbox_id}/chats instead.
          */
         post: operations["postV1AccountIdChats"];
         delete?: never;
@@ -490,6 +850,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{account_id}/chats/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search chats
+         * @description Free-text search of the connected account's own inbox. Matches both participant names and message content. A no-match term returns an empty list, not an error.
+         */
+        get: operations["getV1AccountIdChatsSearch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{account_id}/messages/inmail": {
         parameters: {
             query?: never;
@@ -504,6 +884,126 @@ export interface paths {
          * @description Sends a LinkedIn InMail from the account's own premium InMail credits to a member who is not a direct connection.
          */
         post: operations["postV1AccountIdMessagesInmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/inboxes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List inboxes
+         * @description Returns the account's personal inbox plus, when the company product is attached, one entry per company page × folder (id like 'COMPANY_83734124_PRIMARY'). Company inboxes carry reply_only:true — company pages can only reply to existing conversations, never start one. company_id is resolved by correlating the page name against the account's managed pages; an uncorrelatable page returns company_id:null, never a fabricated id. When no company inbox exists, hint names the Company Pages reconnect requirement instead of returning silently empty.
+         */
+        get: operations["getV1AccountIdInboxes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/inboxes/{inbox_id}/chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List an inbox's conversations
+         * @description Returns a paginated list of an inbox's conversations, newest-activity-first. Each chat's id is send-ready: pass it directly to the send-message endpoint to reply — a company inbox's chat id (e.g. 'COMPANY_83734124_2-…') replies AS THE PAGE, no separate parameter needed. Works identically for personal (CLASSIC_) inboxes. Company pages are reply-only (reply_only:true on the inbox, from GET /inboxes) — they cannot start a new conversation. Unknown inbox id returns 404.
+         */
+        get: operations["getV1AccountIdInboxesInboxIdChats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/feed/home": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the account's home feed
+         * @description Returns the connected account's LinkedIn home feed as agent-actionable posts. `sort=recent` (default) is reverse-chronological and always available; `sort=relevant` is LinkedIn's ranked 'top' feed, which draws on a shared, throttled request budget and can rate-limit. Each post carries the numeric activity id you pass to the Posts group to react, comment, or fetch detail. Page until cursor is null.
+         */
+        get: operations["getV1AccountIdFeedHome"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the account's notifications
+         * @description Returns the connected account's notification cards as a cursor-paginated list, plus the account-level unread badge (unread_count) and a newest-notification watermark (latest_published_at) for cheap polling. Injected/promo cards are included and flagged. Each post-related card carries the numeric activity id you pass to the Posts group. Page until cursor is null.
+         */
+        get: operations["getV1AccountIdNotifications"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/notifications/{card_urn}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a notification
+         * @description Deletes one of the connected account's own notification cards by its card urn. This is a self-action — no third party is notified. It cannot be undone. Pass the `card_urn` of a notifications list item (not object_urn).
+         */
+        delete: operations["deleteV1AccountIdNotificationsCardUrn"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/notifications/{card_urn}/show-less": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Show less like a notification
+         * @description Applies 'show less like this' to the source of one of the connected account's own notification cards. For network-activity cards (a repost, comment, or reaction by your network) this removes the card — the same effect as deleting it — because LinkedIn exposes no separate softer signal for these cards. This is a self-action and cannot be undone. No request body.
+         */
+        post: operations["postV1AccountIdNotificationsCardUrnShowLess"];
         delete?: never;
         options?: never;
         head?: never;
@@ -783,7 +1283,7 @@ export interface paths {
         };
         /**
          * Get job posting
-         * @description Returns one classic LinkedIn job posting owned by the connected account, at full detail — title, company, location, description, applicant count, and budget when set. Pass `with_sections` to request additional sections such as hiring team, salary, or benefits.
+         * @description Returns one classic LinkedIn job posting at full detail — title, company, location, description, applicant count, and budget when set. Any posting reachable by its numeric id can be retrieved — including public postings not owned by the connected account. Pass `with_sections` to request additional sections such as hiring team, salary, or benefits.
          */
         get: operations["getV1AccountIdJobsJobId"];
         put?: never;
@@ -1025,6 +1525,50 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/saved-posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the account's saved posts
+         * @description Returns the connected account's own saved posts (a private bookmark list), newest-saved-first, each a preview — never the full post body. Self resource: there is no other-member saved-posts view.
+         */
+        get: operations["getV1AccountIdSavedPosts"];
+        put?: never;
+        /**
+         * Save a post
+         * @description Saves a post to the connected account's private bookmark list. Any post may be saved — it does not notify the author and is never visible to third parties.
+         */
+        post: operations["postV1AccountIdSavedPosts"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{account_id}/saved-posts/{post_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Unsave a post
+         * @description Removes a post from the connected account's private bookmark list.
+         */
+        delete: operations["deleteV1AccountIdSavedPostsPostId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1741,7 +2285,7 @@ export interface paths {
         put?: never;
         /**
          * Start a credential/cookie authentication
-         * @description Authenticate a LinkedIn account directly with credentials or a session cookie. Omit `account_id` to connect a NEW account (into the given empty `seat_id`); include `account_id` (in the body) to re-authenticate an EXISTING account in place. Returns the account on success (201 new / 200 reconnect), or a checkpoint challenge (202) carrying the account_id when LinkedIn requires verification. Complete the challenge with POST /v1/auth/checkpoint/solve (codes) or POST /v1/auth/checkpoint/poll (mobile-app approval).
+         * @description Authenticate a LinkedIn account directly with credentials or a session cookie. Omit `account_id` to connect a NEW account (into the given empty `seat_id`); include `account_id` (in the body) to re-authenticate an EXISTING account in place. Returns the account on success (201 new / 200 reconnect), or a checkpoint challenge (202) carrying the account_id when LinkedIn requires verification. Complete the challenge with POST /v1/auth/checkpoint/solve (codes) or POST /v1/auth/checkpoint/poll (mobile-app approval). Connection scope (which LinkedIn products are enabled) is derived from the account's seat — there is no products input; the recorded scope is readable as `requested_products` on the account. A reconnect that changes scope must use credentials (a saved cookie cannot change scope). Pin a managed proxy with the optional `country`/`ip` or supply a `proxy` to override it.
          */
         post: operations["postV1AuthIntent"];
         delete?: never;
@@ -2521,6 +3065,1009 @@ export interface operations {
             };
         };
     };
+    getV1AccountIdInmailCredits: {
+        parameters: {
+            query?: {
+                /** @description Filter to one product's InMail credit count. Omit to return all three. */
+                service?: "classic" | "recruiter" | "sales_navigator";
+            };
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) to use for the request. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's remaining InMail credits across subscribed LinkedIn premium products. Each product's balance is null when that product is not subscribed. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "inmail_credits";
+                        credits: {
+                            /** @description Remaining InMail credits on a LinkedIn Premium (classic) subscription, or null if not subscribed. */
+                            classic: number | null;
+                            /** @description Remaining InMail credits on a Recruiter seat, or null if not subscribed. */
+                            recruiter: number | null;
+                            /** @description Remaining InMail credits on a Sales Navigator seat, or null if not subscribed. */
+                            sales_navigator: number | null;
+                        };
+                    };
+                };
+            };
+            /** @description Invalid service value. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The supplied account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    postV1AccountIdUsersUserIdEndorseSkill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) performing the endorsement. */
+                account_id: string;
+                /** @description The LinkedIn member ID (`ACo…` format) whose skill is being endorsed — a public identifier does not resolve on this endpoint. */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The endorsement ID for the specific skill to endorse. Obtain it from the `endorsement_id` field on a skill in the target's skills section — GET /v1/{account_id}/users/{user_id}?linkedin_sections=linkedin_skills. */
+                    endorsement_id: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The skill was endorsed. A 200 IS the success signal — the v2 endorsement wire carries no additional status field. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "skill_endorsed";
+                    };
+                };
+            };
+            /** @description Missing or empty endorsement_id. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account lacks the required permission for this action. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the user_id was not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot perform endorsements. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdCompaniesManaged: {
+        parameters: {
+            query?: {
+                /** @description Number of managed pages to return per page (1–100, default 10). */
+                limit?: number;
+                /** @description Opaque pagination cursor from a previous response. Omit for the first page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose administered pages to list. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The company pages the account administers, each with its per-page admin capability matrix. An account that administers no pages returns an empty list — never a 403. Page names are returned verbatim and are never stored. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "managed_company_list";
+                        /** @description The administered pages. */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "managed_company";
+                            /**
+                             * @description Entity sub-discriminator.
+                             * @enum {string}
+                             */
+                            type: "organization";
+                            /** @description Numeric company id — pass this to the followers / invitable-followers endpoints. null only if the page's id could not be resolved. */
+                            id: string | null;
+                            /** @description Native company urn. */
+                            entity_urn?: string | null;
+                            /** @description Page display name (content pass-through — never stored). */
+                            name?: string | null;
+                            /** @description Vanity slug (the /company/<slug>/ segment). */
+                            universal_name?: string | null;
+                            /** @description Page logo URL when available; else null. */
+                            logo_url?: string | null;
+                            /** @description Page follower count. 0 is a real value (a fresh page). */
+                            follower_count?: number | null;
+                            /** @description Visitors in the past month. 0 is a real value. */
+                            visitor_count?: number | null;
+                            /** @description Page-type enum: COMPANY | SHOWCASE | … . */
+                            page_type?: string | null;
+                            /** @description null for own admin pages (follow-state not meaningful). */
+                            is_following?: boolean | null;
+                            /** @description Always true — this is the administered set. */
+                            is_admin: boolean;
+                            /** @description The follow-invite gate. true → the account may invite connections to follow this page. */
+                            can_invite_to_follow: boolean;
+                            /** @description Canonical page URL (falls back to /company/<id>/ when absent but id parsed). */
+                            url?: string | null;
+                            /** @description Admin / paid-media roles: ADMINISTRATOR | DIRECT_SPONSORED_CONTENT_POSTER | … . Often empty. */
+                            roles?: string[];
+                            /** @description The full set of granted permission keys — the machine-readable action matrix for routing. */
+                            capabilities: string[];
+                            /** @description Convenience projection of four high-signal capabilities. */
+                            permissions: {
+                                /** @description May edit the page profile. */
+                                update_profile: boolean;
+                                /** @description May post organic content. */
+                                create_share: boolean;
+                                /** @description May edit administrators. */
+                                manage_admins: boolean;
+                                /** @description May read follower analytics. */
+                                read_analytics: boolean;
+                            };
+                        }[];
+                        paging: {
+                            /** @description Total administered pages. Equals items.length — the full set returns in one page. */
+                            total_count: number;
+                        };
+                        /** @description Always null for this resource — the full administered set returns in one page. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description The limit query parameter is out of range or not an integer. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not have the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdProfileSubscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose own insights to read. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's premium entitlement inventory. A free account is a valid 200 empty state (has_premium:false, all *_url:null, subscriptions:[]) with an identical key set — never a 403. The external manage/cancel/switch URLs are LinkedIn-owned pass-through links. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "profile_subscription";
+                        /** @description true when the account holds at least one real premium plan; false for a free account. Keys on a real plan title, not on array length. */
+                        has_premium: boolean;
+                        /** @description Title of the primary (first) plan; null when free. */
+                        plan_title: string | null;
+                        /** @description Human status line for the primary plan, or the no-premium message for a free account. Display only — never branch on it. */
+                        description: string | null;
+                        /** @description External manage URL for the primary plan; null when free. */
+                        manage_url: string | null;
+                        /** @description External cancel URL for the primary plan; null when free. May be served over http://, surfaced verbatim. */
+                        cancel_url: string | null;
+                        /** @description External switch/upgrade URL for the primary plan; null when free. */
+                        switch_url: string | null;
+                        /** @description The complete entitlement inventory — one item per active plan; [] for a free account. Length > 1 when the account holds multiple concurrent plans. The flat fields mirror subscriptions[0]. */
+                        subscriptions: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "subscription";
+                            /** @description Plan title, e.g. "Premium Business". Always present for items. */
+                            title: string | null;
+                            /** @description Human status line for this plan (display only — never branch on it). */
+                            description: string | null;
+                            /** @description External LinkedIn-owned URL to manage this plan. */
+                            manage_url: string | null;
+                            /** @description External LinkedIn-owned URL to cancel this plan (may be served over http://). */
+                            cancel_url: string | null;
+                            /** @description External LinkedIn-owned URL to switch/upgrade this plan. */
+                            switch_url: string | null;
+                            /** @description This plan's full action map (action key → external URL). Open-ended; observed keys: manage_subscription, cancel_subscription, switch_plans. */
+                            actions: {
+                                [key: string]: string;
+                            };
+                        }[];
+                        /** @description The primary plan's action map (action key → external URL); {} for a free account. */
+                        actions: {
+                            [key: string]: string;
+                        };
+                    };
+                };
+            };
+            /** @description Invalid request — a query parameter failed validation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the account is unknown. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdProfileAnalytics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose own insights to read. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's performance dashboard as one composite — four headline metrics, always present. A metric's count present-and-0 is a real 0 (never a silent empty). */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "profile_analytics";
+                        /** @description Profile viewers, trailing 90 days. */
+                        profile_viewers: {
+                            /** @description The headline value. Present-and-0 is a real 0; null only on a parser-drift failure (never a silent empty). */
+                            count: number | null;
+                            /** @description The reporting-window label as rendered, e.g. "Profile viewers in 90 days", "Search appearances Jun 23–29". */
+                            window: string | null;
+                            /** @description Trend magnitude in percent (direction is a client-rendered icon absent from the source, so magnitude only). */
+                            change_pct_magnitude: number | null;
+                        };
+                        /** @description Total followers (running total). */
+                        followers: {
+                            /** @description The headline value. Present-and-0 is a real 0; null only on a parser-drift failure (never a silent empty). */
+                            count: number | null;
+                            /** @description The reporting-window label as rendered, e.g. "Profile viewers in 90 days", "Search appearances Jun 23–29". */
+                            window: string | null;
+                            /** @description Trend magnitude in percent (direction is a client-rendered icon absent from the source, so magnitude only). */
+                            change_pct_magnitude: number | null;
+                        };
+                        /** @description Post impressions, trailing 7 days. */
+                        post_impressions: {
+                            /** @description The headline value. Present-and-0 is a real 0; null only on a parser-drift failure (never a silent empty). */
+                            count: number | null;
+                            /** @description The reporting-window label as rendered, e.g. "Profile viewers in 90 days", "Search appearances Jun 23–29". */
+                            window: string | null;
+                            /** @description Trend magnitude in percent (direction is a client-rendered icon absent from the source, so magnitude only). */
+                            change_pct_magnitude: number | null;
+                        };
+                        /** @description Times the account appeared in search, last completed week. */
+                        search_appearances: {
+                            /** @description The headline value. Present-and-0 is a real 0; null only on a parser-drift failure (never a silent empty). */
+                            count: number | null;
+                            /** @description The reporting-window label as rendered, e.g. "Profile viewers in 90 days", "Search appearances Jun 23–29". */
+                            window: string | null;
+                            /** @description Trend magnitude in percent (direction is a client-rendered icon absent from the source, so magnitude only). */
+                            change_pct_magnitude: number | null;
+                        };
+                    };
+                };
+            };
+            /** @description Invalid request — a query parameter failed validation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the account is unknown. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdProfileVisitors: {
+        parameters: {
+            query?: {
+                /** @description Maximum viewers to return in this page (1–100, default 20). The server may walk a few internal pages to fill one page. */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's `cursor`; omit for the first page. Zero individuals on a page does NOT mean the list is exhausted while `cursor` is non-null (an aggregate-only page may precede more identified viewers) — page until `cursor` is null. Heavy pagination consumes a shared, throttled upstream request budget; you own the spend via the cursor. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose own insights to read. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the account's recent profile viewers, each classified by disclosure fidelity. A free account is capped at semi-anonymous fidelity (an in-band 200, never a 403). Empty account → items:[], cursor:null. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "profile_visitor_list";
+                        /** @description The viewer entries for this page — identified + semi-anonymous individuals plus any aggregate rollup cards, most-recent first. [] for a zero-visitor account. */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "profile_visitor";
+                            /**
+                             * @description Disclosure fidelity: identified = a real person with a member handle (fully actionable); semi-anonymous = a description only, no handle; aggregate = a non-person rollup card (every handle field null).
+                             * @enum {string}
+                             */
+                            kind: "identified" | "semi-anonymous" | "aggregate";
+                            /** @description Display name (identified), anonymized description (semi-anonymous), or rollup label (aggregate). */
+                            name: string | null;
+                            /** @description Profile headline — present for identified, null otherwise. */
+                            headline: string | null;
+                            /** @description Connection distance "1st" | "2nd" | "3rd", or null when undisclosed. */
+                            degree: string | null;
+                            /** @description Human-relative view time as rendered (e.g. "Viewed 3h ago") or a mode note. Not a machine timestamp. */
+                            viewed_at: string | null;
+                            /** @description The obfuscated member id (identified only) — the handle other endpoints key on. */
+                            member_id: string | null;
+                            /** @description The member URN (identified only). */
+                            member_urn: string | null;
+                            /** @description Canonical profile URL (identified only). */
+                            profile_url: string | null;
+                            /** @description Largest available avatar, or null. */
+                            avatar_url: string | null;
+                        }[];
+                        /** @description Opaque cursor for the next page; null when the list is known-exhausted. A non-null cursor means more may exist — keep paging (zero individuals on a page is not exhaustion). There is no total (the upstream total is unreliable). */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description Invalid request — a query parameter failed validation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the account is unknown. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdProfileSsi: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose own insights to read. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's Social Selling Index — overall score, four pillar sub-scores, and industry/network percentile ranks. A free/low-activity account returns a valid low score (a 200, not a 403). */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "profile_ssi";
+                        /** @description The out-of-100 score (float; round for display). null only on a genuine zero-activity empty state. The four pillars sum to overall. */
+                        overall: number | null;
+                        /** @description The four SSI pillar sub-scores (each max 25; a genuine 0 is legitimate). */
+                        pillars: {
+                            /** @description "Establish your professional brand" pillar. */
+                            professional_brand: number | null;
+                            /** @description "Find the right people" pillar. */
+                            find_right_people: number | null;
+                            /** @description "Engage with insights" pillar. */
+                            insight_engagement: number | null;
+                            /** @description "Build relationships" pillar. */
+                            strong_relationship: number | null;
+                        };
+                        /** @description "Top N% of your industry" (lower is better). */
+                        industry_rank_pct: number | null;
+                        /** @description "Top N% of your network" (lower is better). */
+                        network_rank_pct: number | null;
+                        /** @description The industry the industry-rank is computed against. */
+                        industry: string | null;
+                        /** @description Whether the account holds an active Sales Navigator seat (this read doubles as a free seat probe). */
+                        active_seat: boolean;
+                        /** @description Freshness watermark (epoch ms). Treat 0/null as "no watermark / computed on read", not a 1970 date. */
+                        calculated_at: number | null;
+                    };
+                };
+            };
+            /** @description Invalid request — a query parameter failed validation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The LinkedIn account lacks the feature backing this score. Defensive and unobserved — a free account with activity returns a valid 200, not a 403. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the account is unknown. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getV1AccountIdUsersUserIdFollowers: {
         parameters: {
             query?: {
@@ -3043,256 +4590,6 @@ export interface operations {
                 };
             };
             /** @description The account is restricted and cannot unfollow this user. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Rate limited — slow down and retry after the hinted delay. */
-            429: {
-                headers: {
-                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                    RateLimit: components["headers"]["RateLimit"];
-                    "Retry-After": components["headers"]["Retry-After"];
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Internal error. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description A temporary error occurred. Please try again. */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Service unavailable. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Gateway timeout. */
-            504: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    getV1AccountIdInmailCredits: {
-        parameters: {
-            query?: {
-                /** @description Filter to one product's InMail credit count. Omit to return all three. */
-                service?: "classic" | "recruiter" | "sales_navigator";
-            };
-            header?: never;
-            path: {
-                /** @description The account ID (`acc_…`) to use for the request. */
-                account_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The account's remaining InMail credits across subscribed LinkedIn premium products. Each product's balance is null when that product is not subscribed. */
-            200: {
-                headers: {
-                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                    RateLimit: components["headers"]["RateLimit"];
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * @description Response type discriminator.
-                         * @enum {string}
-                         */
-                        object: "inmail_credits";
-                        credits: {
-                            /** @description Remaining InMail credits on a LinkedIn Premium (classic) subscription, or null if not subscribed. */
-                            classic: number | null;
-                            /** @description Remaining InMail credits on a Recruiter seat, or null if not subscribed. */
-                            recruiter: number | null;
-                            /** @description Remaining InMail credits on a Sales Navigator seat, or null if not subscribed. */
-                            sales_navigator: number | null;
-                        };
-                    };
-                };
-            };
-            /** @description Invalid service value. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description The supplied account_id does not belong to this tenant. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Rate limited — slow down and retry after the hinted delay. */
-            429: {
-                headers: {
-                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                    RateLimit: components["headers"]["RateLimit"];
-                    "Retry-After": components["headers"]["Retry-After"];
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Internal error. */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description A temporary error occurred. Please try again. */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Service unavailable. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Gateway timeout. */
-            504: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-        };
-    };
-    postV1AccountIdUsersUserIdEndorseSkill: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description The account ID (`acc_…`) performing the endorsement. */
-                account_id: string;
-                /** @description The LinkedIn member ID (`ACo…` format) whose skill is being endorsed — a public identifier does not resolve on this endpoint. */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description The endorsement ID for the specific skill to endorse. Obtain it from the `endorsement_id` field on a skill in the target's skills section — GET /v1/{account_id}/users/{user_id}?linkedin_sections=linkedin_skills. */
-                    endorsement_id: string;
-                };
-            };
-        };
-        responses: {
-            /** @description The skill was endorsed. A 200 IS the success signal — the v2 endorsement wire carries no additional status field. */
-            200: {
-                headers: {
-                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
-                    RateLimit: components["headers"]["RateLimit"];
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * @description Response type discriminator.
-                         * @enum {string}
-                         */
-                        object: "skill_endorsed";
-                    };
-                };
-            };
-            /** @description Missing or empty endorsement_id. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description The account lacks the required permission for this action. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description The account_id does not belong to this tenant, or the user_id was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description The account is restricted and cannot perform endorsements. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -4081,6 +5378,1646 @@ export interface operations {
             };
         };
     };
+    getV1AccountIdCompaniesIdentifierFollowers: {
+        parameters: {
+            query?: {
+                /** @description Number of followers to return per page (1–50, default 10). */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's cursor. Omit for the first page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the company page's followers — the admin analytics follower list. Follower names and headlines are returned verbatim and are never stored. Page until cursor is null. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "company_follower_list";
+                        /** @description The page's followers, newest first. */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_follower";
+                            /** @description The follower's member id. */
+                            id: string;
+                            /** @description Follower display name (content pass-through — never stored). */
+                            name?: string | null;
+                            /** @description Follower headline (content pass-through — never stored). */
+                            headline?: string | null;
+                            /** @description Vanity slug. */
+                            public_identifier?: string | null;
+                            /** @description Canonical profile URL. */
+                            profile_url?: string | null;
+                            /** @description Network degree relative to the acting account: 1st | 2nd | 3rd | out-of-network | self | null. */
+                            degree?: string | null;
+                            /** @description Best-effort avatar URL. */
+                            picture_url?: string | null;
+                            /** @description Month/year the follow began (e.g. "June 2026") — nothing finer is exposed per follower. Rely on the newest-first list order for ordering. */
+                            followed_at?: string | null;
+                        }[];
+                        /** @description Opaque cursor for the next page, or null at end-of-list. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description A non-numeric identifier, a malformed cursor, or a limit out of range. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page (follower analytics is admin-gated), or lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the company id does not resolve to a page. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdCompaniesIdentifierInvitableFollowers: {
+        parameters: {
+            query?: {
+                /** @description Number of invitable connections to return per page (1–50, default 10). */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's cursor. Omit for the first page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page with invite rights. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the account's connections invitable to follow the page. The account must administer the page with the invite-to-follow entitlement. Page until cursor is null. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "invitable_connection_list";
+                        /** @description Connections invitable to follow the page. */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "invitable_connection";
+                            /** @description The connection's stable profile id. */
+                            id: string;
+                            /** @description Native profile urn (same underlying id as id). */
+                            profile_urn: string;
+                            /** @description Opaque per-suggestion correlation token, passed through verbatim; null when the read does not surface one. */
+                            invite_token?: string | null;
+                        }[];
+                        /** @description Opaque cursor for the next page, or null when exhausted. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description A non-numeric identifier, a malformed cursor, or a limit out of range. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page with the invite-to-follow entitlement, or lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the company id does not resolve to a page. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdCompaniesIdentifierChats: {
+        parameters: {
+            query?: {
+                /** @description Number of conversations to return per page (1–50, default 20). */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's cursor. Omit for the first page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the company page's admin conversations, newest-activity-first. Participant names and last_message.text are returned verbatim and are never stored. An empty admin inbox returns an empty list — never a 403. Page until cursor is null. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "company_chat_list";
+                        /** @description The admin conversations, newest-activity-first. */
+                        items: {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_chat";
+                            /** @description The conversation id (2-… form) — the key for retrieve-chat and get-messages. */
+                            id: string;
+                            /** @description Group vs 1:1 conversation. */
+                            is_group_chat: boolean;
+                            /** @description Group title, or the other participant's name for a 1:1. */
+                            title?: string | null;
+                            /** @description The human participants (the company page itself is excluded). */
+                            participants: {
+                                /** @description The participant's member id. */
+                                id: string;
+                                /** @description Display name (content pass-through — never stored). */
+                                name: string;
+                                /**
+                                 * @description Participant kind — always "member" (the page itself is excluded).
+                                 * @enum {string}
+                                 */
+                                kind: "member";
+                                /** @description Member headline (content pass-through — never stored). */
+                                headline?: string | null;
+                                /** @description Canonical member profile URL. */
+                                profile_url: string;
+                            }[];
+                            /** @description Unread message count (0 = read). */
+                            unread_count: number;
+                            /** @description Epoch-ms of last activity — also the newest-first pagination anchor. */
+                            last_activity_at: number | null;
+                            /** @description Last-message preview. text is a content pass-through — present on a fresh read, never stored. */
+                            last_message: {
+                                /** @description Sender's member id. */
+                                sender_id?: string;
+                                /** @description Epoch-ms delivery time. */
+                                sent_at?: number;
+                                /** @description Message body (content pass-through — never stored). */
+                                text?: string | null;
+                            } | null;
+                        }[];
+                        /** @description Opaque cursor for the next page, or null at end-of-list. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description A non-numeric identifier, a malformed cursor, or a limit out of range. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page (the admin gate), or lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdCompaniesIdentifierChatsChatId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+                /** @description The conversation id in the "2-…" form — the id field of a chats list or search result. Pass it verbatim. */
+                chat_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A single admin conversation, the same shape as a list item. last_message.text is returned verbatim and is never stored. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "company_chat";
+                        /** @description The conversation id (2-… form) — the key for retrieve-chat and get-messages. */
+                        id: string;
+                        /** @description Group vs 1:1 conversation. */
+                        is_group_chat: boolean;
+                        /** @description Group title, or the other participant's name for a 1:1. */
+                        title?: string | null;
+                        /** @description The human participants (the company page itself is excluded). */
+                        participants: {
+                            /** @description The participant's member id. */
+                            id: string;
+                            /** @description Display name (content pass-through — never stored). */
+                            name: string;
+                            /**
+                             * @description Participant kind — always "member" (the page itself is excluded).
+                             * @enum {string}
+                             */
+                            kind: "member";
+                            /** @description Member headline (content pass-through — never stored). */
+                            headline?: string | null;
+                            /** @description Canonical member profile URL. */
+                            profile_url: string;
+                        }[];
+                        /** @description Unread message count (0 = read). */
+                        unread_count: number;
+                        /** @description Epoch-ms of last activity — also the newest-first pagination anchor. */
+                        last_activity_at: number | null;
+                        /** @description Last-message preview. text is a content pass-through — present on a fresh read, never stored. */
+                        last_message: {
+                            /** @description Sender's member id. */
+                            sender_id?: string;
+                            /** @description Epoch-ms delivery time. */
+                            sent_at?: number;
+                            /** @description Message body (content pass-through — never stored). */
+                            text?: string | null;
+                        } | null;
+                    };
+                };
+            };
+            /** @description A non-numeric identifier, or a malformed/empty chat_id. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page (the admin gate), or lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the conversation is not in this mailbox. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdCompaniesIdentifierChatsChatIdMessages: {
+        parameters: {
+            query?: {
+                /** @description Number of messages to return per page (1–50, default 20). */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's cursor. Omit for the first page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+                /** @description The conversation id in the "2-…" form — the id field of a chats list or search result. Pass it verbatim. */
+                chat_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of a conversation's messages, newest-first. Message text is returned verbatim and is never stored. A genuinely empty (but existing) thread returns an empty list; an unknown conversation returns 404. Page until cursor is null. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "company_chat_message_list";
+                        /** @description The thread's messages, newest-first. */
+                        items: {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_chat_message";
+                            /** @description The message id (2-… form). */
+                            id: string;
+                            /** @description The parent conversation id (2-… form). */
+                            conversation_id: string;
+                            sender: {
+                                /** @description Sender's member id. */
+                                id: string;
+                                /** @description Sender display name (content pass-through — never stored). */
+                                name: string | null;
+                            };
+                            /** @description Epoch-ms delivery time — also the newest-first pagination anchor. */
+                            sent_at: number;
+                            /** @description Message body (content pass-through — never stored). */
+                            text?: string | null;
+                        }[];
+                        /** @description Opaque cursor for the next page, or null at end-of-list. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description A non-numeric identifier, or a malformed/empty chat_id. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page (the admin gate), or lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the conversation does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdCompaniesIdentifierChatsChatIdMessagesMessageId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+                /** @description The conversation id in the "2-…" form — the id field of a chats list or search result. Pass it verbatim. */
+                chat_id: string;
+                /** @description The message id in the "2-…" form — the id field of a messages list result. Always resolved scoped to its chat_id. */
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A single message from a conversation, the same shape as a messages-list item. Message text is returned verbatim and is never stored. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "company_chat_message";
+                        /** @description The message id (2-… form). */
+                        id: string;
+                        /** @description The parent conversation id (2-… form). */
+                        conversation_id: string;
+                        sender: {
+                            /** @description Sender's member id. */
+                            id: string;
+                            /** @description Sender display name (content pass-through — never stored). */
+                            name: string | null;
+                        };
+                        /** @description Epoch-ms delivery time — also the newest-first pagination anchor. */
+                        sent_at: number;
+                        /** @description Message body (content pass-through — never stored). */
+                        text?: string | null;
+                    };
+                };
+            };
+            /** @description A non-numeric identifier, or a malformed/empty chat_id or message_id. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page (the admin gate), or lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the message is not in this conversation. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdCompaniesIdentifierChatsSearch: {
+        parameters: {
+            query?: {
+                /** @description Free-text mode — matches participant names AND message content. Mutually exclusive with topic and unread. */
+                query?: string;
+                /** @description Filter mode — one inbox topic card: 1–5 or its name (Service request, Request a demo, Support, Careers, Other). Mutually exclusive with query and unread. */
+                topic?: string;
+                /** @description Filter mode — unread conversations only. Pass unread=true. Mutually exclusive with query and topic. */
+                unread?: boolean;
+                /** @description Number of conversations to return per page (1–50, default 20). */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's cursor. Omit for the first page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of matching admin conversations — free-text search (query) OR one topic/unread filter, exactly one per call. filter_effective is present and true only in topic/unread filter mode. A no-match search returns an empty list. Participant names and last_message.text pass through verbatim and are never stored. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "company_chat_list";
+                        /** @description The matching admin conversations. */
+                        items: {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_chat";
+                            /** @description The conversation id (2-… form) — the key for retrieve-chat and get-messages. */
+                            id: string;
+                            /** @description Group vs 1:1 conversation. */
+                            is_group_chat: boolean;
+                            /** @description Group title, or the other participant's name for a 1:1. */
+                            title?: string | null;
+                            /** @description The human participants (the company page itself is excluded). */
+                            participants: {
+                                /** @description The participant's member id. */
+                                id: string;
+                                /** @description Display name (content pass-through — never stored). */
+                                name: string;
+                                /**
+                                 * @description Participant kind — always "member" (the page itself is excluded).
+                                 * @enum {string}
+                                 */
+                                kind: "member";
+                                /** @description Member headline (content pass-through — never stored). */
+                                headline?: string | null;
+                                /** @description Canonical member profile URL. */
+                                profile_url: string;
+                            }[];
+                            /** @description Unread message count (0 = read). */
+                            unread_count: number;
+                            /** @description Epoch-ms of last activity — also the newest-first pagination anchor. */
+                            last_activity_at: number | null;
+                            /** @description Last-message preview. text is a content pass-through — present on a fresh read, never stored. */
+                            last_message: {
+                                /** @description Sender's member id. */
+                                sender_id?: string;
+                                /** @description Epoch-ms delivery time. */
+                                sent_at?: number;
+                                /** @description Message body (content pass-through — never stored). */
+                                text?: string | null;
+                            } | null;
+                        }[];
+                        /** @description Opaque cursor for the next page, or null at end-of-list. */
+                        cursor: string | null;
+                        /**
+                         * @description Present and true only in topic/unread filter mode — the signal that the filter was applied upstream. Absent in free-text mode.
+                         * @enum {boolean}
+                         */
+                        filter_effective?: true;
+                    };
+                };
+            };
+            /** @description A non-numeric identifier; zero or more than one of query/topic/unread; or an unknown topic. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page (the admin gate), or lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdProfileGroups: {
+        parameters: {
+            query?: {
+                /** @description Target any other LinkedIn user's groups instead of the acting account's own — a vanity slug or a full /in/{vanity} URL. Omit to enumerate the acting account's own groups (a complete read). A profile target is a documented partial read (that target's interests-groups section only). */
+                profile?: string;
+                /** @description Maximum items to return per page (1–100, default 20). */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's cursor. Omit for the first page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account performing the read. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The groups the acting account (or a `profile` target) belongs to, each enriched to full group detail. Own-groups is a complete enumeration (a real total_count on cursor:null); a `profile` target is a documented partial (total_count always null). Zero groups is a valid empty result, never an error. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "group_list";
+                        /** @description The resolved groups for this page. */
+                        items: {
+                            /**
+                             * @description Type discriminator.
+                             * @enum {string}
+                             */
+                            object: "group";
+                            /** @description Numeric group id. */
+                            id: string;
+                            /** @description Native group urn. */
+                            entity_urn: string;
+                            /** @description Group display name. */
+                            name: string;
+                            /** @description Total members. Reliable; cross-checked against the rendered page. */
+                            member_count: number;
+                            /** @description Group description; may contain newlines or non-English text. */
+                            description: string | null;
+                            /** @description Group type (observed: STANDARD). */
+                            type: string;
+                            /** @description Whether the group is publicly listed/discoverable vs members-only. */
+                            public_visibility: boolean;
+                            /** @description Whether a member may join directly vs request/approval. */
+                            direct_join_enabled: boolean;
+                            /** @description Whether the acting account is a member. */
+                            is_member: boolean;
+                            /**
+                             * @description The acting account's membership presence (the same signal as is_member, as an enum).
+                             * @enum {string}
+                             */
+                            membership_status: "MEMBER" | "NON_MEMBER";
+                            /** @description Canonical group URL. */
+                            url: string;
+                            /** @description The group's admin contact — the highest-value per-community contact. null when no admin contact is exposed. */
+                            admin: {
+                                /** @description Admin display name. */
+                                name: string | null;
+                                /**
+                                 * @description Admin's network distance from the acting account — a reachability signal.
+                                 * @enum {string|null}
+                                 */
+                                connection_degree: "1st" | "2nd" | "3rd" | null;
+                                /** @description Admin's obfuscated member id. */
+                                member_id: string | null;
+                                /** @description Admin's profile vanity slug. */
+                                vanity: string | null;
+                                /** @description Admin's canonical profile URL. */
+                                profile_url: string | null;
+                            } | null;
+                            /** @description Whether posts require admin approval — a write-automation feasibility gate. */
+                            post_approval_enabled: boolean | null;
+                            /** @description Who may invite (observed: ALL). */
+                            invitation_level: string | null;
+                            /** @description Up to ~12 sampled member ids — a partial sample, possibly empty. */
+                            sample_past_members: string[];
+                        }[];
+                        paging: {
+                            /** @description A real total ONLY on a complete own-groups enumeration (cursor:null); null on any partial read (a profile target, or a page truncated by limit/budget) — never invented. */
+                            total_count: number | null;
+                        };
+                        /** @description Opaque cursor for the next page; null when the enumeration is exhausted. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description Invalid request — a path or query parameter failed validation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No active Core seat for this tenant. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the account is unknown. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdGroupsGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account performing the read. */
+                account_id: string;
+                /** @description The group to look up. Accepts a numeric group id (e.g. 9123014) or a full group URL (e.g. https://www.linkedin.com/groups/9123014/, .../members/). The numeric id is extracted from either form — pass the id field returned by GET /v1/{account_id}/profile/groups or this endpoint's own response. */
+                group: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The group's full detail, returned directly (no envelope, no cursor, no paging). */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Type discriminator.
+                         * @enum {string}
+                         */
+                        object: "group";
+                        /** @description Numeric group id. */
+                        id: string;
+                        /** @description Native group urn. */
+                        entity_urn: string;
+                        /** @description Group display name. */
+                        name: string;
+                        /** @description Total members. Reliable; cross-checked against the rendered page. */
+                        member_count: number;
+                        /** @description Group description; may contain newlines or non-English text. */
+                        description: string | null;
+                        /** @description Group type (observed: STANDARD). */
+                        type: string;
+                        /** @description Whether the group is publicly listed/discoverable vs members-only. */
+                        public_visibility: boolean;
+                        /** @description Whether a member may join directly vs request/approval. */
+                        direct_join_enabled: boolean;
+                        /** @description Whether the acting account is a member. */
+                        is_member: boolean;
+                        /**
+                         * @description The acting account's membership presence (the same signal as is_member, as an enum).
+                         * @enum {string}
+                         */
+                        membership_status: "MEMBER" | "NON_MEMBER";
+                        /** @description Canonical group URL. */
+                        url: string;
+                        /** @description The group's admin contact — the highest-value per-community contact. null when no admin contact is exposed. */
+                        admin: {
+                            /** @description Admin display name. */
+                            name: string | null;
+                            /**
+                             * @description Admin's network distance from the acting account — a reachability signal.
+                             * @enum {string|null}
+                             */
+                            connection_degree: "1st" | "2nd" | "3rd" | null;
+                            /** @description Admin's obfuscated member id. */
+                            member_id: string | null;
+                            /** @description Admin's profile vanity slug. */
+                            vanity: string | null;
+                            /** @description Admin's canonical profile URL. */
+                            profile_url: string | null;
+                        } | null;
+                        /** @description Whether posts require admin approval — a write-automation feasibility gate. */
+                        post_approval_enabled: boolean | null;
+                        /** @description Who may invite (observed: ALL). */
+                        invitation_level: string | null;
+                        /** @description Up to ~12 sampled member ids — a partial sample, possibly empty. */
+                        sample_past_members: string[];
+                    };
+                };
+            };
+            /** @description Invalid request — a path or query parameter failed validation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No active Core seat for this tenant. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Either the account_id does not belong to this tenant, or the referenced group does not exist, is not accessible, or the account is not a member of it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdGroupsGroupMembers: {
+        parameters: {
+            query?: {
+                /** @description Filter members by name — prefix/substring, multi-word, case-insensitive (e.g. 'raphael red' matches "Raphael Redmer"). Folds in member search as this SAME endpoint — not a separate one. Omit (or pass an empty string) for the full roster. */
+                name?: string;
+                /** @description Maximum items to return per page (1–100, default 20). */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's cursor. Omit for the first page. Scoped to the `name` value it was minted under — replaying it alongside a different `name` is rejected. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account performing the read. */
+                account_id: string;
+                /** @description The group to look up. Accepts a numeric group id (e.g. 9123014) or a full group URL (e.g. https://www.linkedin.com/groups/9123014/, .../members/). The numeric id is extracted from either form — pass the id field returned by GET /v1/{account_id}/profile/groups or this endpoint's own response. */
+                group: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the group's members. An optional `name` filter folds in member search as this SAME endpoint — the filtered items plus a filtered total_count. Requires the acting account be a member of the group. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "group_member_list";
+                        /** @description The page of members for this page. */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "group_member";
+                            /**
+                             * @description Entity kind — always individual for a group member.
+                             * @enum {string}
+                             */
+                            type: "individual";
+                            /** @description The member's obfuscated profile id — the stable handle other endpoints key on (connect, message, profile-enrich). */
+                            id: string;
+                            /** @description Display name; null if the payload carries neither first nor last. */
+                            name: string | null;
+                            /** @description Professional headline. Finder-dependent — treat as nullable. */
+                            headline: string | null;
+                            /** @description Canonical profile URL. */
+                            profile_url: string | null;
+                            /** @description Highest-resolution avatar; null if no photo. */
+                            avatar_url: string | null;
+                            /** @description When the member joined, epoch milliseconds. */
+                            joined_at: number | null;
+                            /**
+                             * @description The acting account's relationship to this member — MESSAGE = already connected (DM directly); CONNECT = not connected (invite first).
+                             * @enum {string|null}
+                             */
+                            relationship: "MESSAGE" | "CONNECT" | null;
+                            /** @description Zero or more targeting signals (observed: VERIFIED_PROFILE, OPEN_TO_WORK, PREMIUM, INFLUENCER); empty when none. */
+                            badges: string[];
+                        }[];
+                        paging: {
+                            /** @description The roster total (reliable) — the FILTERED match count under `name`. null (never 0) only on a soft-empty read where the paging container is genuinely absent. */
+                            total_count: number | null;
+                        };
+                        /** @description Opaque cursor for the next page; null on the last page. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description Invalid request — a path or query parameter failed validation. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description No active Core seat for this tenant. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Either the account_id does not belong to this tenant, or the referenced group does not exist, is not accessible, or the account is not a member of it. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getV1AccountIdSearchParameters: {
         parameters: {
             query: {
@@ -4840,13 +7777,13 @@ export interface operations {
                      * @enum {string}
                      */
                     sort_by?: "relevance" | "date";
-                    /** @description Filter to jobs posted within N days (e.g. 7 for last week). */
+                    /** @description Filter to jobs posted within N days (positive integer). Snapped UP to the nearest supported window: 1 = past day, 2-7 = past week, 8+ = past month (clamped — no window beyond 30 days is available). */
                     date_posted?: number;
                     /** @description Opaque region ID. */
                     region?: string;
                     /** @description Opaque location IDs from GET .../search/parameters?type=LOCATION. */
                     location?: string[];
-                    /** @description Search radius around the location, in miles (positive number). */
+                    /** @description Search radius around the location, in kilometers. Snapped to the nearest supported bucket: 0, 8, 16, 40, 80, or 160 km (ties round up). */
                     location_within_area?: number;
                     /** @description Opaque industry IDs from GET .../search/parameters?type=INDUSTRY. */
                     industry?: string[];
@@ -5240,6 +8177,459 @@ export interface operations {
                 };
             };
             /** @description Missing or malformed url, or limit outside the 1-50 range. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The supplied account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot perform searches. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdSearchGroups: {
+        parameters: {
+            query: {
+                /** @description Search terms for LinkedIn groups (multi-word supported, e.g. 'gtm engineering'). */
+                keywords: string;
+                /** @description Maximum groups to return per page (1–100, default 10). */
+                limit?: number;
+                /** @description Opaque pagination cursor returned from a previous response. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The linked LinkedIn account to search on behalf of. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of LinkedIn groups matching the keyword search. A no-match search returns an empty list, not an error. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "group_search_result";
+                        /** @description Group search result items. */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "group";
+                            /** @description Numeric group id — the key for a future group-detail read. */
+                            id: string;
+                            /** @description Group name. */
+                            name: string | null;
+                            /** @description Display-rounded member count exactly as the search surface shows it ('4K' -> 4000) — an approximation, not an exact count. */
+                            member_count: number | null;
+                            /**
+                             * @description Group visibility.
+                             * @enum {string|null}
+                             */
+                            type: "public" | "private" | null;
+                            /** @description https://www.linkedin.com/groups/<id>/ */
+                            url: string;
+                        }[];
+                        /** @description Opaque next-page cursor; null on the last page. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description Missing or empty account_id, or missing or empty keywords. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The supplied account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot perform searches. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    postV1AccountIdSearchServices: {
+        parameters: {
+            query?: {
+                /** @description Maximum results per page (1–50, default 10). */
+                limit?: number;
+                /** @description Opaque pagination cursor returned from a previous response. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The linked LinkedIn account to search on behalf of. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Free-text keyword match. */
+                    keywords?: string;
+                    /** @description Opaque service-filter ids from GET .../search/services/parameters?type=service_category. */
+                    service_category?: string[];
+                    /** @description Opaque location ids from GET .../search/services/parameters?type=location. */
+                    location?: string[];
+                    /** @description Connection degree filter: 1 = 1st, 2 = 2nd, 3 = 3rd+. */
+                    connections?: (1 | 2 | 3)[];
+                    /** @description Profile-language ISO 639-1 codes (e.g. en, de, es, fr). */
+                    language?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description A page of people offering services, matching the filters. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "service_search_result";
+                        /** @description Service-provider search result items. */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "service_provider";
+                            /** @description The member id (ACoAAA…) — the key for connect/message/enrich. */
+                            id: string | null;
+                            /** @description Display name. */
+                            name: string | null;
+                            /** @description Professional headline. */
+                            headline: string | null;
+                            /** @description Location string. */
+                            location: string | null;
+                            /** @description Connection degree: 1, 2, or 3. */
+                            network_distance: number | null;
+                            /** @description Canonical profile URL (https://www.linkedin.com/in/<vanity>/), cleaned of any tracking querystring. */
+                            profile_url: string | null;
+                            /** @description Highest-resolution avatar URL. */
+                            avatar_url: string | null;
+                            /** @description True if the profile carries a verification badge. */
+                            is_verified: boolean;
+                            /** @description True if this is a LinkedIn Premium account. */
+                            is_premium: boolean;
+                        }[];
+                        /** @description Paging metadata. */
+                        paging: {
+                            /** @description Total matching result count. */
+                            total_count: number | null;
+                        };
+                        /** @description Opaque next-page cursor; null on the last page. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description Missing or empty account_id, or no filter supplied — at least one of keywords, service_category, or location is required. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The supplied account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot perform searches. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdSearchServicesParameters: {
+        parameters: {
+            query: {
+                /** @description The service-filter type to resolve: service_category (the 'Add a service category' typeahead) or location (the 'Add a location' typeahead). */
+                type?: "service_category" | "location";
+                /** @description The typed text to resolve (e.g. 'marke'). */
+                keywords: string;
+                /** @description Maximum options to return (1–100, default 10). */
+                limit?: number;
+                /** @description Opaque pagination cursor returned from a previous response. */
+                cursor?: string;
+                /** @description Zero-based pagination offset — a numeric fallback for cursor (default 0). */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description The linked LinkedIn account to search on behalf of. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A list of matching service-filter option ids for use in search/services. Each item maps a human-readable label to an opaque ID. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "search_parameter_list";
+                        /** @description Resolved service-filter option id / label pairs. */
+                        items: {
+                            /** @description Opaque filter ID — pass into search/services' service_category[] or location[]. */
+                            id: string;
+                            /** @description Human-readable label for this filter value. */
+                            name: string;
+                            /**
+                             * @description Echoes the type this item resolves — service_category or location.
+                             * @enum {string}
+                             */
+                            type: "service_category" | "location";
+                        }[];
+                        /** @description Opaque pagination cursor for the next page, or null when this is the last page. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description Missing or empty account_id or keywords, or an unsupported type. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6239,7 +9629,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Message sent. Returns the new message_id. */
+            /** @description Message sent. Returns the new message_id and sent_as — the acting identity. A COMPANY_ chat id (e.g. `COMPANY_83734124_2-…`) sends AS THE PAGE and echoes sent_as:{kind:'company',company_id,name} (company_id may be null when the page could not be correlated to a managed page); any other chat id sends as the connected member and echoes sent_as:{kind:'personal'}. Never infer the acting identity from the message's sender field. */
             201: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -6255,6 +9645,18 @@ export interface operations {
                         object?: "message_sent";
                         /** @description The sent message's identifier. */
                         message_id?: string;
+                        /** @description The identity this message was actually sent as. */
+                        sent_as?: {
+                            /**
+                             * @description Which identity sent the message.
+                             * @enum {string}
+                             */
+                            kind?: "personal" | "company";
+                            /** @description Company inboxes only — null when uncorrelatable. */
+                            company_id?: string | null;
+                            /** @description Company inboxes only — the page's display name. */
+                            name?: string;
+                        };
                     };
                 };
             };
@@ -6973,6 +10375,185 @@ export interface operations {
             };
         };
     };
+    getV1AccountIdChatsSearch: {
+        parameters: {
+            query: {
+                /** @description The search term — matches both participant names and message content (e.g. 'sophie keller'). */
+                query: string;
+                /** @description Maximum chats to return per page (1–100, default 20). The server may walk a few internal pages to fill one page. */
+                limit?: number;
+                /** @description Opaque pagination cursor returned from a previous response; wraps a zero-based item offset. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) whose inbox to search. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of chats matching the search term (participant names and/or message content), plus the next-page cursor. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object?: "chat_list";
+                        items?: {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "chat";
+                            /** @description Chat identifier. */
+                            id?: string;
+                            /** @description Account id that owns this chat. */
+                            account_id?: string;
+                            /** @description Chat display name, or null. */
+                            name?: string | null;
+                            /**
+                             * @description Conversation type (search results are never channels).
+                             * @enum {string}
+                             */
+                            type?: "1to1" | "group";
+                            is_group?: boolean;
+                            is_1to1?: boolean;
+                            /** @description Number of unread messages in this chat. */
+                            unread_count?: number;
+                            /** @description Identifier of the 1:1 counterpart, when the match is a 1:1 chat. */
+                            user_id?: string;
+                            /** @description The most recent message in the chat, when the search carrier returned one. */
+                            last_message?: {
+                                /**
+                                 * @description Response type discriminator.
+                                 * @enum {string}
+                                 */
+                                object?: "message";
+                                /** @description Message identifier. */
+                                id?: string;
+                                /** @description Account id that owns this message. */
+                                account_id?: string;
+                                /** @description Full message text (content pass-through — never stored). */
+                                text?: string | null;
+                                /** @description Identifier of the sender. */
+                                sender_id?: string;
+                                /** @description Always empty — the search carrier does not surface attachment descriptors. */
+                                attachments?: {
+                                    /** @description Attachment identifier. */
+                                    id?: string;
+                                    /** @description MIME type of the attachment. */
+                                    mimetype?: string;
+                                    /** @description Attachment kind: file | img | video | audio. */
+                                    type?: string;
+                                    /** @description Original file name. */
+                                    filename?: string;
+                                    /** @description Size in bytes. */
+                                    file_size?: number;
+                                    /** @description True when the attachment is no longer available. */
+                                    unavailable?: boolean | null;
+                                }[];
+                            };
+                        }[];
+                        /** @description Opaque next-page cursor; null on the last page. */
+                        cursor?: string | null;
+                    };
+                };
+            };
+            /** @description Missing or empty account_id, or missing or empty query. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The supplied account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     postV1AccountIdMessagesInmail: {
         parameters: {
             query?: never;
@@ -7084,6 +10665,833 @@ export interface operations {
                 };
             };
             /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdInboxes: {
+        parameters: {
+            query?: {
+                /** @description Filter to only personal (CLASSIC_) or only company (COMPANY_) inboxes. Omit to list both. */
+                kind?: "personal" | "company";
+                /** @description Filter to the one company inbox correlated to this managed-company id (e.g. '112013061'). */
+                company_id?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) whose inboxes to list. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's inboxes — personal plus, when the company product is attached, one entry per company page × folder (e.g. id='COMPANY_83734124_PRIMARY'). When no company inbox exists, hint names the Company Pages reconnect requirement instead of returning silently empty. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object?: "inbox_list";
+                        items?: {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "inbox";
+                            /** @description Inbox identifier — pass to the inbox-chats endpoint. */
+                            id?: string;
+                            /**
+                             * @description Whether this is the account's own inbox or a company page's.
+                             * @enum {string}
+                             */
+                            kind?: "personal" | "company";
+                            /** @description Folder within the inbox, e.g. 'primary', 'archived', 'spam'. */
+                            folder?: string;
+                            /** @description Personal: the folder's display name. Company: the page's display name. */
+                            name?: string | null;
+                            /** @description Company inboxes only — the managed-company id this mailbox was correlated to, or null when it could not be correlated (never a fabricated id). */
+                            company_id?: string | null;
+                            /** @description Company inboxes only — the substrate's internal mailbox id (distinct from company_id). */
+                            mailbox_id?: string | null;
+                            /** @description true for company inboxes — company pages can only reply to existing conversations, never start one. */
+                            reply_only?: boolean;
+                        }[];
+                        /** @description Present only when no company inbox exists — names the reconnect requirement. */
+                        hint?: string;
+                    };
+                };
+            };
+            /** @description Invalid kind or company_id filter value. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdInboxesInboxIdChats: {
+        parameters: {
+            query?: {
+                /** @description Number of items to return per page (1–25, default 20). */
+                limit?: number;
+                /** @description An opaque cursor for pagination. Pass the `cursor` from the preceding response to fetch the next page. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) whose inbox to list. */
+                account_id: string;
+                /** @description The inbox ID (e.g. 'CLASSIC_PRIMARY' or 'COMPANY_83734124_PRIMARY') from GET /inboxes. */
+                inbox_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the inbox's conversations, newest-activity-first. Each chat's id is send-ready — pass it directly to POST .../chats/{chat_id}/messages to reply (a company inbox's chats carry ids like 'COMPANY_83734124_2-YTQ3ODU3Njgt'; replying with that id sends AS THE PAGE, no separate parameter needed). Works identically for personal (CLASSIC_) inboxes. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object?: "inbox_chat_list";
+                        items?: Record<string, never>[];
+                        /** @description Next-page cursor; follow until items is empty. */
+                        cursor?: string | null;
+                    };
+                };
+            };
+            /** @description limit out of range (1–25) or malformed cursor. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected account is not an admin of this page. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The inbox does not exist for this account. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdFeedHome: {
+        parameters: {
+            query?: {
+                /** @description Sort order. `recent` (default) = reverse-chronological, always available. `relevant` = LinkedIn's ranked 'top' feed, which draws on a shared, throttled request budget and can rate-limit. When a `cursor` is supplied the sort is taken from the cursor and this is ignored. */
+                sort?: "recent" | "relevant";
+                /** @description Lower bound on the posts returned in this page (1–100, default 20). The server walks fixed internal pages and returns whole pages up to the next boundary at or beyond this value, so a page may return slightly more; page until `cursor` is null. */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's `cursor`; omit for the first page. Self-describing of its sort — when present, the sort is taken from the cursor. Pass it back verbatim; the `relevant` cursor expires (~1h). Page until `cursor` is null. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose home feed to read. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The connected account's home feed as agent-actionable posts. `sort=recent` (default) resolves each post's activity id + author name + post URL + kind; `sort=relevant` resolves the full shape (text, engagement, author id-triple). An empty feed is a valid 200 (items:[], cursor:null). Page until cursor is null. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "feed_post_list";
+                        /** @description The feed posts, in feed order (for recent, appearance order == recency). [] for an empty feed (a 200 success). A page may return slightly more than `limit` (whole pages up to the next boundary). */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "feed_post";
+                            /** @description The post's numeric activity id (no urn prefix) — the primary durable handle to react/comment/fetch-detail, and the feed dedup key (the feed reorders; there is no disjoint-page guarantee). Both sorts. */
+                            activity_urn_id: string;
+                            /** @description The post's author. On `sort=recent` only `name` resolves (`type` is `other`, the rest null). */
+                            author: {
+                                /**
+                                 * @description Person → individual; company/showcase/sponsored → organization; unresolved (every recent author) → other.
+                                 * @enum {string}
+                                 */
+                                type: "individual" | "organization" | "other";
+                                /** @description Author display name. */
+                                name: string | null;
+                                /** @description Author headline/tagline. null on recent. */
+                                headline: string | null;
+                                /** @description Relative time label as rendered ("6d", "1w") or "Promoted" for sponsored posts. Locale-dependent. null on recent. */
+                                posted_ago: string | null;
+                                /** @description Obfuscated member id (ACoAA…) — set for person authors (relevant). */
+                                member_id: string | null;
+                                /** @description Numeric member id — the strongest durable cross-action join key. Person authors (relevant). */
+                                numeric_id: string | null;
+                                /** @description Public identifier slug. Person authors (relevant). */
+                                vanity: string | null;
+                                /** @description Numeric company/organization id — organization authors (relevant), instead of a member id. */
+                                company_id: string | null;
+                                /** @description Canonical profile URL. */
+                                profile_url: string | null;
+                            };
+                            /** @description Full post body, verbatim (relevant). null on recent (the body is nested deep in the source). Pass-through — never stored. */
+                            text: string | null;
+                            /** @description Canonical post URL (recent). null on relevant. */
+                            post_url: string | null;
+                            /** @description Post type parsed from the URL slug: ugcPost | share | groupPost | activity | post (recent). Open enum. null on relevant. */
+                            kind: string | null;
+                            /** @description true for sponsored/promoted posts (relevant). Defaults false. */
+                            is_promoted: boolean;
+                            /** @description true if this post reshares another (relevant). Defaults false. */
+                            is_reshare: boolean;
+                            /** @description When `is_reshare`, the original post's { name, text }; else null. */
+                            reshared_from: {
+                                /** @description Original author's display name. */
+                                name: string | null;
+                                /** @description Original post body (pass-through; never stored). */
+                                text: string | null;
+                            } | null;
+                            /** @description Engagement counts. All 0 on recent. */
+                            engagement: {
+                                /** @description Reaction count. Defaults 0. */
+                                likes: number;
+                                /** @description Comment count. Defaults 0. */
+                                comments: number;
+                                /** @description Reshare count. Defaults 0. */
+                                shares: number;
+                            };
+                        }[];
+                        /** @description Opaque cursor for the next page; null when the walk is exhausted. Self-describing of the sort — pass it back verbatim as `cursor`. The relevant cursor expires (~1h). There is no total (an unbounded, reordering stream) — page until cursor is null. */
+                        cursor: string | null;
+                    };
+                };
+            };
+            /** @description Invalid request — an unsupported `sort`, an out-of-range `limit`, or a corrupt/expired `cursor`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The LinkedIn account lacks a feature backing the feed. Not expected — both free and premium accounts read the home feed; documented for completeness. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the account is unknown. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited. `sort=relevant` draws on a shared, throttled ranked-feed budget; when it is exhausted this is returned (never a silent empty feed). `sort=recent` is not rate-limited — prefer it when the budget is tight. Retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    getV1AccountIdNotifications: {
+        parameters: {
+            query?: {
+                /** @description Which notification stream to read (default all): all | jobs | mentions | my_posts | my_posts_comments | my_posts_reactions | my_posts_reposts. Any other value is a 400. */
+                filter?: "all" | "jobs" | "mentions" | "my_posts" | "my_posts_comments" | "my_posts_reactions" | "my_posts_reposts";
+                /** @description Lower bound on the notifications returned in this page (1–100, default 20). The server walks fixed internal pages and returns whole pages up to the next boundary at or beyond this value; page until cursor is null. */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's `cursor`; omit for the first page. Pass it back verbatim. This feed throttles hard under fast polling — poll `unread_count` rather than deep-paging. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose notifications to read or act on. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of the account's notification cards, plus the account-level unread badge (unread_count) and newest-notification watermark (latest_published_at). Injected/promo cards are included and flagged (injected:true). Zero notifications is a valid 200 (items:[], cursor:null, unread_count:0). Page until cursor is null. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "notification_list";
+                        /** @description The notification cards for this page, newest first — injected/promo cards included and flagged. [] for a zero-notification account. A page may return slightly more than `limit` (whole pages up to the next boundary). */
+                        items: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "notification";
+                            /** @description The card entity urn — the item's primary identity AND the exact handle passed to DELETE .../{card_urn} and .../{card_urn}/show-less. null on injected cards (not deletable). This — not object_urn — is the write handle. */
+                            card_urn: string | null;
+                            /** @description The notification's own object urn — a SECONDARY identifier, NOT the delete handle (feeding it to a write targets the wrong notification). null on injected cards. */
+                            object_urn: string | null;
+                            /** @description true for an injected promo/suggestion card (card_urn/object_urn/type all null; not deletable). Injected cards are always included — flagged, never filtered. */
+                            injected: boolean;
+                            /** @description Notification kind (e.g. SHARED_BY_YOUR_NETWORK, COMMENTS_BY_YOUR_NETWORK, REACTIONS_BY_YOUR_NETWORK, PYMK, WVMP_V2, CAREER_INSIGHTS_FREEMIUM, SEARCH_APPEARANCE). Some kinds carry a trailing version digit (WVMP_V2). Open enum — treat unknown values as pass-through. null when the urn encodes no type. */
+                            type: string | null;
+                            /** @description Full preview text of the notification. Pass-through — never stored. null on cards with no headline. */
+                            text: string | null;
+                            /** @description Primary actor — the profile id of who triggered the notification. null for system/algorithmic cards. */
+                            actor_id: string | null;
+                            /** @description All distinct actor profile ids in the card ([] for system cards). Superset of actor_id. */
+                            actor_ids: string[];
+                            /** @description Deep-link to the primary actor's profile. null when actor_id is null. */
+                            actor_profile_url: string | null;
+                            /** @description Numeric activity id of the post to act on (no urn prefix) for post-related cards — feeds a downstream react/comment. null for non-post cards (profile views, career insights). */
+                            activity_urn_id: string | null;
+                            /** @description Whether the notification has been read/seen. false = unread. null when the substrate omits it. */
+                            read: boolean | null;
+                            /** @description When the notification was published (epoch ms). */
+                            published_at: number | null;
+                            /** @description Where the card links when tapped — a LinkedIn-relative path. */
+                            target_url: string | null;
+                            /** @description Whether the card exposes a 'show less like this' affordance. */
+                            can_show_less: boolean;
+                        }[];
+                        /** @description Opaque cursor for the next page; null on the terminal page. Pass it back verbatim. There is no total (a shifting feed) — page until cursor is null. */
+                        cursor: string | null;
+                        /** @description The unseen-badge count for the account (0 when nothing is unread). Threaded from account metadata — NOT a count of items. Poll this cheaply rather than deep-paging. */
+                        unread_count: number;
+                        /** @description Timestamp (epoch ms) of the newest notification — a poll watermark to detect 'anything new since last poll'. null if unavailable. */
+                        latest_published_at: number | null;
+                    };
+                };
+            };
+            /** @description Invalid request — an unsupported `filter`, an out-of-range `limit`, or a corrupt `cursor`. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The LinkedIn account lacks a feature backing notifications. Not expected — free accounts read notifications; documented for completeness. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or the account is unknown. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited. This feed throttles hard under fast polling — poll `unread_count` rather than deep-paging, and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred, or the upstream response could not be interpreted. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteV1AccountIdNotificationsCardUrn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose notifications to read or act on. */
+                account_id: string;
+                /** @description The card urn to delete — the `card_urn` field of a GET /v1/{account_id}/notifications item (urn:li:fsd_notificationCard:…). Pass the card urn, NOT object_urn (which targets the wrong notification). Percent-encode it into the path. This cannot be undone. */
+                card_urn: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The notification card was deleted. This cannot be undone.
+             *
+             *     **Safe to retry.** This operation is idempotent: deleting a card that you have already deleted succeeds with 200 — it is not an error, and it does not delete anything else. A client that retries after a network timeout is never punished for it. (A `card_urn` that never existed on this account is a 404 — that distinguishes a wrong handle from a repeat.)
+             *
+             *     **Timing.** The removal takes effect within a few seconds; a notifications list read immediately after this call may still include the card for a moment. If you need to confirm removal, re-read after a short delay rather than instantly — but the 200 is already your confirmation that the card was resolved and the removal accepted. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "notification_deleted";
+                        /** @description The card urn that was deleted. */
+                        card_urn: string;
+                    };
+                };
+            };
+            /** @description Invalid request — `card_urn` is not a notification card urn (pass the item's `card_urn`, not `object_urn`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant or is unknown, or the `card_urn` does not exist on this account (it belongs to another account, or never existed). Deleting a card that you already deleted is NOT a 404 — it succeeds with 200; see the 200 description. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    postV1AccountIdNotificationsCardUrnShowLess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account whose notifications to read or act on. */
+                account_id: string;
+                /** @description The card urn — the `card_urn` field of a GET /v1/{account_id}/notifications item. For network-activity cards (a repost, comment, or reaction by your network) 'show less' removes the card — the same effect as deleting it — because LinkedIn exposes no separate softer signal for these cards. This cannot be undone. */
+                card_urn: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The 'show less like this' action was applied — the card is removed, exactly as `delete_notification` removes it. This cannot be undone.
+             *
+             *     **This is the same operation as delete.** LinkedIn's own web client sends an identical request for both its 'Delete notification' and its 'Show less like this' menu item, on every card type that offers them — there is no separate, softer signal available to send. This endpoint exists so the calling intent reads clearly; it does not behave differently. If you want fewer cards like this one in future, change the account's notification preferences on LinkedIn instead.
+             *
+             *     **Safe to retry**, and same timing as `delete_notification`: idempotent (a repeat is a 200, not an error), effective within a few seconds. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "notification_show_less_applied";
+                        /** @description The card urn the show-less action was applied to. */
+                        card_urn: string;
+                    };
+                };
+            };
+            /** @description Invalid request — `card_urn` is not a notification card urn (pass the item's `card_urn`, not `object_urn`). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The connected LinkedIn account's session is disconnected — reconnect the account. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant or is unknown, or the `card_urn` does not exist on this account (it belongs to another account, or never existed). Deleting a card that you already deleted is NOT a 404 — it succeeds with 200; see the 200 description. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary upstream error occurred. Please try again. */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -7309,7 +11717,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -7477,7 +11885,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to comment as. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -7680,7 +12088,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to reply as. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The parent comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -7885,7 +12293,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) that authored the comment. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -7998,7 +12406,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) that authored the comment. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -8179,7 +12587,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The parent comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -8356,7 +12764,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -8494,7 +12902,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to react from. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -8632,7 +13040,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) whose reaction to remove. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
                 /** @description The comment's `id` (a bare numeric string), as returned by comment_on_post / list_comment_replies. */
                 comment_id: string;
@@ -9636,8 +14044,8 @@ export interface operations {
                             /** @description Job location, when set. */
                             location?: string;
                         }[];
-                        /** @description Opaque pagination cursor for the next page. Present only when a full page was returned — omit on the first request, pass back verbatim to page forward. */
-                        cursor?: string;
+                        /** @description Opaque pagination cursor for the next page; null when no next page. A string only when a full page was returned — pass it back verbatim to page forward. */
+                        cursor: string | null;
                     };
                 };
             };
@@ -9992,7 +14400,7 @@ export interface operations {
             path: {
                 /** @description The connected LinkedIn account to retrieve the job posting on behalf of. */
                 account_id: string;
-                /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                /** @description The numeric id of the job posting, e.g. 4100000000. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4100000000) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
                 job_id: string;
             };
             cookie?: never;
@@ -10193,7 +14601,7 @@ export interface operations {
             path: {
                 /** @description The connected LinkedIn account that owns the job posting. */
                 account_id: string;
-                /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                /** @description The numeric id of the job posting, e.g. 4100000000. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4100000000) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
                 job_id: string;
             };
             cookie?: never;
@@ -10441,7 +14849,7 @@ export interface operations {
             path: {
                 /** @description The connected LinkedIn account that owns the job posting. */
                 account_id: string;
-                /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                /** @description The numeric id of the job posting, e.g. 4100000000. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4100000000) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
                 job_id: string;
             };
             cookie?: never;
@@ -10601,7 +15009,7 @@ export interface operations {
             path: {
                 /** @description The connected LinkedIn account to publish the job posting on behalf of. */
                 account_id: string;
-                /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                /** @description The numeric id of the job posting, e.g. 4100000000. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4100000000) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
                 job_id: string;
             };
             cookie?: never;
@@ -10704,7 +15112,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description The account does not have the required Core seat. */
+            /** @description Forbidden. Either the account does not have the required Core seat (TIER_NOT_ACTIVE, carries required_tier:'core'; upgrade the Curviate subscription) — or LINKEDIN_FEATURE_NOT_SUBSCRIBED — the connected LinkedIn account lacks the subscription/entitlement LinkedIn requires to publish job postings, even a FREE posting (activate it on LinkedIn; reconnecting will not help). The code field distinguishes the two. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10788,7 +15196,7 @@ export interface operations {
             path: {
                 /** @description The connected LinkedIn account that owns the job posting. */
                 account_id: string;
-                /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                /** @description The numeric id of the job posting, e.g. 4100000000. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4100000000) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
                 job_id: string;
             };
             cookie?: never;
@@ -10830,7 +15238,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description The account does not have the required Core seat. */
+            /** @description Forbidden. Either the account does not have the required Core seat (TIER_NOT_ACTIVE, carries required_tier:'core'; upgrade the Curviate subscription) — or LINKEDIN_FEATURE_NOT_SUBSCRIBED — the connected LinkedIn account lacks the subscription/entitlement LinkedIn requires to manage job postings (the same gate that blocks publish also blocks close; activate it on LinkedIn — reconnecting will not help). The code field distinguishes the two. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -10919,7 +15327,7 @@ export interface operations {
             path: {
                 /** @description The connected LinkedIn account that owns the job posting. */
                 account_id: string;
-                /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                /** @description The numeric id of the job posting, e.g. 4100000000. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4100000000) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
                 job_id: string;
             };
             cookie?: never;
@@ -11127,7 +15535,7 @@ export interface operations {
             path: {
                 /** @description The connected LinkedIn account that owns the job posting. */
                 account_id: string;
-                /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                /** @description The numeric id of the job posting, e.g. 4100000000. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4100000000) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
                 job_id: string;
                 /** @description The numeric id of the job applicant, obtained from the list-applicants endpoint's items[].id. */
                 applicant_id: string;
@@ -11309,7 +15717,7 @@ export interface operations {
             path: {
                 /** @description The connected LinkedIn account that owns the job posting. */
                 account_id: string;
-                /** @description The numeric id of the job posting, e.g. 4428113858. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4428113858) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
+                /** @description The numeric id of the job posting, e.g. 4100000000. This is the number in a LinkedIn job URL (https://www.linkedin.com/jobs/view/4100000000) and the job_urn value in a POST /v1/{account_id}/search/jobs result. Pass the number only — a full URL is not accepted by the API (the SDK and CLI extract the id from a URL for you). */
                 job_id: string;
                 /** @description The numeric id of the job applicant, obtained from the list-applicants endpoint's items[].id. */
                 applicant_id: string;
@@ -12077,7 +16485,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to use for the request. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -12220,7 +16628,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) to react from. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -12354,7 +16762,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) whose reaction to remove. */
                 account_id: string;
-                /** @description The post's `id`, as returned by get-post / list-posts. Full LinkedIn share URLs are also accepted (e.g. `https://www.linkedin.com/posts/someone_title-activity-7332661864792854528-Qh99/` or `https://www.linkedin.com/feed/update/urn:li:activity:7332661864792854528-slug`). Bare numeric ids and URN forms are also accepted: `7332661864792854528`, `urn:li:activity:N`, `urn:li:ugcPost:N`, `urn:li:share:N`. */
+                /** @description The post's `id` exactly as returned by get-post / list-posts (the opaque id form). Other id forms (bare numeric, `urn:li:…`, share URLs) are not accepted on this operation — fetch the post first and use its `id` verbatim. */
                 post_id: string;
             };
             cookie?: never;
@@ -12613,6 +17021,418 @@ export interface operations {
             };
         };
     };
+    getV1AccountIdSavedPosts: {
+        parameters: {
+            query?: {
+                /** @description Page-size lower bound (1–100, default 20) — returns AT LEAST this many items, up to the next upstream page boundary (a page may return slightly more). Paginate with the returned cursor and walk until `cursor` is null for the complete list. */
+                limit?: number;
+                /** @description Opaque pagination cursor from a prior response's `cursor`; omit for the first page. Page until `cursor` is null. There is no `offset` parameter — an unanchored numeric offset is inert upstream, so it is not a product-surface knob. */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) whose OWN saved posts to list. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The connected account's own saved posts, newest-saved-first, each a PREVIEW (never the full post body). Self resource — no other-member view exists. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object?: "saved_post_list";
+                        /** @description Page of saved-post previews. */
+                        items?: {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "saved_post_preview";
+                            /** @description The numeric activity id. */
+                            id?: string | null;
+                            /** @description The activity id, stripped of the urn:li:activity: prefix — the actionable handle for save/unsave and for GET /v1/{account_id}/posts/{post_id}. */
+                            activity_urn_id?: string | null;
+                            /** @description Canonical post URL. */
+                            url?: string | null;
+                            /**
+                             * @description Basic post-type metadata.
+                             * @enum {string}
+                             */
+                            type?: "post" | "article";
+                            /** @description Author of the saved post. */
+                            author?: {
+                                /**
+                                 * @description Author entity type.
+                                 * @enum {string}
+                                 */
+                                type?: "person" | "company";
+                                /** @description Author's display name. */
+                                name?: string | null;
+                                /** @description Obfuscated member id (person) or company id. */
+                                id?: string | null;
+                                /** @description Numeric member id (person), or null for a company author. */
+                                numeric_id?: string | null;
+                                /** @description Author's headline, or null if not set. */
+                                headline?: string | null;
+                                /** @description Author's profile or company page URL, or null. */
+                                profile_url?: string | null;
+                            };
+                            /** @description The post's published age as rendered (e.g. "1w"), NOT saved-time. */
+                            posted_ago?: string | null;
+                            /** @description A preview of the post body, capped at 140 characters — never the full body. */
+                            snippet?: string | null;
+                            /** @description Always null — no per-item saved-time is exposed. Rely on list order (newest-saved-first). */
+                            saved_at?: null;
+                        }[];
+                        /** @description Next-page cursor; null on the last page. */
+                        cursor?: string | null;
+                    };
+                };
+            };
+            /** @description Invalid account_id, an out-of-range limit, or a corrupt/foreign cursor. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description This account does not have an active Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant (ACCOUNT_NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    postV1AccountIdSavedPosts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) that performs the save. */
+                account_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The post to save. Accepts `urn:li:activity:<id>` or a bare numeric `<id>` — both normalize to the same target. Any other shape (e.g. urn:li:ugcPost:, urn:li:share:, a full URL) is rejected with 400 INVALID_REQUEST. */
+                    post_id: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The post is now saved (a private bookmark — no notification to the author, never visible to third parties). Re-saving an already-saved post is idempotent. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "save_result";
+                        /** @description true after save_post, false after unsave_post. */
+                        saved: boolean;
+                        /** @description The target post's activity id, stripped of the urn:li:activity: prefix. */
+                        post_id: string;
+                    };
+                };
+            };
+            /** @description Missing/malformed account_id, or post_id is not a bare numeric id or a urn:li:activity:<id>. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description This account does not have an active Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant (ACCOUNT_NOT_FOUND), or the target post was not found (RESOURCE_NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    deleteV1AccountIdSavedPostsPostId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The account ID (`acc_…`) that performs the unsave. */
+                account_id: string;
+                /** @description The post to unsave. Accepts `urn:li:activity:<id>` or a bare numeric `<id>`. */
+                post_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The post is no longer saved. Unsaving a not-currently-saved post is idempotent. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "save_result";
+                        /** @description true after save_post, false after unsave_post. */
+                        saved: boolean;
+                        /** @description The target post's activity id, stripped of the urn:li:activity: prefix. */
+                        post_id: string;
+                    };
+                };
+            };
+            /** @description Missing/malformed account_id, or post_id is not a bare numeric id or a urn:li:activity:<id>. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description This account does not have an active Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant (ACCOUNT_NOT_FOUND), or the target post was not found (RESOURCE_NOT_FOUND). */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getV1AccountIdRecruiterProfilesUserId: {
         parameters: {
             query?: {
@@ -12796,7 +17616,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many profile views. */
+            /** @description RATE_LIMIT_ACCOUNT — too many profile views. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -13031,7 +17851,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -13325,7 +18145,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -13508,7 +18328,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Slow down and retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Slow down and retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -13732,7 +18552,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -13935,7 +18755,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -14092,7 +18912,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -14336,7 +19156,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -14634,7 +19454,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -14966,7 +19786,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -15136,7 +19956,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -15343,7 +20163,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -15488,7 +20308,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -15652,7 +20472,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -15859,7 +20679,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -16029,7 +20849,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -16236,7 +21056,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -16421,7 +21241,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -16549,7 +21369,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -16684,7 +21504,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -17006,7 +21826,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -17204,7 +22024,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -17326,7 +22146,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — too many requests. Retry with exponential backoff. */
+            /** @description RATE_LIMIT_ACCOUNT — too many requests. Retry with exponential backoff. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -17503,7 +22323,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -17703,7 +22523,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -17859,7 +22679,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -18015,7 +22835,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -18188,7 +23008,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -18359,7 +23179,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -18496,7 +23316,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -18633,7 +23453,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -18784,7 +23604,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -19168,7 +23988,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. Retry after the period indicated in the Retry-After header. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. Retry after the period indicated in the Retry-After header. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -19430,7 +24250,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. Retry after the period indicated in the Retry-After header. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. Retry after the period indicated in the Retry-After header. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -19725,7 +24545,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description RATE_LIMITED — request rate exceeded. Retry after the period indicated in the Retry-After header. */
+            /** @description RATE_LIMIT_ACCOUNT — request rate exceeded. Retry after the period indicated in the Retry-After header. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -19819,6 +24639,8 @@ export interface operations {
                             seat_id?: string | null;
                             /** @description ISO-8601 UTC connection timestamp. */
                             connected_at?: string | null;
+                            /** @description The seat-derived connection scope this account was last connected with (e.g. ["classic","company","sales_navigator"]). Scope is derived from the account's seat — there is no products input. Null for accounts connected before this was recorded; not attachment truth for Company Pages. */
+                            requested_products?: ("classic" | "company" | "sales_navigator" | "recruiter")[] | null;
                             /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until the first background enrichment lands. */
                             substrate_created_at?: string | null;
                         }[];
@@ -19924,6 +24746,8 @@ export interface operations {
                         last_checked_at?: string;
                         /** @description The seat this account occupies (null for an admin seatless account). */
                         seat_id?: string | null;
+                        /** @description The seat-derived connection scope this account was last connected with (e.g. ["classic","company","sales_navigator"]). Scope is derived from the account's seat — there is no products input. Null for accounts connected before this was recorded; not attachment truth for Company Pages. */
+                        requested_products?: ("classic" | "company" | "sales_navigator" | "recruiter")[] | null;
                         /** @description ISO-8601 UTC creation timestamp of the underlying LinkedIn account — distinct from connected_at. Null until the first background enrichment lands. */
                         substrate_created_at?: string | null;
                         /** @description Usage-safety recommendations for this account — one entry per tracked family (messages.daily, connection_requests.daily, profile_views.daily, inmail.daily, profile.endorse, account.per_minute). These are advisory only: Curviate never rejects a request because a daily recommendation is exceeded; only account.per_minute is a binding limit enforced with HTTP 429. */
@@ -20289,8 +25113,6 @@ export interface operations {
                     };
                     /** @description Exact browser User-Agent to pin for this account, if it hits disconnection issues. */
                     user_agent?: string;
-                    /** @description Optional features to leave un-synced for this account. Allowed: recruiter, sales_navigator, organization_mailboxes. */
-                    disabled_features?: ("recruiter" | "sales_navigator" | "organization_mailboxes")[];
                     /** @description Optional caps on how much history is synced for this account. */
                     sync_limit?: {
                         /** @description Maximum number of chats to sync. */

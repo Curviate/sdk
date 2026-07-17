@@ -1570,6 +1570,481 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+
+  // ─── Account-scoped: profile (M2 / F1) ──────────────────────────────────
+  {
+    name: "profile.subscription",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/subscription`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile_subscription", has_premium: false, plan_title: null, subscriptions: [], actions: {} });
+        }),
+      );
+      await client.account(ACCOUNT_ID).profile.subscription();
+      return captured!;
+    },
+  },
+  {
+    name: "profile.analytics",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/analytics`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile_analytics", profile_viewers: { count: 0 }, followers: { count: 0 }, post_impressions: { count: 0 }, search_appearances: { count: 0 } });
+        }),
+      );
+      await client.account(ACCOUNT_ID).profile.analytics();
+      return captured!;
+    },
+  },
+  {
+    name: "profile.visitors",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/visitors`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile_visitor_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).profile.visitors({ limit: 20 });
+      return captured!;
+    },
+  },
+  {
+    name: "profile.ssi",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/ssi`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "profile_ssi", overall: null, pillars: {}, active_seat: false });
+        }),
+      );
+      await client.account(ACCOUNT_ID).profile.ssi();
+      return captured!;
+    },
+  },
+
+  // ─── Account-scoped: groups (M2 / F1) ───────────────────────────────────
+  {
+    name: "groups.list",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/profile/groups`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "group_list", items: [], paging: { total_count: null }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).groups.list();
+      return captured!;
+    },
+  },
+  {
+    name: "groups.get",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/groups/grp_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "group", id: "grp_1", name: "AI Engineers" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).groups.get("grp_1");
+      return captured!;
+    },
+  },
+  {
+    name: "groups.members",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/groups/grp_1/members`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "group_member_list", items: [], paging: { total_count: 0 }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).groups.members("grp_1", { name: "dana" });
+      return captured!;
+    },
+  },
+
+  // ─── Account-scoped: feed (M2 / F1) ─────────────────────────────────────
+  {
+    name: "feed.home",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/feed/home`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "feed_post_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).feed.home({ sort: "recent" });
+      return captured!;
+    },
+  },
+
+  // ─── Account-scoped: companies extension (insights + company inbox) ────
+  {
+    name: "companies.managed",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/managed`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "managed_company_list", items: [], paging: { total_count: 0 }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.managed();
+      return captured!;
+    },
+  },
+  {
+    name: "companies.followers",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/followers`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_follower_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.followers("1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.invitableFollowers",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/invitable-followers`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "invitable_connection_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.invitableFollowers("1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.chats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.chats("1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.chat",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/chat_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat", id: "chat_1", is_group_chat: false, unread_count: 0 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.chat("1", "chat_1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.messages",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/chat_1/messages`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat_message_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.messages("1", "chat_1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.message",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/chat_1/messages/msg_1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat_message", id: "msg_1", conversation_id: "chat_1", sender: { id: "ACo1" }, sent_at: 1 });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.message("1", "chat_1", "msg_1");
+      return captured!;
+    },
+  },
+  {
+    name: "companies.searchChats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/search`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.searchChats("1", { topic: "1" });
+      return captured!;
+    },
+  },
+
+  // ─── Account-scoped: search extension (groups, services, parameters) ───
+  {
+    name: "search.groups",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/search/groups`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "group_search_result", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).search.groups({ keywords: "gtm" });
+      return captured!;
+    },
+  },
+  {
+    name: "search.services",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/search/services`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "service_search_result", items: [], paging: { total_count: 0 }, cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).search.services({ keywords: "marketing" });
+      return captured!;
+    },
+  },
+  {
+    name: "search.getServiceParameters",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/search/services/parameters`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "search_parameter_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).search.getServiceParameters({ type: "service_category", keywords: "marke" });
+      return captured!;
+    },
+  },
+
+  // ─── Account-scoped: messaging extension (inbox search) ────────────────
+  {
+    name: "messaging.searchChats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/chats/search`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).messaging.searchChats({ query: "sophie" });
+      return captured!;
+    },
+  },
+
+  // ─── Account-scoped: posts extension — saved posts ──────────────────────
+  {
+    name: "posts.listSaved",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/saved-posts`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "saved_post_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).posts.listSaved();
+      return captured!;
+    },
+  },
+  {
+    name: "posts.save",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/saved-posts`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "save_result", saved: true, post_id: "1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).posts.save("1");
+      return captured!;
+    },
+  },
+  {
+    name: "posts.unsave",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/saved-posts/1`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "save_result", saved: false, post_id: "1" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).posts.unsave("1");
+      return captured!;
+    },
+  },
+
+  // ─── Account-scoped: notifications (NEW namespace) ──────────────────────
+  {
+    name: "notifications.list",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/notifications`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({
+            object: "notification_list",
+            items: [],
+            cursor: null,
+            unread_count: 0,
+            latest_published_at: null,
+          });
+        }),
+      );
+      await client.account(ACCOUNT_ID).notifications.list();
+      return captured!;
+    },
+  },
+  {
+    name: "notifications.delete",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.delete(`${BASE}/v1/${ACCOUNT_ID}/notifications/:cardUrn`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "notification_deleted", card_urn: "urn:li:fsd_notificationCard:(x)" });
+        }),
+      );
+      await client.account(ACCOUNT_ID).notifications.delete("urn:li:fsd_notificationCard:(x)");
+      return captured!;
+    },
+  },
+  {
+    name: "notifications.showLess",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/notifications/:cardUrn/show-less`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({
+            object: "notification_show_less_applied",
+            card_urn: "urn:li:fsd_notificationCard:(x)",
+          });
+        }),
+      );
+      await client.account(ACCOUNT_ID).notifications.showLess("urn:li:fsd_notificationCard:(x)");
+      return captured!;
+    },
+  },
+
+  // ─── Account-scoped: inboxes (Beta) ─────────────────────────────────────
+  {
+    name: "inboxes.list",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/inboxes`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "inbox_list", items: [] });
+        }),
+      );
+      await client.account(ACCOUNT_ID).inboxes.list();
+      return captured!;
+    },
+  },
+  {
+    name: "inboxes.listChats",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.get(`${BASE}/v1/${ACCOUNT_ID}/inboxes/CLASSIC_PRIMARY/chats`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "inbox_chat_list", items: [], cursor: null });
+        }),
+      );
+      await client.account(ACCOUNT_ID).inboxes.listChats("CLASSIC_PRIMARY");
+      return captured!;
+    },
+  },
 ];
 
 describe("path grammar — account-first for account-scoped, verbatim for root", () => {
