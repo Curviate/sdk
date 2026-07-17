@@ -95,12 +95,12 @@ export class MessagingResource {
 
   /**
    * Start a new chat with one or more members. `POST /v1/{account_id}/chats`
-   * `attachments[]`, when supplied, carry base64-encoded file bytes — always
+   * `attachments[]`, when supplied, carry base64-encoded file bytes, always
    * sent as JSON, never multipart.
    *
-   * Company pages are reply-only and cannot start a conversation this way —
-   * reply to an existing one instead with `sendMessage()` using a `COMPANY_`
-   * chat id from `inboxes.listChats()`.
+   * Company pages are reply-only and cannot start a conversation this way.
+   * Reply to an existing one instead, with `sendMessage()` using a
+   * `COMPANY_` chat id from `inboxes.listChats()`.
    */
   startChat(body: StartChatBody): Promise<StartChatResult> {
     return this.ctx.request<StartChatResult>({
@@ -144,17 +144,19 @@ export class MessagingResource {
 
   /**
    * Send a message in a chat. `POST /v1/{account_id}/chats/{chat_id}/messages`
-   * `attachments[]`, when supplied, carry base64-encoded file bytes — always
+   * `attachments[]`, when supplied, carry base64-encoded file bytes, always
    * sent as JSON, never multipart. At least one of `text`/`attachments` is
    * required (enforced server-side).
    *
-   * The response echoes `sent_as` — the acting identity. A `COMPANY_` chat id
-   * (e.g. from `inboxes.listChats()`, `"COMPANY_83734124_2-…"`) sends AS THE
-   * PAGE and echoes `sent_as: { kind: "company", company_id, name }`
-   * (`company_id` may be `null` when the page could not be correlated to a
-   * managed page); any other chat id sends as the connected member and
-   * echoes `sent_as: { kind: "personal" }`. Never infer the acting identity
-   * from a message's `sender` field.
+   * The response echoes `sent_as`, the acting identity actually used. Reply
+   * as a company page simply by sending into one of its chat ids (from
+   * `inboxes.listChats()`), no separate parameter needed: a `COMPANY_` chat
+   * id (e.g. `"COMPANY_83734124_2-YTQ3ODU3Njgt"`) sends AS THE PAGE and
+   * echoes `sent_as: { kind: "company", company_id, name }` (`company_id`
+   * is `null` when the page could not be correlated to a managed page); any
+   * other chat id sends as the connected member and echoes
+   * `sent_as: { kind: "personal" }`. Never infer the acting identity from a
+   * message's `sender` field, only from `sent_as`.
    */
   sendMessage(chatId: string, body: SendMessageBody): Promise<SendMessageResult> {
     return this.ctx.request<SendMessageResult>({

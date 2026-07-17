@@ -16,46 +16,46 @@ Mostly additive, plus one breaking removal on the connect/reconnect body.
 ### Breaking
 
 - **`disabled_features` is removed from `auth.intent()`'s request body**
-  (`AuthIntentBody`) — the negative-list model could not express the `company`
+  (`AuthIntentBody`). The negative-list model could not express the `company`
   product or the one-Premium-per-profile XOR. Connection scope (which
   LinkedIn products get synced) is now **seat-derived**: there is no products
   input on connect/reconnect at all. Drop any `disabled_features` you were
-  passing — a body still carrying it is now rejected 400 by the server. The
+  passing: a body still carrying it is now rejected 400 by the server. The
   scope actually recorded for an account reads back as the new
   `requested_products` field (see Added, below). A reconnect that changes
-  scope must use `auth_method: "credentials"` — a cookie replay cannot change
-  scope and now throws `CurviateError(code: "REAUTH_REQUIRED")`.
+  scope must use `auth_method: "credentials"`, since a cookie replay cannot
+  change scope and now throws `CurviateError(code: "REAUTH_REQUIRED")`.
 
 ### Added
 
-- **New account-scoped `inboxes` namespace (2 methods, Beta)** —
-  `inboxes.list(query?)` discovers the account's personal inbox plus, when
-  the company product is attached, one entry per company page × folder (id
-  like `"COMPANY_83734124_PRIMARY"`); `inboxes.listChats(inboxId, query?)`
+- **New account-scoped `inboxes` namespace (2 methods, Beta), the reply-as-a-page
+  surface.** `inboxes.list(query?)` discovers the account's personal inbox
+  plus, when the company product is attached, one entry per company page (id
+  like `"COMPANY_83734124_PRIMARY"`). `inboxes.listChats(inboxId, query?)`
   lists a single inbox's conversations, cursor-paginated. Every returned chat
-  `id` is send-ready — pass it straight to the existing
-  `messaging.sendMessage()` to reply; no separate start/send endpoint for
-  company pages, which are reply-only (`reply_only: true`) and cannot start
-  a new conversation. **Beta:** single-page listing is verified; deep
-  pagination against a busier inbox is still being validated.
-- **`sendMessage()` echoes the acting identity as `sent_as`** — additive on
+  `id` is send-ready: pass it straight to the existing `messaging.sendMessage()`
+  to reply, no separate start/send endpoint. Company pages are reply-only
+  (`reply_only: true`) and cannot start a new conversation. **Beta:**
+  single-page listing is verified; deep pagination against a busier inbox is
+  still being validated.
+- **`sendMessage()` echoes the acting identity as `sent_as`,** additive on
   the existing send-message response. A `COMPANY_` chat id (from
   `inboxes.listChats()`) sends AS THE PAGE and echoes
-  `sent_as: { kind: "company", company_id, name }` (`company_id` may be
-  `null` when the page could not be correlated to a managed page); any other
-  chat id sends as the connected member and echoes
-  `sent_as: { kind: "personal" }`. Never infer the acting identity from a
-  message's `sender` field.
-- **`accounts.list()` / `accounts.get()` gain `requested_products`** — the
+  `sent_as: { kind: "company", company_id, name }` (`company_id` is `null`
+  when the page could not be correlated to a managed page). Any other chat id
+  sends as the connected member and echoes `sent_as: { kind: "personal" }`.
+  Never infer the acting identity from a message's `sender` field, only from
+  `sent_as`.
+- **`accounts.list()` / `accounts.get()` gain `requested_products`,** the
   seat-derived connection scope (e.g. `["classic", "company",
   "sales_navigator"]`) the account was last connected with. `null` for
-  accounts connected before this was recorded; not attachment truth for
+  accounts connected before this was recorded, and not attachment truth for
   Company Pages (that is decidable only via `inboxes.list()`).
-- **Two new error codes** — `PREMIUM_CONFLICT` (a seat resolving to both
-  individual-Premium tiers at once — LinkedIn permits only one per profile;
-  `user_fixable`, never retryable) and `REAUTH_REQUIRED` (a scope-changing
-  reconnect attempted with a cookie instead of credentials; `user_fixable`,
-  never retryable).
+- **Two new error codes:** `PREMIUM_CONFLICT` (a seat resolving to both
+  individual-Premium tiers at once, since LinkedIn permits only one per
+  profile; `user_fixable`, never retryable) and `REAUTH_REQUIRED` (a
+  scope-changing reconnect attempted with a cookie instead of credentials;
+  `user_fixable`, never retryable).
 - **New account-scoped `profile` namespace (4 methods)** — the connected
   account's own insight surface: `profile.subscription()`, `profile.analytics()`,
   `profile.visitors(query?)`, `profile.ssi()`. Distinct from the retired
@@ -106,7 +106,7 @@ Mostly additive, plus one breaking removal on the connect/reconnect body.
   still show the card for a moment, which is not a failure signal. The SDK
   percent-encodes `cardUrn` (which embeds `(`, `)`, `:`, `,`) into the path.
 - **Parity pin: 143 methods across 18 namespaces** (was 135 / 16 at the start
-  of this release cycle) — the `inboxes` namespace is the final addition.
+  of this release cycle). The `inboxes` namespace is the final addition.
 
 ## [0.15.0] — 2026-07-11
 

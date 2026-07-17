@@ -86,16 +86,16 @@ export class AuthResource {
    * account) rather than connecting a brand-new one — it is absent on a normal
    * connect.
    *
-   * Connection scope (which LinkedIn products are enabled — classic, company,
+   * Connection scope (which LinkedIn products are enabled: classic, company,
    * a premium tier) is **seat-derived**: there is no products input on this
    * body, and the recorded scope is readable back as `requested_products` on
    * the account (`accounts.list()` / `accounts.get()`). A reconnect that
-   * would change scope must use `auth_method: "credentials"` — a cookie
+   * would change scope must use `auth_method: "credentials"`, since a cookie
    * replay cannot change scope and throws `CurviateError(code:
-   * "REAUTH_REQUIRED")`. A seat resolving to both individual-Premium tiers at
-   * once throws `CurviateError(code: "PREMIUM_CONFLICT")` — LinkedIn permits
-   * only one per profile. Pin a managed proxy with the optional `country`/`ip`,
-   * or supply `proxy` to override it entirely.
+   * "REAUTH_REQUIRED")` instead. A seat resolving to both individual-Premium
+   * tiers at once throws `CurviateError(code: "PREMIUM_CONFLICT")` (LinkedIn
+   * permits only one per profile). Pin a managed proxy with the optional
+   * `country`/`ip`, or supply `proxy` to override it entirely.
    */
   intent(body: AuthIntentBody): Promise<AuthIntentResult> {
     return this.ctx.request<AuthIntentResult>({
