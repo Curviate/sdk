@@ -224,9 +224,10 @@ export class CompaniesResource {
    * The account must administer the page with the invite-to-follow
    * entitlement (see `managed()`). `identifier` must be the company's numeric
    * provider_id. Pass the `AC…` member ids from an `invitableFollowers()`
-   * read. Results are partial-success: one outcome per requested invitee, in
-   * request order, and valid invitees succeed even if others fail.
-   * Re-inviting an already-invited member is a safe no-op — the same
+   * read. All-or-nothing: for an all-valid request, resolves to one outcome
+   * per requested invitee, in request order. If any invitee id is invalid,
+   * the whole request rejects with a 404, not a partial result.
+   * Re-inviting an already-invited member is a safe no-op, the same
    * invitation id, never a duplicate.
    */
   followInvite(identifier: string, body: CompanyFollowInviteBody): Promise<CompanyFollowInviteResult> {

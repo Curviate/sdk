@@ -4,9 +4,11 @@
 // injection failure). `managed`/`followers`/`invitableFollowers` are the
 // company-insights trio; `followers` is re-added under a different item
 // shape than the pre-0.15.0 method of the same name. `followInvite` (spec
-// api/028) sends the follow-invitation invitableFollowers() seeds — partial-
-// success per-invitee results, in request order. `chats`/`chat`/`messages`/
-// `message`/`searchChats` are the Beta company-inbox surface.
+// api/028) sends the follow-invitation invitableFollowers() seeds. All-or-
+// nothing: an all-valid batch returns 200 with one outcome per invitee, in
+// request order; a batch containing an invalid/nonexistent invitee rejects
+// the whole request with 404, never a partial 200. `chats`/`chat`/
+// `messages`/`message`/`searchChats` are the Beta company-inbox surface.
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../msw/server.js";
@@ -329,7 +331,11 @@ describe("companies.followInvite", () => {
     expect(res.results[0]?.invitation_id).toBe("urn:li:fsd_invitation:7483788354204020736");
   });
 
-  it("partial success: a mixed batch returns one outcome per invitee, in request order", async () => {
+  it("an all-valid batch returns one outcome per invitee, in request order (already_invited + ineligible)", async () => {
+    // All-or-nothing (spec api/028 OQ-1, qa live-verify 2026-07-17): a 200 only
+    // happens when every invitee id resolves to a real member. "ineligible" is a
+    // per-invitee outcome for a resolvable-but-not-invitable member, distinct
+    // from a nonexistent id (which never reaches a 200, see the 404 test below).
     server.use(
       http.post(`${BASE}/v1/acc_co1/companies/112013061/follow-invite`, () =>
         HttpResponse.json({
@@ -360,6 +366,36 @@ describe("companies.followInvite", () => {
     expect(res.results[0]?.status).toBe("already_invited");
     expect(res.results[1]?.status).toBe("ineligible");
     expect(res.results[1]?.error?.code).toBe("RESOURCE_ACCESS_RESTRICTED");
+  });
+
+  it("wrong usage: a batch containing a nonexistent invitee rejects the whole request with 404, not a partial 200", async () => {
+    // All-or-nothing, not partial success: the substrate top-level-rejects a
+    // batch containing ANY invalid/nonexistent invitee id, even alongside
+    // otherwise-valid ids. The SDK surfaces this as a thrown CurviateError, not
+    // a 200 with per-invitee results.
+    server.use(
+      http.post(`${BASE}/v1/acc_co1/companies/112013061/follow-invite`, () =>
+        HttpResponse.json(
+          {
+            code: "RESOURCE_NOT_FOUND",
+            message: "The invitee member was not found.",
+            user_fixable: true,
+            retry_likely_to_succeed: false,
+          },
+          { status: 404 },
+        ),
+      ),
+    );
+    let caught: unknown;
+    try {
+      await companies().followInvite("112013061", {
+        invitee_ids: ["ACoAAExampleInvitee0001", "ACoAANonexistent0001"],
+      });
+    } catch (e) {
+      caught = e;
+    }
+    expect(isCurviateError(caught)).toBe(true);
+    expect((caught as CurviateError).code).toBe("RESOURCE_NOT_FOUND");
   });
 });
 

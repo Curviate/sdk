@@ -341,7 +341,7 @@ export interface paths {
         put?: never;
         /**
          * Invite connections to follow a page
-         * @description Invites one or more of the connected account's 1st-degree connections to follow a company page it administers with the invite-to-follow entitlement. Pass the AC… member ids from an invitable-followers read. Returns one outcome per invitee, in request order; valid invitees succeed even if others fail. Re-inviting an already-invited member is a safe no-op (the same invitation id, never a duplicate). Only identifiers transit. Nothing is stored.
+         * @description Invites one or more of the connected account's 1st-degree connections to follow a company page it administers with the invite-to-follow entitlement. Pass the AC… member ids from an invitable-followers read. Returns one outcome per invitee, in request order, for an all-valid request. If any invitee id is invalid, the whole request is rejected (404), with no partial success. Re-inviting an already-invited member is a safe no-op (the same invitation id, never a duplicate). Only identifiers transit. Nothing is stored.
          */
         post: operations["postV1AccountIdCompaniesIdentifierFollowInvite"];
         delete?: never;
@@ -5419,7 +5419,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description One per-invitee outcome for each requested member, in request order. Valid invitees succeed even if others fail (partial success). Re-inviting an already-invited member returns the same invitation id with status "already_invited", an idempotent no-op, never a duplicate. Only identifiers transit; nothing is stored. */
+            /** @description One per-invitee outcome for each requested member, in request order, for an all-valid request. If any invitee id is invalid, the whole request is rejected (404), with no partial success. Re-inviting an already-invited member returns the same invitation id with status "already_invited", an idempotent no-op, never a duplicate. Only identifiers transit; nothing is stored. */
             200: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -5433,7 +5433,7 @@ export interface operations {
                          * @enum {string}
                          */
                         object: "company_follow_invite_result";
-                        /** @description One entry per requested invitee, in request order. Valid invitees succeed even if others fail (partial success). */
+                        /** @description One entry per requested invitee, in request order, for an all-valid request. If any invitee id is invalid, the whole request is rejected (404), with no partial success. */
                         results: {
                             /**
                              * @description Item type discriminator.
