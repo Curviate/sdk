@@ -9,6 +9,15 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ## [Unreleased]
 
+### Added
+
+- **`companies.sendMessage(identifier, chatId, body)`**: reply to a company-inbox
+  conversation as the page. `POST /v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages`.
+  `chatId` must be the send-ready `COMPANY_` chat id from `inboxes.listChats()`, not the
+  `2-…` id `companies.chats()`/`chat()`/`searchChats()` return; a non-`COMPANY_` id is
+  rejected with a guiding 400. Reply-only. The response echoes `sent_as`, the acting
+  identity actually used.
+
 ## [0.17.0] — 2026-07-17
 
 ### Added

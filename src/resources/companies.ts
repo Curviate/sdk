@@ -1,5 +1,5 @@
 /**
- * Companies resource — 13 methods.
+ * Companies resource — 14 methods.
  *
  * Account-scoped: the bound context injects `account_id` as the leading
  * `/v1/` path segment on every request (account-first grammar) — the 0.14.1
@@ -25,6 +25,11 @@
  * **Beta:** single-page listing and termination are verified; deep pagination
  * (many pages / large cursor round-trips) is still being validated against a
  * busier inbox.
+ *
+ * `sendMessage()` is the inbox's one write: reply to an existing
+ * conversation AS THE PAGE. It requires the send-ready `COMPANY_` chat id
+ * from `inboxes.listChats()`, not the `2-…` id the reads above return.
+ * Reply-only, same admin requirement as the reads.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -98,6 +103,11 @@ export type CompanyChatSearchPage =
 export type CompanyChatSearchQuery = NonNullable<
   paths["/v1/{account_id}/companies/{identifier}/chats/search"]["get"]["parameters"]["query"]
 >;
+
+export type CompanySendMessageBody =
+  paths["/v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages"]["post"]["requestBody"]["content"]["application/json"];
+export type CompanySendMessageResult =
+  paths["/v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages"]["post"]["responses"]["201"]["content"]["application/json"];
 
 // ─── Resource class ───────────────────────────────────────────────────────────
 
@@ -316,6 +326,53 @@ export class CompaniesResource {
       method: "GET",
       path: `/v1/{account_id}/companies/${identifier}/chats/search`,
       ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * Reply to a company-inbox conversation, AS THE PAGE.
+   * `POST /v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages`
+   *
+   * `chatId` must be the send-ready `COMPANY_` chat id, not the `2-…` id
+   * `chats()`/`chat()`/`searchChats()` return. Get the `COMPANY_` id from
+   * `inboxes.listChats()` (`GET /v1/{account_id}/inboxes/{inbox_id}/chats`).
+   * A `2-…` or personal chat id is rejected with a guiding 400 that names
+   * the required form and its source.
+   *
+   * Reply-only: this method can only answer an existing conversation, it
+   * cannot start a new one on the page's behalf. The connected account
+   * must administer the page (`managed()`). `attachments[]`, when
+   * supplied, carry base64-encoded file bytes, always sent as JSON, never
+   * multipart. At least one of `text`/`attachments` is required (enforced
+   * server-side). Message content passes through verbatim and is never
+   * stored.
+   *
+   * The response echoes `sent_as`, the acting identity actually used:
+   * `{ kind: "company", company_id, name }` (`company_id` is `null` when
+   * the page could not be correlated to a managed page on Curviate).
+   *
+   * @example
+   * const acc = curviate.account("acc_YOUR_ACCOUNT_ID");
+   * const { items: inboxes } = await acc.inboxes.list({ kind: "company" });
+   * const pageInbox = inboxes[0]!; // e.g. id "COMPANY_83734124_PRIMARY"
+   *
+   * const { items: chats } = await acc.inboxes.listChats(pageInbox.id);
+   * const chatId = chats[0]!.id as string; // e.g. "COMPANY_83734124_2-YTQ3ODU3Njgt"
+   *
+   * const result = await acc.companies.sendMessage("112013061", chatId, {
+   *   text: "Thanks for reaching out, happy to help!",
+   * });
+   * console.log(result.sent_as); // { kind: "company", company_id: "112013061", name: "RedHire" }
+   */
+  sendMessage(
+    identifier: string,
+    chatId: string,
+    body: CompanySendMessageBody,
+  ): Promise<CompanySendMessageResult> {
+    return this.ctx.request<CompanySendMessageResult>({
+      method: "POST",
+      path: `/v1/{account_id}/companies/${identifier}/chats/${chatId}/messages`,
+      body,
     });
   }
 }

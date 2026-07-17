@@ -51,11 +51,6 @@
       "description": "Send messages, manage conversations, track message threads with connections, and search your inbox."
     },
     {
-      "name": "Messaging: Inboxes",
-      "x-displayName": "Inboxes",
-      "description": "Discover the account's personal and company-page inboxes (with a send-ready chat id per conversation) and list an inbox's conversations. Replying as a page reuses the ordinary send-message endpoint."
-    },
-    {
       "name": "Feed",
       "description": "Read the connected account's home feed as agent-actionable posts — ranked or reverse-chronological."
     },
@@ -172,8 +167,7 @@
     {
       "name": "Messaging",
       "tags": [
-        "Messaging",
-        "Messaging: Inboxes"
+        "Messaging"
       ]
     },
     {
@@ -10392,6 +10386,462 @@
         ],
         "description": "Returns a page of one conversation's messages, newest-first. Message text passes through and is never stored. An unknown conversation returns 404 (the empty page is not trusted at face value); a genuinely empty existing thread returns an empty list. The connected account must administer the page.",
         "x-order": 10
+      },
+      "post": {
+        "operationId": "postV1AccountIdCompaniesIdentifierChatsChatIdMessages",
+        "tags": [
+          "Companies: Inbox"
+        ],
+        "summary": "Reply as the company page",
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The connected LinkedIn account, which must administer the page."
+          },
+          {
+            "name": "identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id."
+          },
+          {
+            "name": "chat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The COMPANY_ chat id to reply to (e.g. 'COMPANY_83734124_2-…'), from GET /v1/{account_id}/inboxes/{inbox_id}/chats, not the 2-… id from this group's chat reads (that form is rejected with a guiding 400)."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Message sent as the page. Returns the new message_id and sent_as, the acting identity, always kind:'company' on this endpoint. company_id is null when the page could not be correlated to a managed page on Curviate, even though the page itself and its name are still known.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "object": {
+                      "type": "string",
+                      "enum": [
+                        "message_sent"
+                      ],
+                      "description": "Response type discriminator."
+                    },
+                    "message_id": {
+                      "type": "string",
+                      "description": "The sent message's identifier."
+                    },
+                    "sent_as": {
+                      "type": "object",
+                      "description": "The identity this message was actually sent as.",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "personal",
+                            "company"
+                          ],
+                          "description": "Which identity sent the message."
+                        },
+                        "company_id": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Company inboxes only. Null when this page is not one of the account's managed companies on Curviate, even though the page itself, and its name, are still known."
+                        },
+                        "name": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Company inboxes only. The page's display name, or null in the rare case the page itself could not be resolved at all."
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "sentAsCompany": {
+                    "summary": "Message sent as the page",
+                    "value": {
+                      "object": "message_sent",
+                      "message_id": "COMPANY_83734124_1-GGGG7777HHHH8888IIII",
+                      "sent_as": {
+                        "kind": "company",
+                        "company_id": "112013061",
+                        "name": "RedHire"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              }
+            }
+          },
+          "400": {
+            "description": "Empty body or neither text nor attachment supplied, a non-numeric identifier, or chat_id is not the send-ready COMPANY_ form (the guiding error names the required form and its /inboxes source).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "400 error",
+                    "value": {
+                      "code": "INVALID_REQUEST",
+                      "message": "A parameter failed validation.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "401 error",
+                    "value": {
+                      "code": "UNAUTHORIZED",
+                      "message": "Missing or invalid API key.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The account does not administer this page (the substrate's own admin gate), the COMPANY_ chat's mailbox correlates to a DIFFERENT company than {identifier}, or the account lacks the required Core seat.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "403 error",
+                    "value": {
+                      "code": "TIER_NOT_ACTIVE",
+                      "message": "The seat plan does not permit this operation; a higher plan is required.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The account_id does not belong to this tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "404 error",
+                    "value": {
+                      "code": "RESOURCE_NOT_FOUND",
+                      "message": "The referenced resource does not exist for this tenant.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large, an attachment exceeds 5 MiB or the total body exceeds 8 MiB.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "413 error",
+                    "value": {
+                      "code": "PAYLOAD_TOO_LARGE",
+                      "message": "An uploaded part or the request body exceeds the size limit.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type, the request must use application/json.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "415 error",
+                    "value": {
+                      "code": "UNSUPPORTED_MEDIA_TYPE",
+                      "message": "The request content type or attachment format is not accepted.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The account is restricted and cannot be queried.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "422 error",
+                    "value": {
+                      "code": "UNPROCESSABLE",
+                      "message": "The request was well-formed but cannot be completed as asked.",
+                      "user_fixable": true,
+                      "retry_likely_to_succeed": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited, slow down and retry after the hinted delay.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "429 error",
+                    "value": {
+                      "code": "RATE_LIMIT_ACCOUNT",
+                      "message": "The per-account request rate limit was exceeded; retry after the delay in retry_hint. Per-workspace breaches carry RATE_LIMIT_TENANT; ingress-wide breaches (pre-auth, no per-client key) and upstream saturation both carry PLATFORM_RATE_LIMIT.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "RateLimit-Policy": {
+                "$ref": "#/components/headers/RateLimit-Policy"
+              },
+              "RateLimit": {
+                "$ref": "#/components/headers/RateLimit"
+              },
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "500 error",
+                    "value": {
+                      "code": "INTERNAL_ERROR",
+                      "message": "An unexpected internal error occurred.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "A temporary error occurred. Please try again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "502 error",
+                    "value": {
+                      "code": "PLATFORM_ERROR",
+                      "message": "A temporary error occurred. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "503 error",
+                    "value": {
+                      "code": "SERVICE_UNAVAILABLE",
+                      "message": "The service is temporarily unavailable. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Gateway timeout.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "error": {
+                    "summary": "504 error",
+                    "value": {
+                      "code": "GATEWAY_TIMEOUT",
+                      "message": "The request timed out. Please try again.",
+                      "user_fixable": false,
+                      "retry_likely_to_succeed": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-curviate-tier": "core",
+        "x-badges": [
+          {
+            "name": "CORE",
+            "position": "after",
+            "color": "#A1A1AA"
+          }
+        ],
+        "description": "Sends a message into an existing company-inbox conversation, as the page. chat_id must be the send-ready COMPANY_ form from GET /v1/{account_id}/inboxes/{inbox_id}/chats (the 2-… id from this group's chat reads is not send-ready and returns a guiding 400). The connected account must administer the page. Reply-only: a page can never start a new conversation, only answer an existing one. Send application/json with text, base64 attachments (max 5 MiB per file), or both; at least one of text or attachments is required. Message content passes through to the platform and is never stored. The response's sent_as field names the acting identity that was actually used.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Message text (1–8000 chars). Optional when at least one attachment is supplied."
+                  },
+                  "quote_id": {
+                    "type": "string",
+                    "description": "Optional message ID to quote or reply to."
+                  },
+                  "attachments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string",
+                          "description": "Base64-encoded file bytes."
+                        },
+                        "content_type": {
+                          "type": "string",
+                          "description": "Attachment MIME type (e.g. image/png, application/pdf)."
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "File name for the attachment."
+                        }
+                      },
+                      "required": [
+                        "content",
+                        "content_type",
+                        "filename"
+                      ]
+                    },
+                    "description": "Optional file attachments (base64-encoded)."
+                  }
+                }
+              },
+              "examples": {
+                "textOnly": {
+                  "summary": "Reply with plain text",
+                  "value": {
+                    "text": "Thanks for reaching out, happy to help!"
+                  }
+                },
+                "withAttachment": {
+                  "summary": "Reply with a base64 file attachment",
+                  "value": {
+                    "text": "Here is the info sheet you asked about.",
+                    "attachments": [
+                      {
+                        "content": "aGVsbG8=",
+                        "content_type": "application/pdf",
+                        "filename": "info-sheet.pdf"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-order": 13
       }
     },
     "/v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages/{message_id}": {
@@ -22672,7 +23122,7 @@
       "get": {
         "operationId": "getV1AccountIdInboxes",
         "tags": [
-          "Messaging: Inboxes"
+          "Messaging"
         ],
         "summary": "List inboxes",
         "security": [
@@ -23031,7 +23481,7 @@
       "get": {
         "operationId": "getV1AccountIdInboxesInboxIdChats",
         "tags": [
-          "Messaging: Inboxes"
+          "Messaging"
         ],
         "summary": "List an inbox's conversations",
         "security": [

@@ -443,7 +443,11 @@ export interface paths {
          */
         get: operations["getV1AccountIdCompaniesIdentifierChatsChatIdMessages"];
         put?: never;
-        post?: never;
+        /**
+         * Reply as the company page
+         * @description Sends a message into an existing company-inbox conversation, as the page. chat_id must be the send-ready COMPANY_ form from GET /v1/{account_id}/inboxes/{inbox_id}/chats (the 2-… id from this group's chat reads is not send-ready and returns a guiding 400). The connected account must administer the page. Reply-only: a page can never start a new conversation, only answer an existing one. Send application/json with text, base64 attachments (max 5 MiB per file), or both; at least one of text or attachments is required. Message content passes through to the platform and is never stored. The response's sent_as field names the acting identity that was actually used.
+         */
+        post: operations["postV1AccountIdCompaniesIdentifierChatsChatIdMessages"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6306,6 +6310,184 @@ export interface operations {
                 };
             };
             /** @description Rate limited — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    postV1AccountIdCompaniesIdentifierChatsChatIdMessages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+                /** @description The COMPANY_ chat id to reply to (e.g. 'COMPANY_83734124_2-…'), from GET /v1/{account_id}/inboxes/{inbox_id}/chats, not the 2-… id from this group's chat reads (that form is rejected with a guiding 400). */
+                chat_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Message text (1–8000 chars). Optional when at least one attachment is supplied. */
+                    text?: string;
+                    /** @description Optional message ID to quote or reply to. */
+                    quote_id?: string;
+                    /** @description Optional file attachments (base64-encoded). */
+                    attachments?: {
+                        /** @description Base64-encoded file bytes. */
+                        content: string;
+                        /** @description Attachment MIME type (e.g. image/png, application/pdf). */
+                        content_type: string;
+                        /** @description File name for the attachment. */
+                        filename: string;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Message sent as the page. Returns the new message_id and sent_as, the acting identity, always kind:'company' on this endpoint. company_id is null when the page could not be correlated to a managed page on Curviate, even though the page itself and its name are still known. */
+            201: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object?: "message_sent";
+                        /** @description The sent message's identifier. */
+                        message_id?: string;
+                        /** @description The identity this message was actually sent as. */
+                        sent_as?: {
+                            /**
+                             * @description Which identity sent the message.
+                             * @enum {string}
+                             */
+                            kind?: "personal" | "company";
+                            /** @description Company inboxes only. Null when this page is not one of the account's managed companies on Curviate, even though the page itself, and its name, are still known. */
+                            company_id?: string | null;
+                            /** @description Company inboxes only. The page's display name, or null in the rare case the page itself could not be resolved at all. */
+                            name?: string | null;
+                        };
+                    };
+                };
+            };
+            /** @description Empty body or neither text nor attachment supplied, a non-numeric identifier, or chat_id is not the send-ready COMPANY_ form (the guiding error names the required form and its /inboxes source). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page (the substrate's own admin gate), the COMPANY_ chat's mailbox correlates to a DIFFERENT company than {identifier}, or the account lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Payload too large, an attachment exceeds 5 MiB or the total body exceeds 8 MiB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unsupported media type, the request must use application/json. */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot be queried. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Rate limited, slow down and retry after the hinted delay. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];

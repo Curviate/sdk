@@ -1850,6 +1850,26 @@ const CASES: PathGrammarCase[] = [
       return captured!;
     },
   },
+  {
+    name: "companies.sendMessage",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/companies/1/chats/COMPANY_1_2-abc/messages`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({
+            object: "message_sent",
+            message_id: "COMPANY_1_1-xyz",
+            sent_as: { kind: "company", company_id: "1", name: "Acme" },
+          });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.sendMessage("1", "COMPANY_1_2-abc", { text: "hi" });
+      return captured!;
+    },
+  },
 
   // ─── Account-scoped: search extension (groups, services, parameters) ───
   {
