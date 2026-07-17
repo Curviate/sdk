@@ -9,9 +9,11 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ## [Unreleased]
 
+## [0.17.0] — 2026-07-17
+
 ### Added
 
-- **`companies.followInvite(identifier, body)`** (spec api/028): invite the connected
+- **`companies.followInvite(identifier, body)`**: invite the connected
   account's 1st-degree connections to follow a company page it administers with the
   invite-to-follow entitlement. Pass the `AC…` member ids from an `invitableFollowers()`
   read. `POST /v1/{account_id}/companies/{identifier}/follow-invite`. All-or-nothing:
