@@ -1755,6 +1755,22 @@ const CASES: PathGrammarCase[] = [
     },
   },
   {
+    name: "companies.followInvite",
+    scope: "account",
+    run: async (client) => {
+      let captured: CapturedRequest | undefined;
+      server.use(
+        http.post(`${BASE}/v1/${ACCOUNT_ID}/companies/1/follow-invite`, ({ request }) => {
+          const url = new URL(request.url);
+          captured = { path: url.pathname, search: url.searchParams };
+          return HttpResponse.json({ object: "company_follow_invite_result", results: [] });
+        }),
+      );
+      await client.account(ACCOUNT_ID).companies.followInvite("1", { invitee_ids: ["ACo1"] });
+      return captured!;
+    },
+  },
+  {
     name: "companies.chats",
     scope: "account",
     run: async (client) => {

@@ -330,6 +330,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{account_id}/companies/{identifier}/follow-invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Invite connections to follow a page
+         * @description Invites one or more of the connected account's 1st-degree connections to follow a company page it administers with the invite-to-follow entitlement. Pass the AC… member ids from an invitable-followers read. Returns one outcome per invitee, in request order; valid invitees succeed even if others fail. Re-inviting an already-invited member is a safe no-op (the same invitation id, never a duplicate). Only identifiers transit — nothing is stored.
+         */
+        post: operations["postV1AccountIdCompaniesIdentifierFollowInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{account_id}/companies/{identifier}/followers": {
         parameters: {
             query?: never;
@@ -399,7 +419,7 @@ export interface paths {
         };
         /**
          * Retrieve one admin conversation
-         * @description Returns a single conversation from a company page's admin inbox by id — the same shape as a list item. The connected account must administer the page. Beta — deep pagination is being validated at scale. Single-page listing and termination are verified; deep pagination (many pages / large cursor round-trips) is provisional until validated against a busier inbox.
+         * @description Returns a single conversation from a company page's admin inbox by id — the same shape as a list item. The connected account must administer the page.
          */
         get: operations["getV1AccountIdCompaniesIdentifierChatsChatId"];
         put?: never;
@@ -419,7 +439,7 @@ export interface paths {
         };
         /**
          * List a conversation's messages
-         * @description Returns a page of one conversation's messages, newest-first. Message text passes through and is never stored. An unknown conversation returns 404 (the empty page is not trusted at face value); a genuinely empty existing thread returns an empty list. The connected account must administer the page. Beta — deep pagination is being validated at scale. Single-page listing and termination are verified; deep pagination (many pages / large cursor round-trips) is provisional until validated against a busier inbox.
+         * @description Returns a page of one conversation's messages, newest-first. Message text passes through and is never stored. An unknown conversation returns 404 (the empty page is not trusted at face value); a genuinely empty existing thread returns an empty list. The connected account must administer the page.
          */
         get: operations["getV1AccountIdCompaniesIdentifierChatsChatIdMessages"];
         put?: never;
@@ -439,7 +459,7 @@ export interface paths {
         };
         /**
          * Retrieve one message from a conversation
-         * @description Returns a single message from a company page's admin inbox, scoped to its conversation — the same shape as a messages-list item. Both chat_id and message_id are required. The connected account must administer the page. Beta — deep pagination is being validated at scale. Single-page listing and termination are verified; deep pagination (many pages / large cursor round-trips) is provisional until validated against a busier inbox.
+         * @description Returns a single message from a company page's admin inbox, scoped to its conversation — the same shape as a messages-list item. Both chat_id and message_id are required. The connected account must administer the page.
          */
         get: operations["getV1AccountIdCompaniesIdentifierChatsChatIdMessagesMessageId"];
         put?: never;
@@ -773,7 +793,7 @@ export interface paths {
         put?: never;
         /**
          * Send a message
-         * @description Sends a message into an existing chat. Send application/json with text, base64 attachments (max 5 MiB per file), or both; at least one of text or attachments is required. Message content passes through to the platform and is never stored.
+         * @description Sends a message into an existing chat. Send application/json with text, base64 attachments (max 5 MiB per file), or both; at least one of text or attachments is required. Message content passes through to the platform and is never stored. Sending on behalf of a company page: use a COMPANY_ chat id (from GET /v1/{account_id}/inboxes/{inbox_id}/chats) and the message sends AS THE PAGE, no separate parameter needed. The response's sent_as field names the acting identity that was actually used. Company pages are reply-only: this endpoint can answer an existing conversation on a page's behalf, but a page can never start a new one.
          */
         post: operations["postV1AccountIdChatsChatIdMessages"];
         delete?: never;
@@ -919,7 +939,7 @@ export interface paths {
         };
         /**
          * List an inbox's conversations
-         * @description Returns a paginated list of an inbox's conversations, newest-activity-first. Each chat's id is send-ready: pass it directly to the send-message endpoint to reply — a company inbox's chat id (e.g. 'COMPANY_83734124_2-…') replies AS THE PAGE, no separate parameter needed. Works identically for personal (CLASSIC_) inboxes. Company pages are reply-only (reply_only:true on the inbox, from GET /inboxes) — they cannot start a new conversation. Unknown inbox id returns 404.
+         * @description Returns a paginated list of an inbox's conversations, newest-activity-first. Each chat's id is send-ready: pass it directly to the send-message endpoint to reply — a company inbox's chat id (e.g. 'COMPANY_83734124_2-…') replies AS THE PAGE, no separate parameter needed. Works identically for personal (CLASSIC_) inboxes. Company pages are reply-only (reply_only:true on the inbox, from GET /inboxes) — they cannot start a new conversation. A malformed inbox_id returns 400 INVALID_REQUEST; a well-formed id for a mailbox this account does not administer returns 403 RESOURCE_ACCESS_RESTRICTED (no existence disclosure) — there is no 404 for this endpoint.
          */
         get: operations["getV1AccountIdInboxesInboxIdChats"];
         put?: never;
@@ -5378,6 +5398,163 @@ export interface operations {
             };
         };
     };
+    postV1AccountIdCompaniesIdentifierFollowInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connected LinkedIn account, which must administer the page with invite rights. */
+                account_id: string;
+                /** @description The company's numeric id (e.g. 112013061) — the id field of GET /v1/{account_id}/companies/{identifier} or a POST /v1/{account_id}/search/companies result. A public handle or URN is not accepted here — pass the numeric id. */
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The AC… member ids to invite to follow the page — the id field of an invitable-followers read. Required, 1–50 per request. */
+                    invitee_ids: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description One per-invitee outcome for each requested member, in request order. Valid invitees succeed even if others fail (partial success). Re-inviting an already-invited member returns the same invitation id with status "already_invited" — an idempotent no-op, never a duplicate. Only identifiers transit; nothing is stored. */
+            200: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Response type discriminator.
+                         * @enum {string}
+                         */
+                        object: "company_follow_invite_result";
+                        /** @description One entry per requested invitee, in request order. Valid invitees succeed even if others fail (partial success). */
+                        results: {
+                            /**
+                             * @description Item type discriminator.
+                             * @enum {string}
+                             */
+                            object: "company_follow_invite";
+                            /** @description The member id from the request, echoed back. */
+                            invitee_id: string;
+                            /**
+                             * @description Per-invitee outcome. "invited" — a new follow-invitation was created. "already_invited" — a pending invitation already existed (idempotent no-op; the same invitation_id is returned, never a duplicate). "ineligible" — the member is not an invitable 1st-degree connection. "not_found" — the member id did not resolve.
+                             * @enum {string}
+                             */
+                            status: "invited" | "already_invited" | "ineligible" | "not_found";
+                            /** @description The invitation id — present for "invited" and "already_invited", null for a per-invitee failure. */
+                            invitation_id: string | null;
+                            /** @description Present only for a per-invitee failure ("ineligible" / "not_found"); null otherwise. */
+                            error: {
+                                /** @description Canonical error code for this invitee's failure. */
+                                code?: string;
+                                /** @description Human-readable failure reason. */
+                                message?: string;
+                            } | null;
+                        }[];
+                    };
+                };
+            };
+            /** @description Empty, over-cap (>50), or malformed invitee_ids; or a non-numeric identifier — before any send. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account does not administer this page with the invite-to-follow entitlement (fail-closed), or lacks the required Core seat. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account_id does not belong to this tenant, or a wholly-invalid invitee did not resolve. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The account is restricted and cannot perform this operation. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description The follow-invite credit or rate budget is exhausted — slow down and retry after the hinted delay. */
+            429: {
+                headers: {
+                    "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
+                    RateLimit: components["headers"]["RateLimit"];
+                    "Retry-After": components["headers"]["Retry-After"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Internal error. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description A temporary error occurred. Please try again. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Gateway timeout. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     getV1AccountIdCompaniesIdentifierFollowers: {
         parameters: {
             query?: {
@@ -9604,7 +9781,7 @@ export interface operations {
             path: {
                 /** @description The account ID (`acc_…`) that owns the chat. */
                 account_id: string;
-                /** @description The unique identifier of the chat to send the message to. */
+                /** @description The unique identifier of the chat to send the message to. A COMPANY_ chat id (e.g. 'COMPANY_83734124_2-YTQ3ODU3Njgt', from the inboxes endpoints) sends this message as that company page instead of the connected member. */
                 chat_id: string;
             };
             cookie?: never;
@@ -9629,7 +9806,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Message sent. Returns the new message_id and sent_as — the acting identity. A COMPANY_ chat id (e.g. `COMPANY_83734124_2-…`) sends AS THE PAGE and echoes sent_as:{kind:'company',company_id,name} (company_id may be null when the page could not be correlated to a managed page); any other chat id sends as the connected member and echoes sent_as:{kind:'personal'}. Never infer the acting identity from the message's sender field. */
+            /** @description Message sent. Returns the new message_id and sent_as, the acting identity. Reply as a company page simply by sending into one of its chat ids (from GET /v1/{account_id}/inboxes/{inbox_id}/chats): a COMPANY_ chat id (e.g. `COMPANY_83734124_2-…`) sends AS THE PAGE and echoes sent_as:{kind:'company',company_id,name} (company_id is null when the page could not be correlated to a managed page). Any other chat id sends as the connected member and echoes sent_as:{kind:'personal'}. Never infer the acting identity from the message's sender field, only from sent_as. */
             201: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -9652,10 +9829,10 @@ export interface operations {
                              * @enum {string}
                              */
                             kind?: "personal" | "company";
-                            /** @description Company inboxes only — null when uncorrelatable. */
+                            /** @description Company inboxes only. Null when this page is not one of the account's managed companies on Curviate, even though the page itself, and its name, are still known. */
                             company_id?: string | null;
-                            /** @description Company inboxes only — the page's display name. */
-                            name?: string;
+                            /** @description Company inboxes only. The page's display name, or null in the rare case the page itself could not be resolved at all. */
+                            name?: string | null;
                         };
                     };
                 };
@@ -10710,7 +10887,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The account's inboxes — personal plus, when the company product is attached, one entry per company page × folder (e.g. id='COMPANY_83734124_PRIMARY'). When no company inbox exists, hint names the Company Pages reconnect requirement instead of returning silently empty. */
+            /** @description The account's inboxes: its own personal inbox, plus, when the company product is attached, one entry per company page (e.g. id='COMPANY_83734124_PRIMARY'). When no company inbox exists, hint names the Company Pages reconnect requirement instead of returning silently empty. This is the discovery step of the reply-as-a-page flow: find a company inbox here, read its conversations with GET /v1/{account_id}/inboxes/{inbox_id}/chats, then reply with the existing POST /v1/{account_id}/chats/{chat_id}/messages using one of its chat ids. */
             200: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -10730,7 +10907,7 @@ export interface operations {
                              * @enum {string}
                              */
                             object?: "inbox";
-                            /** @description Inbox identifier — pass to the inbox-chats endpoint. */
+                            /** @description Inbox identifier. Pass it to the inbox-chats endpoint below to read its conversations. */
                             id?: string;
                             /**
                              * @description Whether this is the account's own inbox or a company page's.
@@ -10741,14 +10918,14 @@ export interface operations {
                             folder?: string;
                             /** @description Personal: the folder's display name. Company: the page's display name. */
                             name?: string | null;
-                            /** @description Company inboxes only — the managed-company id this mailbox was correlated to, or null when it could not be correlated (never a fabricated id). */
+                            /** @description Company inboxes only. The managed-company id this mailbox was correlated to, or null when it could not be correlated (never a fabricated id). */
                             company_id?: string | null;
-                            /** @description Company inboxes only — the substrate's internal mailbox id (distinct from company_id). */
+                            /** @description Company inboxes only. The substrate's internal mailbox id (distinct from company_id). */
                             mailbox_id?: string | null;
-                            /** @description true for company inboxes — company pages can only reply to existing conversations, never start one. */
+                            /** @description True for company inboxes: a company page can only reply to an existing conversation, it can never start one. */
                             reply_only?: boolean;
                         }[];
-                        /** @description Present only when no company inbox exists — names the reconnect requirement. */
+                        /** @description Present only when no company inbox exists. Names the reconnect requirement. */
                         hint?: string;
                     };
                 };
@@ -10840,7 +11017,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description A page of the inbox's conversations, newest-activity-first. Each chat's id is send-ready — pass it directly to POST .../chats/{chat_id}/messages to reply (a company inbox's chats carry ids like 'COMPANY_83734124_2-YTQ3ODU3Njgt'; replying with that id sends AS THE PAGE, no separate parameter needed). Works identically for personal (CLASSIC_) inboxes. */
+            /** @description A page of the inbox's conversations, newest-activity-first, in the same shape as GET /v1/{account_id}/chats. Each chat's id is send-ready: pass it directly to POST /v1/{account_id}/chats/{chat_id}/messages to reply. A company inbox's chats carry ids like 'COMPANY_83734124_2-YTQ3ODU3Njgt'; replying with that id sends AS THE PAGE, no separate parameter needed, and the send response's sent_as field confirms it. Works identically for personal (CLASSIC_) inboxes. */
             200: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -10854,13 +11031,112 @@ export interface operations {
                          * @enum {string}
                          */
                         object?: "inbox_chat_list";
-                        items?: Record<string, never>[];
-                        /** @description Next-page cursor; follow until items is empty. */
+                        items?: {
+                            /**
+                             * @description Response type discriminator.
+                             * @enum {string}
+                             */
+                            object?: "chat";
+                            /** @description Chat identifier. */
+                            id?: string;
+                            /** @description Account id that owns this chat. */
+                            account_id?: string;
+                            /** @description Chat display name, or null. */
+                            name?: string | null;
+                            /**
+                             * @description Conversation type.
+                             * @enum {string}
+                             */
+                            type?: "1to1" | "group" | "channel";
+                            is_group?: boolean;
+                            is_1to1?: boolean;
+                            is_channel?: boolean;
+                            is_pinned?: boolean;
+                            is_readonly?: boolean;
+                            /** @description True if the chat is archived. */
+                            is_archived?: boolean;
+                            /** @description True if notifications for this chat are muted. */
+                            muted_until?: boolean;
+                            /** @description Number of unread messages in this chat. */
+                            unread_count?: number;
+                            /** @description Folder labels assigned to this chat. */
+                            folders?: string[];
+                            /** @description The platform this chat originates from. */
+                            provider?: string;
+                            /** @description ISO-8601 UTC creation timestamp. */
+                            created_at?: string;
+                            /** @description ISO-8601 UTC timestamp of the last message. */
+                            last_message_timestamp?: string;
+                            /** @description Identifier of the 1:1 counterpart. */
+                            user_id?: string;
+                            /** @description The most recent message in the chat. */
+                            last_message?: {
+                                /**
+                                 * @description Response type discriminator.
+                                 * @enum {string}
+                                 */
+                                object?: "message";
+                                /** @description Message identifier. */
+                                id?: string;
+                                /** @description Account id that owns this message. */
+                                account_id?: string;
+                                /** @description Chat this message belongs to. */
+                                chat_id?: string;
+                                /** @description Identifier of the sender. */
+                                sender_id?: string;
+                                /** @description Full message text (content pass-through — never stored). */
+                                text?: string | null;
+                                /** @description Attachment descriptors (no bytes — use the attachment endpoint to download). */
+                                attachments?: {
+                                    /** @description Attachment identifier. */
+                                    id?: string;
+                                    /** @description MIME type of the attachment. */
+                                    mimetype?: string;
+                                    /** @description Attachment kind: file | img | video | audio. */
+                                    type?: string;
+                                    /** @description Original file name. */
+                                    filename?: string;
+                                    /** @description Size in bytes. */
+                                    file_size?: number;
+                                    /** @description True when the attachment is no longer available. */
+                                    unavailable?: boolean | null;
+                                }[];
+                                /** @description ISO-8601 UTC send timestamp. */
+                                timestamp?: string;
+                                /** @description True if the connected account sent this message. */
+                                is_sender?: boolean;
+                                is_seen?: boolean;
+                                is_delivered?: boolean;
+                                is_edited?: boolean;
+                                /** @description True if the account is mentioned in this message. */
+                                is_mentionned?: boolean;
+                                /** @description Per-type reaction breakdown on the message. */
+                                reactions?: {
+                                    type?: string;
+                                    count?: number;
+                                }[];
+                                /** @description Total reaction count across all types (derived). */
+                                reaction_count?: number;
+                                /** @description The platform this message originates from. */
+                                provider?: string;
+                            };
+                            /** @description The 1:1 counterpart's profile. */
+                            user?: {
+                                /** @description Identifier of the counterpart. */
+                                id?: string;
+                                /** @description individual | organization. */
+                                type?: string;
+                                display_name?: string;
+                                profile_url?: string;
+                                public_picture_url?: string;
+                            };
+                        }[];
+                        /** @description Next-page cursor. Follow until items is empty. */
                         cursor?: string | null;
                     };
                 };
             };
-            /** @description limit out of range (1–25) or malformed cursor. */
+            /** @description limit out of range (1-25), malformed cursor, or a malformed/unknown-folder inbox_id (rejected before the substrate is ever called; see GET /inboxes for valid ids). */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10878,17 +11154,8 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description The connected account is not an admin of this page. */
+            /** @description The connected account does not administer this inbox: either it is not an admin of this page, or the mailbox is unknown to this account. No existence disclosure. */
             403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error"];
-                };
-            };
-            /** @description The inbox does not exist for this account. */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };

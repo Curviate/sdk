@@ -1,5 +1,5 @@
 /**
- * Companies resource — 12 methods.
+ * Companies resource — 13 methods.
  *
  * Account-scoped: the bound context injects `account_id` as the leading
  * `/v1/` path segment on every request (account-first grammar) — the 0.14.1
@@ -13,10 +13,11 @@
  * `followers()` — re-added under a different item shape (`company_follower`,
  * carrying `degree`/`followed_at`) than the pre-0.15.0 method of the same
  * name. `invitableFollowers()` lists connections the account can invite to
- * follow the page. All three require the account to administer the target
- * page (`managed()` for the caller's own set; `followers`/`invitableFollowers`
- * take the target company's numeric provider_id, same as `employees`/`posts`/
- * `jobs`).
+ * follow the page; `followInvite()` sends the invitation (spec api/028) —
+ * pass the `AC…` member ids `invitableFollowers()` returned. All four require
+ * the account to administer the target page (`managed()` for the caller's
+ * own set; `followers`/`invitableFollowers`/`followInvite` take the target
+ * company's numeric provider_id, same as `employees`/`posts`/`jobs`).
  *
  * `chats()` / `chat()` / `messages()` / `message()` / `searchChats()` are the
  * company page's admin message inbox — a distinct conversation surface from
@@ -68,6 +69,11 @@ export type CompanyInvitableFollowerListPage =
 export type CompanyInvitableFollowerListQuery = NonNullable<
   paths["/v1/{account_id}/companies/{identifier}/invitable-followers"]["get"]["parameters"]["query"]
 >;
+
+export type CompanyFollowInviteBody =
+  paths["/v1/{account_id}/companies/{identifier}/follow-invite"]["post"]["requestBody"]["content"]["application/json"];
+export type CompanyFollowInviteResult =
+  paths["/v1/{account_id}/companies/{identifier}/follow-invite"]["post"]["responses"]["200"]["content"]["application/json"];
 
 export type CompanyChatListPage =
   paths["/v1/{account_id}/companies/{identifier}/chats"]["get"]["responses"]["200"]["content"]["application/json"];
@@ -208,6 +214,26 @@ export class CompaniesResource {
       method: "GET",
       path: `/v1/{account_id}/companies/${identifier}/invitable-followers`,
       ...(params ? { query: params as Record<string, string | number | boolean | string[] | undefined | null> } : {}),
+    });
+  }
+
+  /**
+   * Invite the connected account's 1st-degree connections to follow the
+   * company page. `POST /v1/{account_id}/companies/{identifier}/follow-invite`
+   *
+   * The account must administer the page with the invite-to-follow
+   * entitlement (see `managed()`). `identifier` must be the company's numeric
+   * provider_id. Pass the `AC…` member ids from an `invitableFollowers()`
+   * read. Results are partial-success: one outcome per requested invitee, in
+   * request order, and valid invitees succeed even if others fail.
+   * Re-inviting an already-invited member is a safe no-op — the same
+   * invitation id, never a duplicate.
+   */
+  followInvite(identifier: string, body: CompanyFollowInviteBody): Promise<CompanyFollowInviteResult> {
+    return this.ctx.request<CompanyFollowInviteResult>({
+      method: "POST",
+      path: `/v1/{account_id}/companies/${identifier}/follow-invite`,
+      body,
     });
   }
 
