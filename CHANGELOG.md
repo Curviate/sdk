@@ -9,6 +9,8 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ## [Unreleased]
 
+## [0.18.0] — 2026-07-17
+
 ### Added
 
 - **`companies.sendMessage(identifier, chatId, body)`**: reply to a company-inbox
