@@ -3,8 +3,8 @@
 // never a query param (fixes the pre-existing companies.get query-param
 // injection failure). `managed`/`followers`/`invitableFollowers` are the
 // company-insights trio; `followers` is re-added under a different item
-// shape than the pre-0.15.0 method of the same name. `followInvite` (spec
-// api/028) sends the follow-invitation invitableFollowers() seeds. All-or-
+// shape than the pre-0.15.0 method of the same name. `followInvite`
+// sends the follow-invitation invitableFollowers() seeds. All-or-
 // nothing: an all-valid batch returns 200 with one outcome per invitee, in
 // request order; a batch containing an invalid/nonexistent invitee rejects
 // the whole request with 404, never a partial 200. `chats`/`chat`/
@@ -332,7 +332,7 @@ describe("companies.followInvite", () => {
   });
 
   it("an all-valid batch returns one outcome per invitee, in request order (already_invited + ineligible)", async () => {
-    // All-or-nothing (spec api/028 OQ-1, qa live-verify 2026-07-17): a 200 only
+    // All-or-nothing (qa live-verify 2026-07-17): a 200 only
     // happens when every invitee id resolves to a real member. "ineligible" is a
     // per-invitee outcome for a resolvable-but-not-invitable member, distinct
     // from a nonexistent id (which never reaches a 200, see the 404 test below).

@@ -13,7 +13,7 @@
  * `followers()` — re-added under a different item shape (`company_follower`,
  * carrying `degree`/`followed_at`) than the pre-0.15.0 method of the same
  * name. `invitableFollowers()` lists connections the account can invite to
- * follow the page; `followInvite()` sends the invitation (spec api/028) —
+ * follow the page; `followInvite()` sends the invitation —
  * pass the `AC…` member ids `invitableFollowers()` returned. All four require
  * the account to administer the target page (`managed()` for the caller's
  * own set; `followers`/`invitableFollowers`/`followInvite` take the target
