@@ -9,6 +9,20 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ## [Unreleased]
 
+## [0.17.0] — 2026-07-17
+
+### Added
+
+- **`companies.followInvite(identifier, body)`**: invite the connected
+  account's 1st-degree connections to follow a company page it administers with the
+  invite-to-follow entitlement. Pass the `AC…` member ids from an `invitableFollowers()`
+  read. `POST /v1/{account_id}/companies/{identifier}/follow-invite`. All-or-nothing:
+  for an all-valid request, resolves to one outcome per requested invitee, in request
+  order (`status: "invited" | "already_invited" | "ineligible" | "not_found"`); if any
+  invitee id is invalid, the whole request rejects with a 404, not a partial result.
+  Re-inviting an already-invited member is a safe no-op (the same `invitation_id`,
+  never a duplicate).
+
 ## [0.16.0] — 2026-07-17
 
 Mostly additive, plus one breaking removal on the connect/reconnect body.
