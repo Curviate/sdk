@@ -7870,7 +7870,7 @@
         ],
         "responses": {
           "200": {
-            "description": "One per-invitee outcome for each requested member, in request order. Valid invitees succeed even if others fail (partial success). Re-inviting an already-invited member returns the same invitation id with status \"already_invited\" — an idempotent no-op, never a duplicate. Only identifiers transit; nothing is stored.",
+            "description": "One per-invitee outcome for each requested member, in request order. Valid invitees succeed even if others fail (partial success). Re-inviting an already-invited member returns the same invitation id with status \"already_invited\", an idempotent no-op, never a duplicate. Only identifiers transit; nothing is stored.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7919,14 +7919,14 @@
                               "ineligible",
                               "not_found"
                             ],
-                            "description": "Per-invitee outcome. \"invited\" — a new follow-invitation was created. \"already_invited\" — a pending invitation already existed (idempotent no-op; the same invitation_id is returned, never a duplicate). \"ineligible\" — the member is not an invitable 1st-degree connection. \"not_found\" — the member id did not resolve."
+                            "description": "Per-invitee outcome. \"invited\": a new follow-invitation was created. \"already_invited\": a pending invitation already existed (idempotent no-op; the same invitation_id is returned, never a duplicate). \"ineligible\": the member is not an invitable 1st-degree connection. \"not_found\": the member id did not resolve."
                           },
                           "invitation_id": {
                             "type": [
                               "string",
                               "null"
                             ],
-                            "description": "The invitation id — present for \"invited\" and \"already_invited\", null for a per-invitee failure."
+                            "description": "The invitation id, present for \"invited\" and \"already_invited\", null for a per-invitee failure."
                           },
                           "error": {
                             "type": [
@@ -7986,7 +7986,7 @@
             }
           },
           "400": {
-            "description": "Empty, over-cap (>50), or malformed invitee_ids; or a non-numeric identifier — before any send.",
+            "description": "Empty, over-cap (>50), or malformed invitee_ids, or a non-numeric identifier, rejected before any send.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8091,7 +8091,7 @@
             }
           },
           "429": {
-            "description": "The follow-invite credit or rate budget is exhausted — slow down and retry after the hinted delay.",
+            "description": "The follow-invite credit or rate budget is exhausted. Slow down and retry after the hinted delay.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8215,7 +8215,7 @@
             "color": "#A1A1AA"
           }
         ],
-        "description": "Invites one or more of the connected account's 1st-degree connections to follow a company page it administers with the invite-to-follow entitlement. Pass the AC… member ids from an invitable-followers read. Returns one outcome per invitee, in request order; valid invitees succeed even if others fail. Re-inviting an already-invited member is a safe no-op (the same invitation id, never a duplicate). Only identifiers transit — nothing is stored.",
+        "description": "Invites one or more of the connected account's 1st-degree connections to follow a company page it administers with the invite-to-follow entitlement. Pass the AC… member ids from an invitable-followers read. Returns one outcome per invitee, in request order; valid invitees succeed even if others fail. Re-inviting an already-invited member is a safe no-op (the same invitation id, never a duplicate). Only identifiers transit. Nothing is stored.",
         "requestBody": {
           "required": true,
           "content": {
@@ -8228,7 +8228,7 @@
                     "items": {
                       "type": "string"
                     },
-                    "description": "The AC… member ids to invite to follow the page — the id field of an invitable-followers read. Required, 1–50 per request."
+                    "description": "The AC… member ids to invite to follow the page. Each is the id field of an invitable-followers read. Required, 1 to 50 per request."
                   }
                 },
                 "required": [

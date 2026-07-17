@@ -341,7 +341,7 @@ export interface paths {
         put?: never;
         /**
          * Invite connections to follow a page
-         * @description Invites one or more of the connected account's 1st-degree connections to follow a company page it administers with the invite-to-follow entitlement. Pass the AC… member ids from an invitable-followers read. Returns one outcome per invitee, in request order; valid invitees succeed even if others fail. Re-inviting an already-invited member is a safe no-op (the same invitation id, never a duplicate). Only identifiers transit — nothing is stored.
+         * @description Invites one or more of the connected account's 1st-degree connections to follow a company page it administers with the invite-to-follow entitlement. Pass the AC… member ids from an invitable-followers read. Returns one outcome per invitee, in request order; valid invitees succeed even if others fail. Re-inviting an already-invited member is a safe no-op (the same invitation id, never a duplicate). Only identifiers transit. Nothing is stored.
          */
         post: operations["postV1AccountIdCompaniesIdentifierFollowInvite"];
         delete?: never;
@@ -5413,13 +5413,13 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description The AC… member ids to invite to follow the page — the id field of an invitable-followers read. Required, 1–50 per request. */
+                    /** @description The AC… member ids to invite to follow the page. Each is the id field of an invitable-followers read. Required, 1 to 50 per request. */
                     invitee_ids: string[];
                 };
             };
         };
         responses: {
-            /** @description One per-invitee outcome for each requested member, in request order. Valid invitees succeed even if others fail (partial success). Re-inviting an already-invited member returns the same invitation id with status "already_invited" — an idempotent no-op, never a duplicate. Only identifiers transit; nothing is stored. */
+            /** @description One per-invitee outcome for each requested member, in request order. Valid invitees succeed even if others fail (partial success). Re-inviting an already-invited member returns the same invitation id with status "already_invited", an idempotent no-op, never a duplicate. Only identifiers transit; nothing is stored. */
             200: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
@@ -5443,11 +5443,11 @@ export interface operations {
                             /** @description The member id from the request, echoed back. */
                             invitee_id: string;
                             /**
-                             * @description Per-invitee outcome. "invited" — a new follow-invitation was created. "already_invited" — a pending invitation already existed (idempotent no-op; the same invitation_id is returned, never a duplicate). "ineligible" — the member is not an invitable 1st-degree connection. "not_found" — the member id did not resolve.
+                             * @description Per-invitee outcome. "invited": a new follow-invitation was created. "already_invited": a pending invitation already existed (idempotent no-op; the same invitation_id is returned, never a duplicate). "ineligible": the member is not an invitable 1st-degree connection. "not_found": the member id did not resolve.
                              * @enum {string}
                              */
                             status: "invited" | "already_invited" | "ineligible" | "not_found";
-                            /** @description The invitation id — present for "invited" and "already_invited", null for a per-invitee failure. */
+                            /** @description The invitation id, present for "invited" and "already_invited", null for a per-invitee failure. */
                             invitation_id: string | null;
                             /** @description Present only for a per-invitee failure ("ineligible" / "not_found"); null otherwise. */
                             error: {
@@ -5460,7 +5460,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Empty, over-cap (>50), or malformed invitee_ids; or a non-numeric identifier — before any send. */
+            /** @description Empty, over-cap (>50), or malformed invitee_ids, or a non-numeric identifier, rejected before any send. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5505,7 +5505,7 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
-            /** @description The follow-invite credit or rate budget is exhausted — slow down and retry after the hinted delay. */
+            /** @description The follow-invite credit or rate budget is exhausted. Slow down and retry after the hinted delay. */
             429: {
                 headers: {
                     "RateLimit-Policy": components["headers"]["RateLimit-Policy"];
