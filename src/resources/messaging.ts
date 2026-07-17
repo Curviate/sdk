@@ -148,15 +148,27 @@ export class MessagingResource {
    * sent as JSON, never multipart. At least one of `text`/`attachments` is
    * required (enforced server-side).
    *
-   * The response echoes `sent_as`, the acting identity actually used. Reply
-   * as a company page simply by sending into one of its chat ids (from
-   * `inboxes.listChats()`), no separate parameter needed: a `COMPANY_` chat
-   * id (e.g. `"COMPANY_83734124_2-YTQ3ODU3Njgt"`) sends AS THE PAGE and
-   * echoes `sent_as: { kind: "company", company_id, name }` (`company_id`
-   * is `null` when the page could not be correlated to a managed page); any
-   * other chat id sends as the connected member and echoes
-   * `sent_as: { kind: "personal" }`. Never infer the acting identity from a
+   * Sending on behalf of a company page: this same method is the reply
+   * surface for a company page, there is no separate send-as-page method.
+   * Pass a `COMPANY_` chat id (from `inboxes.listChats()`, e.g.
+   * `"COMPANY_83734124_2-YTQ3ODU3Njgt"`) and the message sends AS THE PAGE,
+   * no extra parameter needed. Any other chat id sends as the connected
+   * member. Company pages are reply-only: they can answer an existing
+   * conversation this way, but `startChat()` cannot start one on their
+   * behalf.
+   *
+   * The response echoes `sent_as`, the acting identity actually used:
+   * `{ kind: "company", company_id, name }` (`company_id` is `null` when
+   * the page could not be correlated to a managed page) or
+   * `{ kind: "personal" }`. Never infer the acting identity from a
    * message's `sender` field, only from `sent_as`.
+   *
+   * @example
+   * const acc = curviate.account("acc_YOUR_ACCOUNT_ID");
+   * const result = await acc.messaging.sendMessage("COMPANY_83734124_2-YTQ3ODU3Njgt", {
+   *   text: "Thanks for reaching out!",
+   * });
+   * console.log(result.sent_as); // { kind: "company", company_id: "112013061", name: "Acme Inc" }
    */
   sendMessage(chatId: string, body: SendMessageBody): Promise<SendMessageResult> {
     return this.ctx.request<SendMessageResult>({

@@ -66,6 +66,7 @@ export class InboxesResource {
    *   and/or `{ company_id }` filters. Omit to list every inbox.
    *
    * @example
+   * const acc = curviate.account("acc_YOUR_ACCOUNT_ID");
    * const { items, hint } = await acc.inboxes.list({ kind: "company" });
    * const companyPage = (items ?? []).find((i) => i.kind === "company");
    * console.log(companyPage?.id, companyPage?.name, hint);
