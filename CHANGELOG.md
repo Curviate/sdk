@@ -9,6 +9,8 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ## [Unreleased]
 
+## [0.18.1] — 2026-07-18
+
 ### Changed
 
 - **`companies.sendMessage(identifier, chatId, body)`** now takes the normal `2-…`
