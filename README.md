@@ -200,7 +200,7 @@ app.post("/webhook", async (c) => {
 ## Links
 
 - API reference: https://docs.curviate.com
-- Issues: https://github.com/curviate/sdk/issues
+- Issues: https://github.com/curviate/curviate-sdk/issues
 - Changelog: [CHANGELOG.md](./CHANGELOG.md)
 
 ## License
