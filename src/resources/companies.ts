@@ -27,9 +27,10 @@
  * busier inbox.
  *
  * `sendMessage()` is the inbox's one write: reply to an existing
- * conversation AS THE PAGE. It requires the send-ready `COMPANY_` chat id
- * from `inboxes.listChats()`, not the `2-…` id the reads above return.
- * Reply-only, same admin requirement as the reads.
+ * conversation AS THE PAGE. It takes the same `2-…` chat id that
+ * `chats()` / `searchChats()` return; the endpoint resolves the page
+ * mailbox internally from `identifier`. Reply-only, same admin
+ * requirement as the reads.
  */
 import type { RequestContext } from "../internal/context.js";
 import type { paths } from "../generated/types.js";
@@ -333,11 +334,10 @@ export class CompaniesResource {
    * Reply to a company-inbox conversation, AS THE PAGE.
    * `POST /v1/{account_id}/companies/{identifier}/chats/{chat_id}/messages`
    *
-   * `chatId` must be the send-ready `COMPANY_` chat id, not the `2-…` id
-   * `chats()`/`chat()`/`searchChats()` return. Get the `COMPANY_` id from
-   * `inboxes.listChats()` (`GET /v1/{account_id}/inboxes/{inbox_id}/chats`).
-   * A `2-…` or personal chat id is rejected with a guiding 400 that names
-   * the required form and its source.
+   * `chatId` is the `2-…` conversation id that `chats()` / `chat()` /
+   * `searchChats()` return for this page. The endpoint resolves the page
+   * mailbox internally from `identifier`, so no special send-ready id is
+   * needed: pass the id straight from the company chat reads.
    *
    * Reply-only: this method can only answer an existing conversation, it
    * cannot start a new one on the page's behalf. The connected account
@@ -353,13 +353,9 @@ export class CompaniesResource {
    *
    * @example
    * const acc = curviate.account("acc_YOUR_ACCOUNT_ID");
-   * const { items: inboxes } = await acc.inboxes.list({ kind: "company" });
-   * const pageInbox = inboxes[0]!; // e.g. id "COMPANY_83734124_PRIMARY"
+   * const { items: chats } = await acc.companies.chats("112013061");
    *
-   * const { items: chats } = await acc.inboxes.listChats(pageInbox.id);
-   * const chatId = chats[0]!.id as string; // e.g. "COMPANY_83734124_2-YTQ3ODU3Njgt"
-   *
-   * const result = await acc.companies.sendMessage("112013061", chatId, {
+   * const result = await acc.companies.sendMessage("112013061", chats[0]!.id, {
    *   text: "Thanks for reaching out, happy to help!",
    * });
    * console.log(result.sent_as); // { kind: "company", company_id: "112013061", name: "RedHire" }

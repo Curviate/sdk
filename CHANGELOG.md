@@ -9,6 +9,15 @@ Versioning: semantic — minor for additive changes, patch for bug fixes; no sta
 
 ## [Unreleased]
 
+### Changed
+
+- **`companies.sendMessage(identifier, chatId, body)`** now takes the normal `2-…`
+  chat id that `companies.chats()` / `chat()` / `searchChats()` return; the endpoint
+  resolves the page mailbox internally from `identifier`. The previous send-ready
+  `COMPANY_` chat-id requirement is gone: pass the id straight from the company chat
+  reads. Method signature and response shape are unchanged (documentation/behavior
+  only).
+
 ## [0.18.0] — 2026-07-17
 
 ### Added
